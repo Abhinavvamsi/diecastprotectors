@@ -64,6 +64,10 @@ export default function CheckoutPage() {
     setPincode
   ] = useState("")
 
+  const [suggestions,
+  setSuggestions
+  ] = useState<any[]>([])
+
   const [loading,
     setLoading
   ] = useState(false)
@@ -73,7 +77,43 @@ export default function CheckoutPage() {
     return <RedirectToSignIn />
 
   }
+async function searchAddress(
+  value: string
+) {
 
+  setAddress(value)
+
+  if (value.length < 3) {
+
+    setSuggestions([])
+
+    return
+
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
+          value
+        )}&filter=countrycode:in&apiKey=${process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY}`
+      )
+
+    const data =
+      await response.json()
+
+    setSuggestions(
+      data.features || []
+    )
+
+  } catch (error) {
+
+    console.log(error)
+
+  }
+
+}
   return (
 
     <main className="min-h-screen bg-background text-foreground">
@@ -174,16 +214,98 @@ export default function CheckoutPage() {
                 />
 
                 {/* Address */}
-                <textarea
-                  placeholder="Full Address"
-                  value={address}
-                  onChange={(e) =>
-                    setAddress(
-                      e.target.value
-                    )
-                  }
-                  className="w-full rounded-xl bg-black border border-zinc-800 px-4 py-4 outline-none focus:border-red-500 transition min-h-[120px]"
-                />
+               {/* Address */}
+<div className="relative">
+
+  <textarea
+    placeholder="Start typing your address..."
+    value={address}
+    onChange={(e) =>
+      searchAddress(
+        e.target.value
+      )
+    }
+    className="
+    w-full
+    rounded-xl
+    bg-black
+    border
+    border-zinc-800
+    px-4
+    py-4
+    outline-none
+    focus:border-red-500
+    transition
+    min-h-[120px]
+    "
+  />
+
+  {suggestions.length > 0 && (
+
+    <div
+      className="
+      absolute
+      z-50
+      mt-2
+      w-full
+      rounded-xl
+      border
+      border-zinc-800
+      bg-zinc-900
+      max-h-60
+      overflow-y-auto
+      shadow-xl
+      "
+    >
+
+      {suggestions.map(
+        (item, index) => (
+
+          <button
+            key={index}
+            type="button"
+            onClick={() => {
+
+              setAddress(
+                item.properties.formatted
+              )
+
+              setCity(
+                item.properties.city ||
+                item.properties.county ||
+                ""
+              )
+
+              setPincode(
+                item.properties.postcode ||
+                ""
+              )
+
+              setSuggestions([])
+
+            }}
+            className="
+            w-full
+            text-left
+            px-4
+            py-3
+            hover:bg-zinc-800
+            transition
+            "
+          >
+
+            {item.properties.formatted}
+
+          </button>
+
+        )
+      )}
+
+    </div>
+
+  )}
+
+</div>
 
                 <div className="grid grid-cols-2 gap-4">
 
