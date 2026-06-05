@@ -10,19 +10,23 @@ export async function POST(
     const {
       code,
       userId,
+      total,
     } = await req.json()
 
     const coupon =
-      await prisma.coupon.findUnique({
+  await prisma.coupon.findUnique({
 
-        where: {
+    where: {
+      code:
+        code.toUpperCase(),
+    },
 
-          code:
-            code.toUpperCase(),
+  })
 
-        },
-
-      })
+console.log(
+  "Coupon From DB:",
+  coupon
+)
 
     if (!coupon) {
 
@@ -50,10 +54,27 @@ export async function POST(
 
     }
 
+    if (
+      coupon.minOrder &&
+      total < coupon.minOrder
+    ) {
+
+      return NextResponse.json({
+
+        valid: false,
+
+        message:
+          `Minimum order ₹${coupon.minOrder} required`,
+
+      })
+
+    }
+
     const usedBy =
       (coupon.usedBy as string[]) || []
 
     if (
+      userId &&
       usedBy.includes(userId)
     ) {
 

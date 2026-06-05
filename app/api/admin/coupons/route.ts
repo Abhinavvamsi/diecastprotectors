@@ -42,6 +42,9 @@ export async function POST(
         value:
           body.value,
 
+        minOrder:
+          body.minOrder || 0,
+
       },
 
     })

@@ -58,17 +58,21 @@ model Product {
 }
 
 model Coupon {
-  id String @id @default(cuid())
 
-  code String @unique
+  id        String   @id @default(cuid())
 
-  type String
+  code      String   @unique
 
-  value Int
+  type      String
 
-  active Boolean @default(true)
+  value     Int
 
-  usedBy Json?
+  minOrder  Int      @default(0)
+
+  active    Boolean  @default(true)
+
+  usedBy    Json?
 
   createdAt DateTime @default(now())
+
 }

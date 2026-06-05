@@ -154,13 +154,16 @@ async function applyCoupon() {
               "application/json",
           },
 
-          body: JSON.stringify({
+         body: JSON.stringify({
 
   code:
     couponCode,
 
   userId:
-  user!.id,
+    user!.id,
+
+  total:
+    total,
 
 })
 
@@ -172,15 +175,15 @@ async function applyCoupon() {
 
     if (!data.valid) {
 
-      toast.error(
-        "Invalid coupon"
-      )
+  toast.error(
+    data.message
+  )
 
-      setDiscount(0)
+  setDiscount(0)
 
-      return
+  return
 
-    }
+}
 
     let discountAmount = 0
 

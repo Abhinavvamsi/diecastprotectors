@@ -16,6 +16,9 @@ export default function CouponsPage() {
 
   const [value, setValue] =
     useState("")
+  
+  const [minOrder, setMinOrder] =
+    useState("")
 
   async function loadCoupons() {
 
@@ -48,28 +51,35 @@ export default function CouponsPage() {
           },
 
           body:
-            JSON.stringify({
+  JSON.stringify({
 
-              code,
+    code,
 
-              type,
+    type,
 
-              value:
-                Number(value),
+    value:
+      Number(value),
 
-            }),
+    minOrder:
+      Number(minOrder),
 
+  }),
         }
       )
 
     if (response.ok) {
 
-      setCode("")
-      setValue("")
+  setCode("")
+  setValue("")
+  setMinOrder("")
 
-      loadCoupons()
+  toast.success(
+    "Coupon created successfully ✅"
+  )
 
-    }
+  loadCoupons()
+
+}
 
   }
 async function deleteCoupon(
@@ -215,7 +225,7 @@ async function toggleCoupon(
 
         </h2>
 
-        <div className="grid md:grid-cols-4 gap-4">
+       <div className="grid md:grid-cols-5 gap-4">
 
           <input
             placeholder="WELCOME10"
@@ -266,7 +276,17 @@ async function toggleCoupon(
             }
             className="border rounded p-3"
           />
-
+<input
+  type="number"
+  placeholder="Minimum Order"
+  value={minOrder}
+  onChange={(e) =>
+    setMinOrder(
+      e.target.value
+    )
+  }
+  className="border rounded p-3"
+/>
           <button
             onClick={
               createCoupon
@@ -318,6 +338,14 @@ async function toggleCoupon(
                 : `₹${coupon.value} OFF`}
 
             </p>
+
+            <p className="text-zinc-500 mt-1">
+
+  Minimum Order:
+
+  ₹{coupon.minOrder}
+
+</p>
 
           </div>
 
@@ -376,17 +404,11 @@ async function toggleCoupon(
 
     <button
 
-     onClick={async () => {
-
-  await deleteCoupon(
+    onClick={() =>
+  deleteCoupon(
     coupon.id
   )
-
-  toast.success(
-    "Coupon deleted successfully ✅"
-  )
-
-}}
+}
 
       className="
       px-4
