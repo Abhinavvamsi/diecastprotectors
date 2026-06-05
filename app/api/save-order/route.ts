@@ -79,7 +79,52 @@ export async function POST(
       })
 
     }
+// Mark coupon as used
+if (body.couponCode) {
 
+  const coupon =
+    await prisma.coupon.findUnique({
+
+      where: {
+
+        code:
+          body.couponCode,
+
+      },
+
+    })
+
+  if (coupon) {
+
+    const usedBy =
+      (coupon.usedBy as string[]) || []
+
+    await prisma.coupon.update({
+
+      where: {
+
+        code:
+          body.couponCode,
+
+      },
+
+      data: {
+
+        usedBy: [
+
+          ...usedBy,
+
+          body.userId,
+
+        ],
+
+      },
+
+    })
+
+  }
+
+}
     // Customer Email
     await resend.emails.send({
 

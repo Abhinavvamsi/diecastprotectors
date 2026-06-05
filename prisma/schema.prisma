@@ -8,54 +8,67 @@ datasource db {
 }
 
 model Order {
-
   status String @default("Pending")
 
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  orderId     String   @unique
+  orderId String @unique
 
-  userId      String?
+  userId String?
 
-  customer    String
+  customer String
 
-  email       String
+  email String
 
-  phone       String
+  phone String
 
-  address     String
+  address String
 
-  city        String
+  city String
 
-  pincode     String
+  pincode String
 
-  products    Json
+  products Json
 
   totalAmount Int
 
-  paymentId   String?
+  paymentId String?
 
-  createdAt   DateTime @default(now())
-
+  createdAt DateTime @default(now())
 }
+
 model Product {
+  id String @id @default(cuid())
 
-  id          String   @id @default(cuid())
-
-  name        String
+  name String
 
   description String
 
-  price       Int
+  price Int
 
-  images      Json
+  images Json
 
-  category    String
+  category String
 
-  stock       Int
+  stock Int
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  badge       String?
+  badge String?
+}
 
+model Coupon {
+  id String @id @default(cuid())
+
+  code String @unique
+
+  type String
+
+  value Int
+
+  active Boolean @default(true)
+
+  usedBy Json?
+
+  createdAt DateTime @default(now())
 }

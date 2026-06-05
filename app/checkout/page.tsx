@@ -72,6 +72,18 @@ export default function CheckoutPage() {
     setLoading
   ] = useState(false)
 
+  const [couponCode,
+  setCouponCode
+] = useState("")
+
+const [discount,
+  setDiscount
+] = useState(0)
+
+const [couponLoading,
+  setCouponLoading
+] = useState(false)
+
   if (!user) {
 
     return <RedirectToSignIn />
@@ -110,6 +122,104 @@ async function searchAddress(
   } catch (error) {
 
     console.log(error)
+
+  }
+
+}
+async function applyCoupon() {
+
+  if (!couponCode) {
+
+    toast.error(
+      "Enter coupon code"
+    )
+
+    return
+
+  }
+
+  try {
+
+    setCouponLoading(true)
+
+    const response =
+      await fetch(
+        "/api/validate-coupon",
+        {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+
+  code:
+    couponCode,
+
+  userId:
+  user!.id,
+
+})
+
+        }
+      )
+
+    const data =
+      await response.json()
+
+    if (!data.valid) {
+
+      toast.error(
+        "Invalid coupon"
+      )
+
+      setDiscount(0)
+
+      return
+
+    }
+
+    let discountAmount = 0
+
+    if (
+      data.coupon.type ===
+      "PERCENTAGE"
+    ) {
+
+      discountAmount =
+        Math.floor(
+          total *
+          data.coupon.value /
+          100
+        )
+
+    } else {
+
+      discountAmount =
+        data.coupon.value
+
+    }
+
+    setDiscount(
+      discountAmount
+    )
+
+    toast.success(
+      `Coupon Applied - ₹${discountAmount} Off`
+    )
+
+  } catch (error) {
+
+    toast.error(
+      "Failed to apply coupon"
+    )
+
+  } finally {
+
+    setCouponLoading(false)
 
   }
 
@@ -405,7 +515,54 @@ async function searchAddress(
                 ))}
 
               </div>
+<div className="mt-8">
 
+  <p className="mb-3 font-medium">
+
+    Coupon Code
+
+  </p>
+
+  <div className="flex gap-3">
+
+    <input
+      type="text"
+      placeholder="WELCOME10"
+      value={couponCode}
+      onChange={(e) =>
+        setCouponCode(
+          e.target.value
+            .toUpperCase()
+        )
+      }
+      className="
+      flex-1
+      h-12
+      rounded-xl
+      bg-black
+      border
+      border-zinc-800
+      px-4
+      outline-none
+      focus:border-red-500
+      "
+    />
+
+    <Button
+      type="button"
+      onClick={applyCoupon}
+      disabled={couponLoading}
+    >
+
+      {couponLoading
+        ? "..."
+        : "Apply"}
+
+    </Button>
+
+  </div>
+
+</div>
               {/* Totals */}
               <div className="border-t border-zinc-800 mt-8 pt-8 space-y-4">
 
@@ -416,7 +573,17 @@ async function searchAddress(
                   <p>₹{total}</p>
 
                 </div>
+                <div className="flex items-center justify-between text-green-500">
 
+  <p>Discount</p>
+
+  <p>
+
+    -₹{discount}
+
+  </p>
+
+</div>
                 <div className="flex items-center justify-between text-zinc-400">
 
                   <p>Shipping</p>
@@ -429,7 +596,15 @@ async function searchAddress(
 
                   <p>Total</p>
 
-                  <p>₹{total + 49}</p>
+                  <p>
+
+  ₹{
+    total -
+    discount +
+    49
+  }
+
+</p>
 
                 </div>
 
@@ -545,8 +720,10 @@ async function searchAddress(
 
                           body: JSON.stringify({
 
-                            amount:
-                              total + 49,
+                           amount:
+  total -
+  discount +
+  49,
 
                           }),
 
@@ -601,7 +778,7 @@ async function searchAddress(
                                     JSON.stringify({
 
                                       userId:
-                                        user.id,
+                                        user!.id,
 
                                       customer,
 
@@ -617,9 +794,12 @@ async function searchAddress(
 
                                       products:
                                         cart,
+                                      couponCode,
 
                                       totalAmount:
-                                        total + 49,
+  total -
+  discount +
+  49,
 
                                       paymentId:
                                         response

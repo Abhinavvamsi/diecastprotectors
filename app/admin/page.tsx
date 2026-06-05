@@ -73,7 +73,7 @@ export default async function AdminPage() {
         </div>
 
         {/* Dashboard Cards */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
 
           {/* Add Product */}
           <Link
@@ -176,6 +176,73 @@ export default async function AdminPage() {
             </div>
 
           </Link>
+
+          {/* Coupon Management */}
+<Link
+  href="/admin/coupons"
+  className="
+  group
+  bg-zinc-900
+  border
+  border-zinc-800
+  rounded-3xl
+  p-8
+  hover:border-white
+  hover:-translate-y-2
+  transition-all
+  duration-300
+  "
+>
+
+  <div className="space-y-6">
+
+    <div
+      className="
+      w-16
+      h-16
+      rounded-2xl
+      bg-red-500
+      text-white
+      hover:bg-red-600
+      flex
+      items-center
+      justify-center
+      text-3xl
+      font-bold
+      "
+    >
+
+      🎟
+
+    </div>
+
+    <div>
+
+      <h2 className="text-3xl font-bold">
+
+        Coupon Management
+
+      </h2>
+
+      <p
+        className="
+        text-red-500
+        mt-4
+        leading-relaxed
+        "
+      >
+
+        Create, enable, disable and
+        monitor coupon usage across
+        your store.
+
+      </p>
+
+    </div>
+
+  </div>
+
+</Link>
 
         </div>
 
