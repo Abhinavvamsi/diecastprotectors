@@ -76,3 +76,13 @@ model Coupon {
   createdAt DateTime @default(now())
 
 }
+
+model StoreSettings {
+
+  id String @id @default(cuid())
+
+  shippingCharge Int
+
+  shippingMessage String?
+
+}

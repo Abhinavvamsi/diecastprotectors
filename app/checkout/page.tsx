@@ -1,6 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import {
+  useState,
+  useEffect,
+} from "react"
 
 import Image from "next/image"
 
@@ -83,6 +86,44 @@ const [discount,
 const [couponLoading,
   setCouponLoading
 ] = useState(false)
+
+const [shipping,
+  setShipping
+] = useState(0)
+
+const [shippingMessage,
+  setShippingMessage
+] = useState("")
+
+useEffect(() => {
+
+  async function loadSettings() {
+
+    const response =
+      await fetch(
+        "/api/admin/settings"
+      )
+
+    const data =
+      await response.json()
+
+    if (data) {
+
+      setShipping(
+        data.shippingCharge
+      )
+
+      setShippingMessage(
+        data.shippingMessage || ""
+      )
+
+    }
+
+  }
+
+  loadSettings()
+
+}, [])
 
   if (!user) {
 
@@ -227,6 +268,7 @@ async function applyCoupon() {
   }
 
 }
+
   return (
 
     <main className="min-h-screen bg-background text-foreground">
@@ -591,7 +633,21 @@ async function applyCoupon() {
 
                   <p>Shipping</p>
 
-                  <p>₹49</p>
+                 {shipping > 0 ? (
+
+  <p>
+    ₹{shipping}
+  </p>
+
+) : (
+
+  <p className="text-yellow-500">
+
+    Actual Charges
+
+  </p>
+
+)}
 
                 </div>
 
@@ -604,7 +660,7 @@ async function applyCoupon() {
   ₹{
     total -
     discount +
-    49
+    shipping
   }
 
 </p>
@@ -612,7 +668,28 @@ async function applyCoupon() {
                 </div>
 
               </div>
+                {shipping === 0 && (
 
+  <div
+    className="
+    mt-6
+    p-4
+    rounded-xl
+    border
+    border-yellow-500/30
+    bg-yellow-500/10
+    "
+  >
+
+    <p className="text-yellow-400 text-sm">
+
+      {shippingMessage}
+
+    </p>
+
+  </div>
+
+)}
               {/* Payment Button */}
               <Button
                 disabled={loading}
@@ -726,7 +803,7 @@ async function applyCoupon() {
                            amount:
   total -
   discount +
-  49,
+  shipping,
 
                           }),
 
@@ -802,7 +879,7 @@ async function applyCoupon() {
                                       totalAmount:
   total -
   discount +
-  49,
+  shipping,
 
                                       paymentId:
                                         response

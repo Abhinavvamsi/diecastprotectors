@@ -1,7 +1,5 @@
 import Link from "next/link"
-import { toast } from "sonner"
 import Navbar from "@/components/navbar"
-
 import {
   currentUser,
 } from "@clerk/nextjs/server"
@@ -243,7 +241,71 @@ export default async function AdminPage() {
   </div>
 
 </Link>
+{/* Store Settings */}
+<Link
+  href="/admin/settings"
+  className="
+  group
+  bg-zinc-900
+  border
+  border-zinc-800
+  rounded-3xl
+  p-8
+  hover:border-white
+  hover:-translate-y-2
+  transition-all
+  duration-300
+  "
+>
 
+  <div className="space-y-6">
+
+    <div
+      className="
+      w-16
+      h-16
+      rounded-2xl
+      bg-red-500
+      text-white
+      hover:bg-red-600
+      flex
+      items-center
+      justify-center
+      text-3xl
+      font-bold
+      "
+    >
+
+      ⚙️
+
+    </div>
+
+    <div>
+
+      <h2 className="text-3xl font-bold">
+
+        Store Settings
+
+      </h2>
+
+      <p
+        className="
+        text-red-500
+        mt-4
+        leading-relaxed
+        "
+      >
+
+        Manage shipping charges and
+        store configuration.
+
+      </p>
+
+    </div>
+
+  </div>
+
+</Link>
         </div>
 
       </div>
