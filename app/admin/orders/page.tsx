@@ -102,8 +102,20 @@ export default async function OrdersPage() {
                     Ordered On:
                     <br />
                     {new Date(
-                      order.createdAt
-                    ).toLocaleString()}
+  order.createdAt
+).toLocaleString(
+  "en-IN",
+  {
+    timeZone:
+      "Asia/Kolkata",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }
+)}
                   </p>
 
                   <div className="mt-6">
