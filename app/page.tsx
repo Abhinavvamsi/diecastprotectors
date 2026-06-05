@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 import { Bebas_Neue } from "next/font/google"
 
 import { Button } from "@/components/ui/button"
@@ -13,6 +15,7 @@ import ProductCard from "@/components/product-card"
 import Navbar from "@/components/navbar"
 
 import Footer from "@/components/footer"
+
 
 const bebas = Bebas_Neue({
 
