@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react"
 
-import { SpeedInsights } from "@vercel/speed-insights/next"
-
 import { Bebas_Neue } from "next/font/google"
 
 import { Button } from "@/components/ui/button"
