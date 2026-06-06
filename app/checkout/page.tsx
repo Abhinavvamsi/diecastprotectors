@@ -118,6 +118,10 @@ const [shippingMessage,
   setShippingMessage
 ] = useState("")
 
+const [validating,
+  setValidating
+] = useState(false)
+
 useEffect(() => {
 
   async function loadSettings() {
@@ -821,7 +825,48 @@ async function applyCoupon() {
                   }
 
                   try {
+                  setValidating(true)
 
+const productsResponse =
+  await fetch(
+    "/api/get-products",
+    {
+      cache: "no-store",
+    }
+  )
+
+const products =
+  await productsResponse.json()
+
+const validIds =
+  products.map(
+    (product: any) =>
+      product.id
+  )
+
+const deletedItems =
+  cart.filter(
+    (item) =>
+      !validIds.includes(
+        item.id
+      )
+  )
+
+if (
+  deletedItems.length > 0
+) {
+
+  toast.error(
+    "Some products in your cart are no longer available"
+  )
+
+  setValidating(false)
+
+  return
+
+}
+
+setValidating(false)
                     setLoading(true)
 
                     const response =

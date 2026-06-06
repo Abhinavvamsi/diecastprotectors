@@ -89,7 +89,27 @@ export default function CartPage() {
 
       const products =
         await response.json()
+      const validIds =
+  products.map(
+    (product: any) =>
+      product.id
+  )
 
+cart.forEach((item) => {
+
+  if (
+    !validIds.includes(
+      item.id
+    )
+  ) {
+
+    removeFromCart(
+      item.id
+    )
+
+  }
+
+})
       products.forEach(
         (product: any) => {
 
