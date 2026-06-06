@@ -262,18 +262,39 @@ const selectedPrice =
                   </div>
 
                   <button
-                    onClick={() =>
-                      setQuantity(
-                        quantity + 1
-                      )
-                    }
-                    className="w-12 h-12 rounded-xl border border-red-500/40 text-xl hover:border-white transition"
-                  >
+  disabled={
+    quantity >= product.stock
+  }
+  onClick={() => {
 
-                    +
+    if (
+      quantity < product.stock
+    ) {
 
-                  </button>
+      setQuantity(
+        quantity + 1
+      )
 
+    }
+
+  }}
+  className="
+    w-12
+    h-12
+    rounded-xl
+    border
+    border-red-500/40
+    text-xl
+    hover:border-white
+    transition
+    disabled:opacity-40
+    disabled:cursor-not-allowed
+  "
+>
+
+  +
+
+</button>
                 </div>
 
               </div>
@@ -286,7 +307,17 @@ const selectedPrice =
                   disabled={product.stock === 0}
                   className="px-8 py-6 text-lg rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
                   onClick={() => {
+if (
+  quantity > product.stock
+) {
 
+  toast.error(
+    `Only ${product.stock} available`
+  )
+
+  return
+
+}
                     for (
                       let i = 0;
                       i < quantity;
@@ -331,7 +362,17 @@ const selectedPrice =
                   variant="outline"
                   className="px-8 py-6 text-lg rounded-xl bg-transparent border-red-500/40 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
                   onClick={() => {
+if (
+  quantity > product.stock
+) {
 
+  toast.error(
+    `Only ${product.stock} available`
+  )
+
+  return
+
+}
                     for (
                       let i = 0;
                       i < quantity;
@@ -421,7 +462,17 @@ const selectedPrice =
             disabled={product.stock === 0}
 
             onClick={() => {
+if (
+  quantity > product.stock
+) {
 
+  toast.error(
+    `Only ${product.stock} available`
+  )
+
+  return
+
+}
               for (
                 let i = 0;
                 i < quantity;
