@@ -161,7 +161,7 @@ export default function AddProductPage() {
 
           body: JSON.stringify({
 
-            name,
+  name,
 
   description,
 
@@ -175,10 +175,14 @@ export default function AddProductPage() {
 
   stock: Number(stock),
 
-  quantityPricing,
+  quantityPricing:
+    quantityPricing.filter(
+      (tier) =>
+        tier.quantity.trim() !== "" &&
+        tier.price.trim() !== ""
+    ),
 
-          }),
-
+}),
         }
       )
 
@@ -195,6 +199,12 @@ export default function AddProductPage() {
       setCategory("")
       setBadge("")
       setStock("")
+      setQuantityPricing([
+  {
+    quantity: "",
+    price: "",
+  },
+])
 
     } else {
 
