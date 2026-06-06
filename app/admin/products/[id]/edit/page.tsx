@@ -36,13 +36,11 @@ export default async function EditPage({
     await params
 
   const product =
-    await prisma.product.findUnique({
-
-      where: {
-        id,
-      },
-
-    })
+  await prisma.product.findUnique({
+    where: {
+      id,
+    },
+  }) as any
 
   if (!product) {
 
@@ -67,14 +65,19 @@ export default async function EditPage({
         </h1>
 
         <EditProductForm
-          product={{
-            ...product,
+  product={{
+    ...product,
 
-            images:
-                (product.images as string[]) || [],
-          }}
-        />
+    images:
+      (product.images as string[]) || [],
 
+    quantityPricing:
+      (product.quantityPricing as {
+        quantity: string
+        price: string
+      }[]) || [],
+  }}
+/>
       </div>
 
     </main>

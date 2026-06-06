@@ -3,26 +3,8 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
 
-  let settings =
+  const settings =
     await prisma.storeSettings.findFirst()
-
-  if (!settings) {
-
-    settings =
-      await prisma.storeSettings.create({
-
-        data: {
-
-          shippingCharge: 49,
-
-          shippingMessage:
-            "Flat shipping across India",
-
-        },
-
-      })
-
-  }
 
   return NextResponse.json(
     settings
@@ -40,10 +22,14 @@ export async function POST(
   const existing =
     await prisma.storeSettings.findFirst()
 
-  if (!existing) {
+  if (existing) {
 
-    const settings =
-      await prisma.storeSettings.create({
+    const updated =
+      await prisma.storeSettings.update({
+
+        where: {
+          id: existing.id,
+        },
 
         data: {
 
@@ -58,17 +44,13 @@ export async function POST(
       })
 
     return NextResponse.json(
-      settings
+      updated
     )
 
   }
 
-  const settings =
-    await prisma.storeSettings.update({
-
-      where: {
-        id: existing.id,
-      },
+  const created =
+    await prisma.storeSettings.create({
 
       data: {
 
@@ -83,7 +65,7 @@ export async function POST(
     })
 
   return NextResponse.json(
-    settings
+    created
   )
 
 }

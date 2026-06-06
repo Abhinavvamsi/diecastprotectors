@@ -19,6 +19,8 @@ type Product = {
     quantity: string
     price: string
   }[]
+
+  badge?: string | null
 }
 export default function EditProductForm({
   product,
