@@ -41,6 +41,7 @@ export default function CartPage() {
     useCartStore(
       (state) => state.removeFromCart
     )
+    
 
     function getCurrentPrice(item: any) {
 
@@ -51,24 +52,28 @@ export default function CartPage() {
     item.quantityPricing
   ) {
 
-    item.quantityPricing
-      .forEach((tier: any) => {
+    item.quantityPricing.forEach(
+  (tier: any) => {
 
-        if (
-          item.quantity >=
-          Number(
-            tier.quantity
-          )
-        ) {
+    if (
+      !tier.quantity ||
+      !tier.price
+    ) {
+      return
+    }
 
-          price =
-            Number(
-              tier.price
-            )
+    if (
+      item.quantity >=
+      Number(tier.quantity)
+    ) {
 
-        }
+      price =
+        Number(tier.price)
 
-      })
+    }
+
+  }
+)
 
   }
 
@@ -134,6 +139,10 @@ cart.forEach((item) => {
       item.quantity,
   0
 )
+const hasUnavailableProducts =
+  cart.some(
+    (item) => item.stock === 0
+  )
 
   return (
 
@@ -155,7 +164,7 @@ cart.forEach((item) => {
 
             <p className="text-red-500 mt-4">
 
-              Review your selected protectors before checkout.
+              Review your selected products before checkout.
 
             </p>
 
@@ -175,7 +184,26 @@ cart.forEach((item) => {
           </Link>
 
         </div>
+{hasUnavailableProducts && (
 
+  <div
+    className="
+    mb-8
+    p-4
+    rounded-xl
+    border
+    border-red-500/30
+    bg-red-500/10
+    text-red-400
+    "
+  >
+
+    Some products in your cart are no longer available.
+    Please remove them before checkout.
+
+  </div>
+
+)}
         {cart.length === 0 ? (
 
           <div className="text-center py-24">
@@ -231,13 +259,38 @@ cart.forEach((item) => {
                       ₹{getCurrentPrice(item)}
                     </p>
 
-                    <p className="text-green-500 mt-2 font-medium">
+                    {item.stock > 0 ? (
 
-                      Stock Left:
-                      {" "}
-                      {item.stock}
+  <p className="text-green-500 mt-2 font-medium">
 
-                    </p>
+    Stock Left:
+    {" "}
+    {item.stock}
+
+  </p>
+
+) : (
+
+  <div
+    className="
+    mt-2
+    inline-flex
+    items-center
+    px-3
+    py-1
+    rounded-full
+    bg-red-500/20
+    text-red-400
+    text-sm
+    font-semibold
+    "
+  >
+
+    ❌ Product No Longer Available
+
+  </div>
+
+)}
 
                     <p className="text-zinc-400 mt-2">
 
@@ -336,16 +389,30 @@ cart.forEach((item) => {
 
               </div>
 
-              <Link href="/checkout">
+              <Link
+  href={
+    hasUnavailableProducts
+      ? "#"
+      : "/checkout"
+  }
+>
 
-                <Button className="px-8 py-6 text-lg rounded-xl">
+  <Button
+    disabled={
+      hasUnavailableProducts
+    }
+    className="
+    px-8 py-6 text-lg rounded-xl
+    "
+  >
 
-                  Proceed to Checkout
+    {hasUnavailableProducts
+      ? "Remove Unavailable Items"
+      : "Proceed to Checkout"}
 
-                </Button>
+  </Button>
 
-              </Link>
-
+</Link>
             </div>
 
           </div>

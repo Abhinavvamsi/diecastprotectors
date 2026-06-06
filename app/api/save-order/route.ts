@@ -15,7 +15,69 @@ export async function POST(
       `HWS-${Date.now()}`
 
     const order =
-      await prisma.order.create({
+  await prisma.$transaction(
+    async (tx) => {
+
+      // Check stock first
+
+      for (const item of body.products) {
+
+        const product =
+          await tx.product.findUnique({
+
+            where: {
+              id: item.id,
+            },
+
+          })
+
+        if (!product) {
+
+          throw new Error(
+            `${item.name} no longer exists`
+          )
+
+        }
+
+        if (
+          product.stock <
+          item.quantity
+        ) {
+
+          throw new Error(
+            `${product.name} is out of stock`
+          )
+
+        }
+
+      }
+
+      // Reduce stock
+
+      for (const item of body.products) {
+
+        await tx.product.update({
+
+          where: {
+            id: item.id,
+          },
+
+          data: {
+
+            stock: {
+              decrement:
+                item.quantity,
+            },
+
+          },
+
+        })
+
+      }
+
+      // Create order
+
+      return await tx.order.create({
 
         data: {
 
@@ -55,31 +117,9 @@ export async function POST(
 
       })
 
-    // Reduce stock
-    for (
-      const item
-      of body.products
-    ) {
-
-      await prisma.product.update({
-
-        where: {
-          id: item.id,
-        },
-
-        data: {
-
-          stock: {
-            decrement:
-              item.quantity,
-          },
-
-        },
-
-      })
-
     }
-// Mark coupon as used
+  )
+  // Mark coupon as used
 if (body.couponCode) {
 
   const coupon =
@@ -202,7 +242,7 @@ if (body.couponCode) {
 
         <p>
           Thank you for shopping
-          with Diecast Protectors.
+          with Diecast Protectors And Cars.
         </p>
 
       </div>
@@ -333,17 +373,16 @@ if (body.couponCode) {
     console.log(error)
 
     return NextResponse.json(
-
-      {
-        error:
-          "Failed to save order",
-      },
-
-      {
-        status: 500,
-      }
-
-    )
+  {
+    error:
+      error instanceof Error
+        ? error.message
+        : "Failed to save order",
+  },
+  {
+    status: 400,
+  }
+)
 
   }
 

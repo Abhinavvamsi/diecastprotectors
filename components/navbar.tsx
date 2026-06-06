@@ -114,7 +114,7 @@ export default function Navbar() {
 
           <Image
             src="/logo.png"
-            alt="Diecast Protectors"
+            alt="Diecast Protectors And Cars"
             width={58}
             height={58}
             className="object-contain"
@@ -130,7 +130,7 @@ export default function Navbar() {
 
             <p className="text-red-500 text-sm tracking-[0.3em]">
 
-              PROTECTORS
+              PROTECTORS AND CARS
 
             </p>
 

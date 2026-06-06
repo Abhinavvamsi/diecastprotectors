@@ -1019,7 +1019,43 @@ setValidating(false)
                       },
 
                     }
+                    const stockResponse =
+  await fetch(
+    "/api/check-stock",
+    {
 
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+
+        products: cart,
+
+      }),
+
+    }
+  )
+
+const stockData =
+  await stockResponse.json()
+
+if (
+  !stockResponse.ok
+) {
+
+  toast.error(
+    stockData.message
+  )
+
+  setLoading(false)
+
+  return
+
+}
                     const razorpay =
                       new (
                         window as any

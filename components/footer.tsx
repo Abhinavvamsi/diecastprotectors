@@ -15,7 +15,7 @@ export default function Footer() {
 
             <h2 className="text-3xl font-bold">
 
-              Diecast Protectors
+              Diecast Protectors And Cars
 
             </h2>
 

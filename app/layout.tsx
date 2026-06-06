@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
 
     title:
-      "Diecast Protectors",
+      "Diecast Protectors and Cars",
 
     description:
       "Premium diecast cars and Hot Wheels protectors.",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
       "https://diecastprotectors.in",
 
     siteName:
-      "Diecast Protectors",
+      "Diecast Protectors And Cars",
 
     locale:
       "en_IN",
