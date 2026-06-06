@@ -5,9 +5,20 @@ import { toast } from "sonner"
 type CartItem = {
   id: string
   name: string
+
   price: number
+
+  originalPrice: number
+
+  quantityPricing?: {
+    quantity: string
+    price: string
+  }[]
+
   image: string
+
   quantity: number
+
   stock: number
 }
 

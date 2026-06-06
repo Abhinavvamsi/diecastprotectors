@@ -31,12 +31,35 @@ export default function CheckoutPage() {
   const { user } = useUser()
 
   const total = cart.reduce(
-    (sum, item) =>
+  (sum, item) => {
+
+    const activeTier =
+      item.quantityPricing
+        ?.filter(
+          (tier) =>
+            item.quantity >=
+            Number(tier.quantity)
+        )
+        .sort(
+          (a, b) =>
+            Number(b.quantity) -
+            Number(a.quantity)
+        )[0]
+
+    const currentPrice =
+      activeTier
+        ? Number(activeTier.price)
+        : item.originalPrice
+
+    return (
       sum +
-      item.price *
-      item.quantity,
-    0
-  )
+      currentPrice *
+      item.quantity
+    )
+
+  },
+  0
+)
 
   const [customer,
     setCustomer
@@ -549,11 +572,26 @@ async function applyCoupon() {
 
                     <p className="font-bold">
 
-                      ₹{item.price}
-                      {" "}×{" "}
-                      {item.quantity}
+  ₹{
+    item.quantityPricing
+      ?.filter(
+        (tier) =>
+          item.quantity >=
+          Number(tier.quantity)
+      )
+      .sort(
+        (a, b) =>
+          Number(b.quantity) -
+          Number(a.quantity)
+      )[0]?.price ||
+    item.originalPrice
+  }
 
-                    </p>
+  {" "}×{" "}
+
+  {item.quantity}
+
+</p>
 
                   </div>
 

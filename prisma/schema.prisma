@@ -52,11 +52,12 @@ model Product {
 
   stock Int
 
+  quantityPricing Json?
+
   createdAt DateTime @default(now())
 
   badge String?
 }
-
 model Coupon {
 
   id        String   @id @default(cuid())

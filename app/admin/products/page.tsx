@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import Image from "next/image"
+import AdminNav from "@/components/admin-nav"
 
 import { prisma } from "@/lib/prisma"
 
@@ -39,13 +40,13 @@ export default async function ProductsPage() {
 
     <main className="min-h-screen bg-black text-white p-8">
 
-      <div className="max-w-7xl mx-auto">
+  <div className="max-w-7xl mx-auto">
 
-        <h1 className="text-5xl font-bold mb-12">
+    <AdminNav />
 
-          Product Management
-
-        </h1>
+    <h1 className="text-5xl font-bold mb-12">
+      Product Management
+    </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 

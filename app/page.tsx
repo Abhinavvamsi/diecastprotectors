@@ -24,23 +24,20 @@ const bebas = Bebas_Neue({
 })
 
 type Product = {
-
   id: string
-
   name: string
-
   description: string
-
   price: number
-
   images: string[]
-
   category: string
-
   stock: number
 
-  badge?: string
+  quantityPricing?: {
+    quantity: string
+    price: string
+  }[]
 
+  badge?: string
 }
 
 export default function Home() {
@@ -488,7 +485,7 @@ export default function Home() {
 
             {filteredProducts.map((product) => (
 
-              <ProductCard
+             <ProductCard
   key={product.id}
   id={product.id}
   name={product.name}
@@ -496,6 +493,11 @@ export default function Home() {
   image={product.images?.[0]}
   description={product.description}
   stock={product.stock}
+
+  quantityPricing={
+    product.quantityPricing
+  }
+
   badge={product.badge}
 />
 

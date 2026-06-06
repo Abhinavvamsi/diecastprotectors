@@ -32,6 +32,17 @@ export default function ProductDetails({
     setSelectedImage
   ] = useState(0)
 
+  const [selectedTier,
+  setSelectedTier
+] = useState<any>(
+  null
+)
+
+const selectedPrice =
+  selectedTier
+    ? Number(selectedTier.price)
+    : product.price
+
   const router = useRouter()
 
   return (
@@ -139,7 +150,85 @@ export default function ProductDetails({
                   : "Out of Stock"}
 
               </p>
+{product.quantityPricing?.length > 0 && (
 
+  <div className="mt-8">
+
+    <p className="text-sm text-zinc-400 mb-4">
+
+      Buy More Save More
+
+    </p>
+
+    <div className="flex flex-wrap gap-3">
+
+      {product.quantityPricing.map(
+        (
+          tier: any,
+          index: number
+        ) => (
+
+          <button
+            key={index}
+            onClick={() => {
+
+  const tierQty =
+    Number(
+      tier.quantity
+    )
+
+  if (
+    tierQty >
+    product.stock
+  ) {
+
+    toast.error(
+      `Only ${product.stock} pieces available`
+    )
+
+    return
+
+  }
+
+  setQuantity(
+    tierQty
+  )
+
+  setSelectedTier(
+    index
+  )
+
+}}
+            className={`
+              px-5
+              py-3
+              rounded-full
+              border
+              transition-all
+
+              ${
+                selectedTier === index
+                  ? "bg-white text-black border-white"
+                  : "border-zinc-700 hover:border-white"
+              }
+            `}
+          >
+
+            {tier.quantity}
+            {" "}
+            pcs @ ₹
+            {tier.price}
+
+          </button>
+
+        )
+      )}
+
+    </div>
+
+  </div>
+
+)}
               {/* Quantity */}
               <div className="mt-10">
 
@@ -204,21 +293,24 @@ export default function ProductDetails({
                       i++
                     ) {
 
-                      addToCart({
+                     addToCart({
+  id: product.id,
+  name: product.name,
 
-                        id: product.id,
+  price: selectedPrice,
 
-                        name: product.name,
+  originalPrice:
+    product.price,
 
-                        price: product.price,
+  quantityPricing:
+    product.quantityPricing,
 
-                        image:
-                          product.images[0],
+  image:
+    product.images[0],
 
-                        stock:
-                          product.stock,
-
-                      })
+  stock:
+    product.stock,
+})
 
                     }
 
@@ -247,21 +339,23 @@ export default function ProductDetails({
                     ) {
 
                       addToCart({
+  id: product.id,
+  name: product.name,
 
-                        id: product.id,
+  price: selectedPrice,
 
-                        name: product.name,
+  originalPrice:
+    product.price,
 
-                        price: product.price,
+  quantityPricing:
+    product.quantityPricing,
 
-                        image:
-                          product.images[0],
+  image:
+    product.images[0],
 
-                        stock:
-                          product.stock,
-
-                      })
-
+  stock:
+    product.stock,
+})
                     }
 
                     router.push(
@@ -334,22 +428,24 @@ export default function ProductDetails({
                 i++
               ) {
 
-                addToCart({
+               addToCart({
+  id: product.id,
+  name: product.name,
 
-                  id: product.id,
+  price: selectedPrice,
 
-                  name: product.name,
+  originalPrice:
+    product.price,
 
-                  price: product.price,
+  quantityPricing:
+    product.quantityPricing,
 
-                  image:
-                    product.images[0],
+  image:
+    product.images[0],
 
-                  stock:
-                    product.stock,
-
-                })
-
+  stock:
+    product.stock,
+})
               }
 
               toast.success(

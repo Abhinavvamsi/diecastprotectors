@@ -23,10 +23,6 @@ export async function POST(
 
   })
 
-console.log(
-  "Coupon From DB:",
-  coupon
-)
 
     if (!coupon) {
 

@@ -40,27 +40,23 @@ if (!isAdmin) {
 
         data: {
 
-          name:
-            body.name,
+          name: body.name,
 
-          description:
-            body.description,
+  description: body.description,
 
-          price:
-            body.price,
+  price: body.price,
 
-          images:
-            body.images,
+  images: body.images,
 
-          category:
-            body.category,
+  category: body.category,
 
-          badge: 
-            body.badge,
+  badge: body.badge,
 
-          stock:
-            body.stock,
+  stock: body.stock,
 
+  quantityPricing:
+
+    body.quantityPricing || null,
         },
 
       })

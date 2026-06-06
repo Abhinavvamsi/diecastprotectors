@@ -15,36 +15,27 @@ import { useUser } from "@clerk/nextjs"
 import { toast } from "sonner"
 
 type ProductCardProps = {
-
   id: string
-
   name: string
-
   price: number
-
   image: string
-
   description: string
-
   stock: number
 
+  quantityPricing?: any[]
+
   badge?: string
-
 }
-
 export default function ProductCard({
 
   id,
-
   name,
-
   price,
-
   image,
-
   description,
-
   stock,
+
+  quantityPricing,
 
   badge,
 
@@ -271,18 +262,21 @@ export default function ProductCard({
                 }
 
                 addToCart({
+  id,
+  name,
 
-                  id,
+  price,
 
-                  name,
+  originalPrice:
+    price,
 
-                  price,
+  quantityPricing:
+    quantityPricing,
 
-                  image,
+  image,
 
-                  stock,
-
-                })
+  stock,
+})
 
                 toast.success(
                   `${name} added to cart 🛒`
@@ -339,18 +333,21 @@ export default function ProductCard({
                 }
 
                 addToCart({
+  id,
+  name,
 
-                  id,
+  price,
 
-                  name,
+  originalPrice:
+    price,
 
-                  price,
+  quantityPricing:
+    quantityPricing,
 
-                  image,
+  image,
 
-                  stock,
-
-                })
+  stock,
+})
 
                 toast.success(
                   "Redirecting to checkout 🚀"

@@ -10,7 +10,6 @@ export async function POST(
 
   try {
 
-    /* Protect API */
     const user =
       await currentUser()
 
@@ -22,20 +21,16 @@ export async function POST(
     if (!isAdmin) {
 
       return NextResponse.json(
-
         {
           error: "Unauthorized",
         },
-
         {
           status: 401,
         }
-
       )
 
     }
 
-    /* Get Product ID */
     const { searchParams } =
       new URL(req.url)
 
@@ -45,24 +40,19 @@ export async function POST(
     if (!id) {
 
       return NextResponse.json(
-
         {
           error: "Missing product id",
         },
-
         {
           status: 400,
         }
-
       )
 
     }
 
-    /* Request Body */
     const body =
       await req.json()
 
-    /* Update Product */
     const updatedProduct =
       await prisma.product.update({
 
@@ -93,6 +83,9 @@ export async function POST(
           stock:
             body.stock,
 
+          quantityPricing:
+            body.quantityPricing,
+
         },
 
       })
@@ -106,16 +99,13 @@ export async function POST(
     console.log(error)
 
     return NextResponse.json(
-
       {
         error:
           "Failed to update product",
       },
-
       {
         status: 500,
       }
-
     )
 
   }

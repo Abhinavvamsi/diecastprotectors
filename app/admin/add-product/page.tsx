@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-
+import AdminNav from "@/components/admin-nav"
 import { Button } from "@/components/ui/button"
 
 import { toast } from "sonner"
@@ -62,6 +62,15 @@ export default function AddProductPage() {
 
   const [stock, setStock] =
     useState("")
+
+  const [quantityPricing,
+  setQuantityPricing
+] = useState([
+  {
+    quantity: "",
+    price: "",
+  },
+])
 
   async function handleImageUpload(
     e: React.ChangeEvent<HTMLInputElement>
@@ -154,17 +163,19 @@ export default function AddProductPage() {
 
             name,
 
-            description,
+  description,
 
-            price: Number(price),
+  price: Number(price),
 
-            images,
+  images,
 
-            category,
+  category,
 
-            badge,
+  badge,
 
-            stock: Number(stock),
+  stock: Number(stock),
+
+  quantityPricing,
 
           }),
 
@@ -201,6 +212,7 @@ export default function AddProductPage() {
 
       <div className="max-w-4xl mx-auto">
 
+  <AdminNav />
         {/* Header */}
         <div className="mb-12">
 
@@ -576,7 +588,133 @@ export default function AddProductPage() {
             </select>
 
           </div>
+<div className="space-y-4">
 
+  <label className="text-sm text-zinc-400 uppercase tracking-wider">
+
+    Quantity Pricing
+
+  </label>
+
+  {quantityPricing.map(
+  (item, index) => (
+
+    <div
+      key={index}
+      className="flex gap-3 items-center"
+    >
+
+        <input
+          type="number"
+          placeholder="Quantity"
+          value={item.quantity}
+          onChange={(e) => {
+
+            const updated =
+              [...quantityPricing]
+
+            updated[index]
+              .quantity =
+              e.target.value
+
+            setQuantityPricing(
+              updated
+            )
+
+          }}
+          className="
+          flex-1
+          h-14
+          rounded-2xl
+          bg-black
+          border
+          border-zinc-800
+          px-5
+          "
+        />
+
+        <input
+  type="number"
+  placeholder="Price"
+  value={item.price}
+  onChange={(e) => {
+
+    const updated =
+      [...quantityPricing]
+
+    updated[index]
+      .price =
+      e.target.value
+
+    setQuantityPricing(
+      updated
+    )
+
+  }}
+  className="
+  flex-1
+  h-14
+  rounded-2xl
+  bg-black
+  border
+  border-zinc-800
+  px-5
+  "
+/>
+
+<button
+  type="button"
+  onClick={() => {
+
+    setQuantityPricing(
+      quantityPricing.filter(
+        (_, i) => i !== index
+      )
+    )
+
+  }}
+  disabled={
+    quantityPricing.length === 1
+  }
+  className="
+  h-14
+  px-4
+  rounded-2xl
+  bg-red-500
+  hover:bg-red-600
+  text-white
+  font-bold
+  disabled:opacity-50
+  disabled:cursor-not-allowed
+  "
+>
+
+  Remove
+
+</button>
+
+</div>
+    )
+  )}
+
+  <Button
+    type="button"
+    onClick={() =>
+      setQuantityPricing([
+        ...quantityPricing,
+        {
+          quantity: "",
+          price: "",
+        },
+      ])
+    }
+  >
+
+    Add Tier
+
+  </Button>
+
+</div>
           {/* Stock */}
           <div className="space-y-3">
 

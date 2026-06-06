@@ -1,5 +1,5 @@
 "use client"
-
+import AdminNav from "@/components/admin-nav"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
@@ -7,7 +7,7 @@ export default function SettingsPage() {
 
   const [shippingCharge,
     setShippingCharge
-  ] = useState("49")
+  ] = useState("0")
 
   const [shippingMessage,
     setShippingMessage
@@ -23,13 +23,17 @@ export default function SettingsPage() {
     const data =
       await response.json()
 
-    setShippingCharge(
-      String(data.shippingCharge)
-    )
+    if (data) {
 
-    setShippingMessage(
-      data.shippingMessage || ""
-    )
+      setShippingCharge(
+        String(data.shippingCharge)
+      )
+
+      setShippingMessage(
+        data.shippingMessage || ""
+      )
+
+    }
 
   }
 
@@ -68,12 +72,6 @@ export default function SettingsPage() {
         "Settings saved successfully ✅"
       )
 
-    } else {
-
-      toast.error(
-        "Failed to save settings"
-      )
-
     }
 
   }
@@ -86,77 +84,55 @@ export default function SettingsPage() {
 
   return (
 
-    <div className="max-w-4xl mx-auto p-8">
-
-      <h1 className="text-3xl font-bold mb-8">
-
+    <div className="max-w-7xl mx-auto">
+    
+      <AdminNav />
+    
+      <h1 className="text-5xl font-bold mb-12">
+    
         Store Settings
-
+    
       </h1>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+      <div className="space-y-6">
 
-        <div className="space-y-6">
+        <input
+          type="number"
+          placeholder="Shipping Charge"
+          value={shippingCharge}
+          onChange={(e) =>
+            setShippingCharge(
+              e.target.value
+            )
+          }
+          className="w-full border rounded-xl p-3"
+        />
 
-          <div>
+        <textarea
+          placeholder="Shipping Message"
+          value={shippingMessage}
+          onChange={(e) =>
+            setShippingMessage(
+              e.target.value
+            )
+          }
+          className="w-full border rounded-xl p-3 min-h-[120px]"
+        />
 
-            <label className="block mb-2">
+        <button
+          onClick={saveSettings}
+          className="
+          bg-red-500
+          text-white
+          px-6
+          py-3
+          rounded-xl
+          "
+        >
 
-              Shipping Charge
+          Save Settings
 
-            </label>
-
-            <input
-              type="number"
-              value={shippingCharge}
-              onChange={(e) =>
-                setShippingCharge(
-                  e.target.value
-                )
-              }
-              className="w-full border border-zinc-800 bg-black rounded-xl p-3"
-            />
-
-          </div>
-
-          <div>
-
-            <label className="block mb-2">
-
-              Shipping Message
-
-            </label>
-
-            <textarea
-              value={shippingMessage}
-              onChange={(e) =>
-                setShippingMessage(
-                  e.target.value
-                )
-              }
-              className="w-full border border-zinc-800 bg-black rounded-xl p-3 min-h-[120px]"
-            />
-
-          </div>
-
-          <button
-            onClick={
-              saveSettings
-            }
-            className="
-            px-6
-            py-3
-            rounded-xl
-            bg-red-500
-            hover:bg-red-600
-            "
-          >
-
-            Save Settings
-
-          </button>
-
-        </div>
+        </button>
 
       </div>
 

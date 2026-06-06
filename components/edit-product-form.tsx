@@ -7,23 +7,19 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
 type Product = {
-
   id: string
-
   name: string
-
   description: string
-
   price: number
-
   images: string[]
-
   category: string
-
   stock: number
 
+  quantityPricing?: {
+    quantity: string
+    price: string
+  }[]
 }
-
 export default function EditProductForm({
   product,
 }: {
@@ -56,6 +52,13 @@ export default function EditProductForm({
 
   const [stock, setStock] =
     useState(product.stock)
+  
+  const [
+  quantityPricing,
+  setQuantityPricing,
+] = useState(
+  product.quantityPricing || []
+)
 
   async function handleUpdate() {
 
@@ -73,20 +76,16 @@ export default function EditProductForm({
 
           body: JSON.stringify({
 
-            name,
+  name,
+  description,
+  price: Number(price),
+  images,
+  category,
+  stock,
 
-            description,
+  quantityPricing,
 
-            price:
-              Number(price),
-
-            images,
-
-            category,
-
-            stock,
-
-          }),
+}),
 
         }
       )
@@ -209,7 +208,132 @@ export default function EditProductForm({
         </option>
 
       </select>
+<div className="space-y-4">
 
+  <label className="text-zinc-400">
+
+    Quantity Pricing
+
+  </label>
+
+  {quantityPricing.map(
+    (tier, index) => (
+
+      <div
+        key={index}
+        className="flex gap-3"
+      >
+
+        <input
+          type="number"
+          value={tier.quantity}
+          placeholder="Quantity"
+          onChange={(e) => {
+
+            const updated =
+              [...quantityPricing]
+
+            updated[index]
+              .quantity =
+              e.target.value
+
+            setQuantityPricing(
+              updated
+            )
+
+          }}
+          className="
+          flex-1
+          h-14
+          rounded-xl
+          bg-black
+          border
+          border-zinc-800
+          px-4
+          "
+        />
+
+        <input
+          type="number"
+          value={tier.price}
+          placeholder="Price"
+          onChange={(e) => {
+
+            const updated =
+              [...quantityPricing]
+
+            updated[index]
+              .price =
+              e.target.value
+
+            setQuantityPricing(
+              updated
+            )
+
+          }}
+          className="
+          flex-1
+          h-14
+          rounded-xl
+          bg-black
+          border
+          border-zinc-800
+          px-4
+          "
+        />
+
+        <button
+          type="button"
+          onClick={() =>
+            setQuantityPricing(
+              quantityPricing.filter(
+                (_, i) =>
+                  i !== index
+              )
+            )
+          }
+          className="
+          px-4
+          rounded-xl
+          bg-red-500
+          hover:bg-red-600
+          "
+        >
+
+          ✕
+
+        </button>
+
+      </div>
+
+    )
+  )}
+
+  <button
+    type="button"
+    onClick={() =>
+      setQuantityPricing([
+        ...quantityPricing,
+        {
+          quantity: "",
+          price: "",
+        },
+      ])
+    }
+    className="
+    h-12
+    px-5
+    rounded-xl
+    bg-zinc-800
+    hover:bg-zinc-700
+    "
+  >
+
+    Add Tier
+
+  </button>
+
+</div>
       {/* Stock */}
       <input
         type="number"

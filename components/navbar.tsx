@@ -15,7 +15,7 @@ import {
   useState,
 } from "react"
 
-import ThemeToggle from "@/components/theme-toggle"
+
 
 import {
   SignInButton,
@@ -258,7 +258,7 @@ export default function Navbar() {
 
           )}
 
-          <ThemeToggle />
+          
 
         </div>
 
@@ -315,7 +315,7 @@ export default function Navbar() {
 
           </Link>
 
-          <ThemeToggle />
+          
 
           <button
             onClick={() =>

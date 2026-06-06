@@ -42,6 +42,40 @@ export default function CartPage() {
       (state) => state.removeFromCart
     )
 
+    function getCurrentPrice(item: any) {
+
+  let price =
+    item.originalPrice
+
+  if (
+    item.quantityPricing
+  ) {
+
+    item.quantityPricing
+      .forEach((tier: any) => {
+
+        if (
+          item.quantity >=
+          Number(
+            tier.quantity
+          )
+        ) {
+
+          price =
+            Number(
+              tier.price
+            )
+
+        }
+
+      })
+
+  }
+
+  return price
+
+}
+
   useEffect(() => {
 
     async function refreshStock() {
@@ -74,11 +108,12 @@ export default function CartPage() {
   }, [syncStock])
 
   const totalPrice = cart.reduce(
-    (total, item) =>
-      total +
-      item.price * item.quantity,
-    0
-  )
+  (total, item) =>
+    total +
+    getCurrentPrice(item) *
+      item.quantity,
+  0
+)
 
   return (
 
@@ -173,7 +208,7 @@ export default function CartPage() {
                     </h2>
 
                     <p className="text-red-500 mt-2">
-                      ₹{item.price}
+                      ₹{getCurrentPrice(item)}
                     </p>
 
                     <p className="text-green-500 mt-2 font-medium">
@@ -189,8 +224,8 @@ export default function CartPage() {
                       Total:
                       {" "}
                       ₹
-                      {item.price *
-                        item.quantity}
+{getCurrentPrice(item) *
+  item.quantity}
 
                     </p>
 
