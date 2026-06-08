@@ -59,6 +59,10 @@ export default function Home() {
     setSelectedCategory
   ] = useState("All")
 
+  const [stockFilter,
+  setStockFilter
+] = useState("All")
+
   const [search,
     setSearch
   ] = useState("")
@@ -128,37 +132,36 @@ export default function Home() {
   ]
 
   const filteredProducts =
-    products.filter((product) => {
+  products.filter((product) => {
 
-      const matchesCategory =
+    const matchesCategory =
+      selectedCategory === "All"
+        ? true
+        : product.category === selectedCategory
 
-        selectedCategory === "All"
+    const matchesSearch =
+      product.name
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
 
-          ? true
+      product.description
+        .toLowerCase()
+        .includes(search.toLowerCase())
 
-          : product.category ===
-            selectedCategory
+    const matchesStock =
+      stockFilter === "All"
+        ? true
+        : stockFilter === "In Stock"
+        ? product.stock > 0
+        : product.stock === 0
 
-      const matchesSearch =
+    return (
+      matchesCategory &&
+      matchesSearch &&
+      matchesStock
+    )
 
-        product.name
-          .toLowerCase()
-          .includes(
-            search.toLowerCase()
-          ) ||
-
-        product.description
-          .toLowerCase()
-          .includes(
-            search.toLowerCase()
-          )
-
-      return (
-        matchesCategory &&
-        matchesSearch
-      )
-
-    })
+  })
 
   return (
 
@@ -414,7 +417,42 @@ export default function Home() {
           ))}
 
         </div>
+<div className="flex flex-wrap gap-4 mb-12">
 
+  {[
+    "All",
+    "In Stock",
+    "Sold Out",
+  ].map((filter) => (
+
+    <button
+      key={filter}
+      onClick={() =>
+        setStockFilter(filter)
+      }
+      className={`
+        px-5
+        py-2.5
+        rounded-full
+        border
+        transition-all
+        duration-300
+
+        ${
+          stockFilter === filter
+            ? "bg-green-500 text-white border-green-500"
+            : "border-zinc-700 text-zinc-400 hover:border-green-500 hover:text-white"
+        }
+      `}
+    >
+
+      {filter}
+
+    </button>
+
+  ))}
+
+</div>
         {/* Skeleton */}
         {loading && (
 

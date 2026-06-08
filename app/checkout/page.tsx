@@ -130,9 +130,8 @@ const [couponLoading,
   setCouponLoading
 ] = useState(false)
 
-const [shipping,
-  setShipping
-] = useState(0)
+const [shipping, setShipping] =
+  useState<number | null>(null)
 
 const [shippingMessage,
   setShippingMessage
@@ -172,6 +171,22 @@ useEffect(() => {
 
 }, [])
 
+useEffect(() => {
+
+  if (cart.length === 0) {
+
+    if (couponCode || discount > 0) {
+
+      
+
+    }
+
+    setCouponCode("")
+    setDiscount(0)
+
+  }
+
+}, [cart])
   if (!user) {
 
     return <RedirectToSignIn />
@@ -214,7 +229,18 @@ async function searchAddress(
   }
 
 }
+
 async function applyCoupon() {
+
+  if (cart.length === 0) {
+
+    toast.error(
+      "Add products before applying coupon"
+    )
+
+    return
+
+  }
 
   if (!couponCode) {
 
@@ -227,7 +253,6 @@ async function applyCoupon() {
   }
 
   try {
-
     setCouponLoading(true)
 
     const response =
@@ -295,8 +320,11 @@ async function applyCoupon() {
     }
 
     setDiscount(
-      discountAmount
-    )
+  Math.min(
+    discountAmount,
+    total
+  )
+)
 
     toast.success(
       `Coupon Applied - ₹${discountAmount} Off`
@@ -761,10 +789,13 @@ async function applyCoupon() {
     />
 
     <Button
-      type="button"
-      onClick={applyCoupon}
-      disabled={couponLoading}
-    >
+  type="button"
+  onClick={applyCoupon}
+  disabled={
+    couponLoading ||
+    cart.length === 0
+  }
+>
 
       {couponLoading
         ? "..."
@@ -819,7 +850,13 @@ async function applyCoupon() {
 
                   <p>Shipping</p>
 
-                 {shipping > 0 ? (
+                 {shipping === null ? (
+
+  <p className="text-zinc-500">
+    Loading...
+  </p>
+
+) : shipping > 0 ? (
 
   <p>
     ₹{shipping}
@@ -828,9 +865,7 @@ async function applyCoupon() {
 ) : (
 
   <p className="text-yellow-500">
-
     Actual Charges
-
   </p>
 
 )}
@@ -843,11 +878,14 @@ async function applyCoupon() {
 
                   <p>
 
-  ₹{
+ ₹{
+  Math.max(
+    0,
     total -
-    discount +
-    shipping
-  }
+      discount +
+      (shipping || 0)
+  )
+}
 
 </p>
 
@@ -879,7 +917,12 @@ async function applyCoupon() {
 
               {/* Payment Button */}
              <Button
-  disabled={loading || cart.length === 0}
+  disabled={
+    loading ||
+    cart.length === 0 ||
+    shipping === null
+  }
+  
   className="
   w-full
   h-14
@@ -1033,9 +1076,12 @@ setValidating(false)
                           body: JSON.stringify({
 
                            amount:
-  total -
-  discount +
-  shipping,
+  Math.max(
+    0,
+    total -
+      discount +
+      (shipping || 0)
+  )
 
                           }),
 
@@ -1109,13 +1155,15 @@ setValidating(false)
                                       couponCode,
 
                                       totalAmount:
-  total -
-  discount +
-  shipping,
+  Math.max(
+    0,
+    total -
+      discount +
+      (shipping || 0)
+  ),
 
-                                      paymentId:
-                                        response
-                                          .razorpay_payment_id,
+paymentId:
+  response.razorpay_payment_id,
 
                                     }),
 
@@ -1285,10 +1333,84 @@ if (
 
                 {loading
                   ? "Processing Payment..."
-                  : "Proceed to Payment"}
+                  : "Proceed to Payment"} 
 
               </Button>
+              <div
+  className="
+  mt-4
+  text-center
+  text-xs
+  text-zinc-500
+  "
+>
+  🔒 Secure Payment Powered by Razorpay
+</div>
+<div
+  className="
+  mt-8
+  p-6
+  rounded-2xl
+  border
+  border-green-500/30
+  bg-green-500/10
+  text-center
+  "
+>
 
+  <h3
+    className="
+    text-xl
+    font-bold
+    text-green-400
+    "
+  >
+
+    🎉 Join The diecast protectors Community
+
+  </h3>
+
+  <p
+    className="
+    text-zinc-300
+    mt-3
+    "
+  >
+
+    Stay updated with:
+    <br />
+    ✅ Protector Restocks
+    <br />
+    ✅ New Product Launches
+    <br />
+    ✅ Exclusive Discounts
+    <br />
+    ✅ Diecast Collector Updates
+
+  </p>
+
+  <a
+    href="https://chat.whatsapp.com/Gj5gV6SHqHM85CKDyDc3JJ?s=cl&p=i&ilr=0"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="
+    inline-block
+    mt-5
+    px-6
+    py-3
+    rounded-xl
+    bg-green-500
+    text-white
+    font-bold
+    hover:bg-green-600
+    "
+  >
+
+    🚀 Join WhatsApp Group
+
+  </a>
+
+</div>
             </div>
 
           </div>

@@ -46,13 +46,32 @@ export default function ProtectorsPage() {
         await response.json()
 
       const filtered =
-  data.filter(
-    (product: Product) =>
-      product.category ===
-      "Protectors"
-  )
+        data.filter(
+          (product: Product) =>
+            product.category ===
+            "Protectors"
+        )
 
-      setProducts(filtered)
+      const sorted =
+        [...filtered].sort(
+          (a, b) =>
+            Number(a.stock) === 0
+              ? 1
+              : Number(b.stock) === 0
+              ? -1
+              : 0
+        )
+
+      setProducts(sorted)
+
+      console.log(
+        sorted.map(
+          (product) => ({
+            name: product.name,
+            stock: product.stock
+          })
+        )
+      )
 
     }
 

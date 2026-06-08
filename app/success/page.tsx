@@ -51,21 +51,71 @@ export default function SuccessPage() {
           </p>
 
           {/* Order ID */}
-          <div className="mt-10 bg-black border border-zinc-800 rounded-2xl p-6">
+<div className="mt-10 bg-black border border-zinc-800 rounded-2xl p-6">
 
-            <p className="text-red-500 text-sm uppercase tracking-widest">
+  <p className="text-red-500 text-sm uppercase tracking-widest">
+    Order ID
+  </p>
 
-              Order ID
+  <p className="text-3xl font-bold mt-3 break-all">
+    {orderId}
+  </p>
 
-            </p>
+</div>
 
-            <p className="text-3xl font-bold mt-3 break-all">
+{/* WhatsApp Community */}
+<div
+  className="
+  mt-8
+  p-6
+  rounded-2xl
+  border
+  border-green-500/30
+  bg-green-500/10
+  text-center
+  "
+>
 
-              {orderId}
+  <h3 className="text-xl font-bold text-green-400">
+    🎉 Join The Diecast Protectors Community
+  </h3>
 
-            </p>
+  <p className="text-zinc-300 mt-3">
 
-          </div>
+    Stay updated with:
+    <br />
+    ✅ Protector Restocks
+    <br />
+    ✅ New Product Launches
+    <br />
+    ✅ Exclusive Discounts
+    <br />
+    ✅ Diecast Collector Updates
+
+  </p>
+
+  <a
+    href="https://chat.whatsapp.com/Gj5gV6SHqHM85CKDyDc3JJ?s=cl&p=i&ilr=0"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="
+    inline-block
+    mt-5
+    px-6
+    py-3
+    rounded-xl
+    bg-green-500
+    text-white
+    font-bold
+    hover:bg-green-600
+    "
+  >
+    🚀 Join WhatsApp Group
+  </a>
+
+</div>
+
+{/* Buttons */}
 
           {/* Buttons */}
           <div className="flex flex-col md:flex-row gap-4 justify-center mt-10">
