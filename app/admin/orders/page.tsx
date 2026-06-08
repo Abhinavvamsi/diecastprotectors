@@ -1,5 +1,6 @@
 import BulkStatusButton from "@/components/bulk-status-button"
 import Image from "next/image"
+import Link from "next/link"
 import AdminNav from "@/components/admin-nav"
 export const dynamic = "force-dynamic"
 
@@ -87,88 +88,75 @@ where: {
     },
 
   })
-const pendingCount =
-  await prisma.order.count({
+const [
+  pendingCount,
+  packedCount,
+  shippedCount,
+  deliveredCount,
+  cancelledCount,
+  totalCount,
+  deliveredOrders,
+  pendingOrders,
+  totalRevenue,
+] = await Promise.all([
 
+  prisma.order.count({
     where: {
       status: "Pending",
     },
+  }),
 
-  })
-
-const packedCount =
-  await prisma.order.count({
-
+  prisma.order.count({
     where: {
       status: "Packed",
     },
+  }),
 
-  })
-
-const shippedCount =
-  await prisma.order.count({
-
+  prisma.order.count({
     where: {
       status: "Shipped",
     },
+  }),
 
-  })
-
-const deliveredCount =
-  await prisma.order.count({
-
+  prisma.order.count({
     where: {
       status: "Delivered",
     },
+  }),
 
-  })
-
-const cancelledCount =
-  await prisma.order.count({
-
+  prisma.order.count({
     where: {
       status: "Cancelled",
     },
+  }),
 
-  })
+  prisma.order.count(),
 
-const totalCount =
-  await prisma.order.count()
-  const totalRevenue =
-  await prisma.order.aggregate({
-
-    where: {
-
-      status: {
-        not: "Cancelled",
-      },
-
-    },
-
-    _sum: {
-
-      totalAmount: true,
-
-    },
-
-  })
-const deliveredOrders =
-  await prisma.order.count({
-
+  prisma.order.count({
     where: {
       status: "Delivered",
     },
+  }),
 
-  })
-
-const pendingOrders =
-  await prisma.order.count({
-
+  prisma.order.count({
     where: {
       status: "Pending",
     },
+  }),
 
-  })
+  prisma.order.aggregate({
+    where: {
+      status: {
+        not: "Cancelled",
+      },
+    },
+
+    _sum: {
+      totalAmount: true,
+    },
+  }),
+
+])
   return (
 
     <main className="min-h-screen bg-black text-white p-8">
@@ -360,7 +348,7 @@ const pendingOrders =
 
 ].map((item) => (
 
-  <a
+  <Link
   key={item.name}
   href={`?search=${search}&status=${item.name}`}
   className={`
@@ -372,24 +360,15 @@ const pendingOrders =
     flex
     items-center
     gap-2
-
-      ${
-        status === item.name
-
-          ? "bg-red-500 border-red-500 text-white"
-
-          : "border-zinc-700 text-zinc-400 hover:border-red-500"
-      }
-    `}
-  >
-
-    {item.name}
-    {" "}
-    (
-    {item.count}
-    )
-
-  </a>
+    ${
+      status === item.name
+        ? "bg-red-500 border-red-500 text-white"
+        : "border-zinc-700 text-zinc-400 hover:border-red-500"
+    }
+  `}
+>
+  {item.name} ({item.count})
+</Link>
 
 ))}
 
