@@ -1,3 +1,4 @@
+import BulkStatusButton from "@/components/bulk-status-button"
 import Image from "next/image"
 import AdminNav from "@/components/admin-nav"
 export const dynamic = "force-dynamic"
@@ -16,12 +17,14 @@ export default async function OrdersPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    search?: string
-  }>
+  search?: string
+  status?: string
+}>
 }) {
 
   const user =
     await currentUser()
+    
 
   const isAdmin =
     user?.primaryEmailAddress
@@ -33,50 +36,139 @@ export default async function OrdersPage({
     redirect("/")
 
   }
-  const { search = "" } =
-  await searchParams
+  const {
+  search = "",
+  status = "All",
+} = await searchParams
+  
   const orders =
   await prisma.order.findMany({
+    
+where: {
 
-    where:
+  ...(search
+    ? {
+        OR: [
 
-      search
-        ? {
+          {
+            orderId: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
 
-            OR: [
+          {
+            customer: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
 
-              {
-                orderId: {
-                  contains: search,
-                  mode: "insensitive",
-                },
-              },
+          {
+            phone: {
+              contains: search,
+            },
+          },
 
-              {
-                customer: {
-                  contains: search,
-                  mode: "insensitive",
-                },
-              },
+        ],
+      }
+    : {}),
 
-              {
-                phone: {
-                  contains: search,
-                },
-              },
+  ...(status !== "All"
+    ? {
+        status,
+      }
+    : {}),
 
-            ],
-
-          }
-
-        : undefined,
+},
 
     orderBy: {
       createdAt: "desc",
     },
 
   })
+const pendingCount =
+  await prisma.order.count({
 
+    where: {
+      status: "Pending",
+    },
+
+  })
+
+const packedCount =
+  await prisma.order.count({
+
+    where: {
+      status: "Packed",
+    },
+
+  })
+
+const shippedCount =
+  await prisma.order.count({
+
+    where: {
+      status: "Shipped",
+    },
+
+  })
+
+const deliveredCount =
+  await prisma.order.count({
+
+    where: {
+      status: "Delivered",
+    },
+
+  })
+
+const cancelledCount =
+  await prisma.order.count({
+
+    where: {
+      status: "Cancelled",
+    },
+
+  })
+
+const totalCount =
+  await prisma.order.count()
+  const totalRevenue =
+  await prisma.order.aggregate({
+
+    where: {
+
+      status: {
+        not: "Cancelled",
+      },
+
+    },
+
+    _sum: {
+
+      totalAmount: true,
+
+    },
+
+  })
+const deliveredOrders =
+  await prisma.order.count({
+
+    where: {
+      status: "Delivered",
+    },
+
+  })
+
+const pendingOrders =
+  await prisma.order.count({
+
+    where: {
+      status: "Pending",
+    },
+
+  })
   return (
 
     <main className="min-h-screen bg-black text-white p-8">
@@ -85,13 +177,266 @@ export default async function OrdersPage({
 
   <AdminNav />
 
-  <h1 className="text-5xl font-bold mb-12">
+  <div
+  className="
+  flex
+  justify-between
+  items-center
+  mb-12
+  "
+>
+
+  <h1 className="text-5xl font-bold">
 
     Orders Dashboard
 
   </h1>
-  <form className="mb-10">
 
+  <a
+    href="/api/export-orders"
+  >
+
+    <button
+      className="
+      px-6
+      py-3
+      rounded-xl
+      bg-green-500
+      hover:bg-green-600
+      font-bold
+      "
+    >
+
+      📥 Export Excel
+
+    </button>
+
+  </a>
+
+</div>
+  <div
+  className="
+  grid
+  grid-cols-1
+  md:grid-cols-4
+  gap-6
+  mb-10
+  "
+>
+
+  <div
+    className="
+    bg-zinc-900
+    border
+    border-zinc-800
+    rounded-3xl
+    p-6
+    "
+  >
+
+    <p className="text-zinc-400">
+
+      Total Orders
+
+    </p>
+
+    <h2 className="text-4xl font-bold mt-2">
+
+      {totalCount}
+
+    </h2>
+
+  </div>
+
+  <div
+    className="
+    bg-zinc-900
+    border
+    border-zinc-800
+    rounded-3xl
+    p-6
+    "
+  >
+
+    <p className="text-zinc-400">
+
+      Revenue
+
+    </p>
+
+    <h2 className="text-4xl font-bold mt-2 text-green-500">
+
+      ₹
+      {
+        totalRevenue._sum
+          .totalAmount || 0
+      }
+
+    </h2>
+
+  </div>
+
+  <div
+    className="
+    bg-zinc-900
+    border
+    border-zinc-800
+    rounded-3xl
+    p-6
+    "
+  >
+
+    <p className="text-zinc-400">
+
+      Pending
+
+    </p>
+
+    <h2 className="text-4xl font-bold mt-2 text-yellow-500">
+
+      {pendingOrders}
+
+    </h2>
+
+  </div>
+
+  <div
+    className="
+    bg-zinc-900
+    border
+    border-zinc-800
+    rounded-3xl
+    p-6
+    "
+  >
+
+    <p className="text-zinc-400">
+
+      Delivered
+
+    </p>
+
+    <h2 className="text-4xl font-bold mt-2 text-green-500">
+
+      {deliveredOrders}
+
+    </h2>
+
+  </div>
+
+</div>
+  <div className="flex flex-wrap gap-3 mb-6">
+
+  {[
+  {
+    name: "All",
+    count: totalCount,
+  },
+
+  {
+    name: "Pending",
+    count: pendingCount,
+  },
+
+  {
+    name: "Packed",
+    count: packedCount,
+  },
+
+  {
+    name: "Shipped",
+    count: shippedCount,
+  },
+
+  {
+    name: "Delivered",
+    count: deliveredCount,
+  },
+
+  {
+    name: "Cancelled",
+    count: cancelledCount,
+  },
+
+].map((item) => (
+
+  <a
+  key={item.name}
+  href={`?search=${search}&status=${item.name}`}
+  className={`
+    px-5
+    py-2
+    rounded-full
+    border
+    transition-all
+    flex
+    items-center
+    gap-2
+
+      ${
+        status === item.name
+
+          ? "bg-red-500 border-red-500 text-white"
+
+          : "border-zinc-700 text-zinc-400 hover:border-red-500"
+      }
+    `}
+  >
+
+    {item.name}
+    {" "}
+    (
+    {item.count}
+    )
+
+  </a>
+
+))}
+
+</div>
+  <form
+  className="mb-10"
+  method="GET"
+  
+>
+  <div className="mb-6">
+
+  {status === "Pending" && (
+
+    <BulkStatusButton
+      currentStatus="Pending"
+      newStatus="Packed"
+      label={`Mark All ${pendingCount} Orders as Packed`}
+    />
+
+  )}
+
+  {status === "Packed" && (
+
+    <BulkStatusButton
+      currentStatus="Packed"
+      newStatus="Shipped"
+      label={`Mark All ${packedCount} Orders as Shipped`}
+    />
+
+  )}
+
+  {status === "Shipped" && (
+
+    <BulkStatusButton
+      currentStatus="Shipped"
+      newStatus="Delivered"
+      label={`Mark All ${shippedCount} Orders as Delivered`}
+    />
+
+  )}
+
+</div>
+<input
+  type="hidden"
+  name="status"
+  value={status}
+/>
   <input
     type="text"
     name="search"
@@ -138,15 +483,16 @@ export default async function OrdersPage({
           {orders.map((order) => (
 
             <div
-              key={order.id}
-              className="
-              bg-zinc-900
-              border
-              border-zinc-800
-              rounded-3xl
-              p-8
-              "
-            >
+  key={order.id}
+  className="
+  bg-zinc-900
+  border
+  border-zinc-800
+  rounded-3xl
+  p-8
+  "
+>
+
 
               <div className="grid md:grid-cols-2 gap-6">
 

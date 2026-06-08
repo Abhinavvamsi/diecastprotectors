@@ -216,7 +216,7 @@ const selectedPrice =
 
             {tier.quantity}
             {" "}
-            pcs @ ₹
+            pcs @ each ₹ 
             {tier.price}
 
           </button>
