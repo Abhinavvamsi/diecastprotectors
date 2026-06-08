@@ -5,6 +5,12 @@ import {
   useEffect,
 } from "react"
 
+import {
+  Minus,
+  Plus,
+  Trash2,
+} from "lucide-react"
+
 import Image from "next/image"
 
 import Navbar from "@/components/navbar"
@@ -26,6 +32,20 @@ export default function CheckoutPage() {
 
   const cart = useCartStore(
     (state) => state.cart
+  )
+  const increaseQuantity =
+  useCartStore(
+    (state) => state.increaseQuantity
+  )
+
+const decreaseQuantity =
+  useCartStore(
+    (state) => state.decreaseQuantity
+  )
+
+const removeFromCart =
+  useCartStore(
+    (state) => state.removeFromCart
   )
 
   const { user } = useUser()
@@ -558,50 +578,155 @@ async function applyCoupon() {
 
                     </div>
 
-                    <div className="flex-1">
+                   <div className="flex-1">
 
-                      <h3 className="font-semibold">
+  <h3 className="font-semibold">
 
-                        {item.name}
+    {item.name}
 
-                      </h3>
+  </h3>
 
-                      <p className="text-red-500 text-sm">
+  <p className="text-red-500 text-sm">
 
-                        Premium Hot Wheels Protector
+    Premium Hot Wheels Protector
 
-                      </p>
+  </p>
 
-                    </div>
+  <div className="flex items-center gap-2 mt-3">
 
-                    <p className="font-bold">
+    <button
+      onClick={() =>
+        decreaseQuantity(
+          item.id
+        )
+      }
+      className="
+      w-8
+      h-8
+      rounded-lg
+      border
+      border-zinc-700
+      flex
+      items-center
+      justify-center
+      "
+    >
 
-  ₹{
-    item.quantityPricing
-      ?.filter(
-        (tier) =>
-          item.quantity >=
-          Number(tier.quantity)
+      <Minus size={14} />
+
+    </button>
+
+    <span className="w-6 text-center">
+
+      {item.quantity}
+
+    </span>
+
+    <button
+      disabled={
+        item.quantity >=
+        item.stock
+      }
+      onClick={() =>
+        increaseQuantity(
+          item.id
+        )
+      }
+      className="
+      w-8
+      h-8
+      rounded-lg
+      border
+      border-zinc-700
+      flex
+      items-center
+      justify-center
+      disabled:opacity-40
+      "
+    >
+
+      <Plus size={14} />
+
+    </button>
+
+    <button
+      onClick={() =>
+        removeFromCart(
+          item.id
+        )
+      }
+      className="
+      ml-3
+      text-red-500
+      "
+    >
+
+      <Trash2 size={16} />
+
+    </button>
+
+  </div>
+
+</div>
+
+<div className="text-right">
+
+  <p className="font-bold">
+
+    ₹{
+      (
+        item.quantityPricing
+          ?.filter(
+            (tier) =>
+              item.quantity >=
+              Number(
+                tier.quantity
+              )
+          )
+          .sort(
+            (a, b) =>
+              Number(
+                b.quantity
+              ) -
+              Number(
+                a.quantity
+              )
+          )[0]?.price ||
+        item.originalPrice
       )
-      .sort(
-        (a, b) =>
-          Number(b.quantity) -
-          Number(a.quantity)
-      )[0]?.price ||
-    item.originalPrice
-  }
+    }
 
-  {" "}×{" "}
+  </p>
 
-  {item.quantity}
-
-</p>
+</div>
 
                   </div>
+                  
 
                 ))}
 
               </div>
+{cart.length === 0 && (
+
+  <div
+    className="
+    p-4
+    rounded-xl
+    border
+    border-red-500/30
+    bg-red-500/10
+    text-red-400
+    mb-6
+    "
+  >
+
+    Your cart is empty.
+    Add at least one product
+    before checkout.
+
+  </div>
+
+)}
 <div className="mt-8">
 
   <p className="mb-3 font-medium">
@@ -671,6 +796,25 @@ async function applyCoupon() {
   </p>
 
 </div>
+{discount > 0 && (
+
+  <div
+    className="
+    bg-green-500/10
+    border
+    border-green-500/30
+    rounded-xl
+    p-3
+    text-green-400
+    text-sm
+    "
+  >
+
+    🎉 You Saved ₹{discount}
+
+  </div>
+
+)}
                 <div className="flex items-center justify-between text-zinc-400">
 
                   <p>Shipping</p>
@@ -732,22 +876,27 @@ async function applyCoupon() {
   </div>
 
 )}
+
               {/* Payment Button */}
-              <Button
-                disabled={loading}
-                className="
-                w-full
-                h-14
-                rounded-xl
-                text-lg
-                mt-10
-                transition-all
-                duration-300
-                hover:scale-[1.02]
-                active:scale-95
-                disabled:opacity-60
-                disabled:cursor-not-allowed
-                "
+             <Button
+  disabled={loading || cart.length === 0}
+  className="
+  w-full
+  h-14
+  rounded-xl
+  text-lg
+  mt-10
+  font-bold
+  transition-all
+  duration-300
+  hover:scale-[1.02]
+  hover:shadow-lg
+  hover:shadow-red-500/30
+  active:scale-95
+  disabled:opacity-50
+  disabled:cursor-not-allowed
+  "
+
                 onClick={async () => {
 
                   /* Validation */
@@ -1039,7 +1188,49 @@ setValidating(false)
 
     }
   )
+if (couponCode) {
 
+  const couponResponse =
+    await fetch(
+      "/api/validate-coupon",
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+
+          code: couponCode,
+
+          userId: user!.id,
+
+          total: total,
+
+        }),
+
+      }
+    )
+
+  const couponData =
+    await couponResponse.json()
+
+  if (!couponData.valid) {
+
+    toast.error(
+      "Coupon no longer valid for current cart value"
+    )
+
+    setLoading(false)
+
+    return
+
+  }
+
+}
 const stockData =
   await stockResponse.json()
 
