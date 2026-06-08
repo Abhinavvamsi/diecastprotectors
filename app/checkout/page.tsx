@@ -175,18 +175,22 @@ useEffect(() => {
 
   if (cart.length === 0) {
 
-    if (couponCode || discount > 0) {
-
-      
-
-    }
-
     setCouponCode("")
     setDiscount(0)
 
   }
 
 }, [cart])
+
+useEffect(() => {
+
+  if (!couponCode.trim()) {
+
+    setDiscount(0)
+
+  }
+
+}, [couponCode])
   if (!user) {
 
     return <RedirectToSignIn />
@@ -770,11 +774,13 @@ async function applyCoupon() {
       placeholder="WELCOME10"
       value={couponCode}
       onChange={(e) =>
-        setCouponCode(
-          e.target.value
-            .toUpperCase()
-        )
-      }
+
+  setCouponCode(
+    e.target.value
+      .toUpperCase()
+  )
+
+}
       className="
       flex-1
       h-12
@@ -1216,6 +1222,19 @@ paymentId:
                       },
 
                     }
+                    if (discount > 0 && !couponCode.trim()) {
+
+  toast.error(
+    "Please apply coupon again"
+  )
+
+  setDiscount(0)
+
+  setLoading(false)
+
+  return
+
+}
                     const stockResponse =
   await fetch(
     "/api/check-stock",
