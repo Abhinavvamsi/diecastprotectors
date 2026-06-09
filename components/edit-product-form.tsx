@@ -61,6 +61,64 @@ export default function EditProductForm({
 ] = useState(
   product.quantityPricing || []
 )
+const [uploading, setUploading] =
+  useState(false)
+
+async function handleImageUpload(
+  e: React.ChangeEvent<HTMLInputElement>
+) {
+
+  const file =
+    e.target.files?.[0]
+
+  if (!file) return
+
+  try {
+
+    setUploading(true)
+
+    const formData =
+      new FormData()
+
+    formData.append(
+      "file",
+      file
+    )
+
+    const response =
+      await fetch(
+        "/api/upload-image",
+        {
+          method: "POST",
+          body: formData,
+        }
+      )
+
+    const data =
+      await response.json()
+
+    setImages((prev) => [
+      ...prev,
+      data.imageUrl,
+    ])
+
+    toast.success(
+      "Image uploaded 🚀"
+    )
+
+  } catch {
+
+    toast.error(
+      "Upload failed"
+    )
+
+  } finally {
+
+    setUploading(false)
+
+  }
+
+}
 
   async function handleUpdate() {
 
@@ -155,36 +213,111 @@ export default function EditProductForm({
         className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4"
       />
 
-      {/* Images */}
-      <div className="space-y-4">
+      {/* Product Images */}
+<div className="space-y-4">
 
-        {images.map(
-          (image, index) => (
+  <label className="text-zinc-400">
 
-            <input
-              key={index}
-              type="text"
-              value={image}
-              onChange={(e) => {
+    Product Images
 
-                const updated =
-                  [...images]
+  </label>
 
-                updated[index] =
-                  e.target.value
+  <label
+    className="
+    flex
+    items-center
+    justify-center
+    h-40
+    rounded-2xl
+    border-2
+    border-dashed
+    border-zinc-700
+    bg-black
+    cursor-pointer
+    hover:border-red-500
+    "
+  >
 
-                setImages(
-                  updated
-                )
+    <span>
 
-              }}
-              className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4"
-            />
+      Upload Images
 
-          )
-        )}
+    </span>
+
+    <input
+      type="file"
+      accept="image/*"
+      onChange={handleImageUpload}
+      className="hidden"
+    />
+
+  </label>
+
+  {uploading && (
+
+    <p className="text-red-500">
+
+      Uploading...
+
+    </p>
+
+  )}
+
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+    {images.map((img) => (
+
+      <div
+        key={img}
+        className="relative"
+      >
+
+        <img
+          src={img}
+          alt="Preview"
+          className="
+          w-full
+          h-40
+          object-contain
+          rounded-xl
+          border
+          border-zinc-800
+          "
+        />
+
+        <button
+          type="button"
+          onClick={() =>
+            setImages(
+              images.filter(
+                (image) =>
+                  image !== img
+              )
+            )
+          }
+          className="
+          absolute
+          top-2
+          right-2
+          w-8
+          h-8
+          rounded-full
+          bg-red-500
+          text-white
+          "
+        >
+
+          ×
+
+        </button>
 
       </div>
+
+    ))}
+
+  </div>
+
+</div>
 
       {/* Category */}
       <select

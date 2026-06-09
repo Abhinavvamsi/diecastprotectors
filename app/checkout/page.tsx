@@ -141,6 +141,9 @@ const [validating,
   setValidating
 ] = useState(false)
 
+const [suggestedProducts, setSuggestedProducts] =
+  useState<any[]>([])
+
 useEffect(() => {
 
   async function loadSettings() {
@@ -173,6 +176,38 @@ useEffect(() => {
 
 useEffect(() => {
 
+  async function loadSuggestions() {
+
+    const response =
+      await fetch("/api/get-products")
+
+    const data =
+      await response.json()
+
+    const cartIds =
+      cart.map(item => item.id)
+
+    const suggestions =
+      data
+        .filter(
+          (product: any) =>
+            !cartIds.includes(
+              product.id
+            )
+        )
+        .slice(0, 4)
+
+    setSuggestedProducts(
+      suggestions
+    )
+
+  }
+
+  loadSuggestions()
+
+}, [cart])
+useEffect(() => {
+
   if (cart.length === 0) {
 
     setCouponCode("")
@@ -191,11 +226,13 @@ useEffect(() => {
   }
 
 }, [couponCode])
-  if (!user) {
 
-    return <RedirectToSignIn />
+if (!user) {
 
-  }
+  return <RedirectToSignIn />
+
+}
+
 async function searchAddress(
   value: string
 ) {
@@ -605,7 +642,7 @@ async function applyCoupon() {
                         src={item.image}
                         alt={item.name}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                       />
 
                     </div>
@@ -1024,6 +1061,19 @@ async function applyCoupon() {
 
                   try {
                   setValidating(true)
+                  if (discount > 0 && !couponCode.trim()) {
+
+  toast.error(
+    "Please apply coupon again"
+  )
+
+  setDiscount(0)
+
+  setLoading(false)
+
+  return
+
+}
 
 const productsResponse =
   await fetch(
@@ -1222,20 +1272,7 @@ paymentId:
                       },
 
                     }
-                    if (discount > 0 && !couponCode.trim()) {
-
-  toast.error(
-    "Please apply coupon again"
-  )
-
-  setDiscount(0)
-
-  setLoading(false)
-
-  return
-
-}
-                    const stockResponse =
+                                        const stockResponse =
   await fetch(
     "/api/check-stock",
     {
@@ -1428,6 +1465,75 @@ if (
     🚀 Join WhatsApp Group
 
   </a>
+
+</div>
+<div className="mt-8">
+
+  <h3 className="text-xl font-bold mb-4">
+
+    You May Also Like
+
+  </h3>
+
+  <div className="space-y-4">
+
+    {suggestedProducts.map(
+      (product) => (
+
+        <Link
+          key={product.id}
+          href={`/products/${product.id}`}
+        >
+
+          <div
+            className="
+            flex
+            items-center
+            gap-4
+            p-3
+            rounded-xl
+            border
+            border-zinc-800
+            hover:border-red-500
+            transition
+            "
+          >
+
+            <div className="relative w-16 h-16">
+
+              <Image
+                src={product.images?.[0]}
+                alt={product.name}
+                fill
+                className="object-contain"
+              />
+
+            </div>
+
+            <div>
+
+              <p className="font-medium">
+
+                {product.name}
+
+              </p>
+
+              <p className="text-red-500">
+
+                ₹{product.price}
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </Link>
+
+      )
+    )}
+
+  </div>
 
 </div>
             </div>

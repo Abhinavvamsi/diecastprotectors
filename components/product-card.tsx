@@ -79,7 +79,7 @@ export default function ProductCard({
             alt={name}
             fill
             className="
-            object-cover
+            object-contain
             group-hover:scale-110
             transition-transform
             duration-700
@@ -88,37 +88,39 @@ export default function ProductCard({
 
           {/* Gradient Overlay */}
           <div
-            className="
-            absolute
-            inset-0
-            bg-gradient-to-t
-            from-black/70
-            to-transparent
-            opacity-0
-            group-hover:opacity-100
-            transition
-            duration-500
-            "
-          />
+  className="
+  absolute
+  inset-0
+  z-10
+  bg-gradient-to-t
+  from-black/70
+  to-transparent
+  opacity-0
+  group-hover:opacity-100
+  transition
+  duration-500
+  "
+/>
 
           {/* Dynamic Badge */}
           {badge && (
 
             <div
               className="
-              absolute
-              top-4
-              left-4
-              px-3
-              py-1
-              rounded-full
-              bg-red-500
-              text-white
-              text-xs
-              font-bold
-              tracking-wider
-              shadow-lg
-              "
+absolute
+top-4
+left-4
+z-20
+px-3
+py-1
+rounded-full
+bg-red-500
+text-white
+text-xs
+font-bold
+tracking-wider
+shadow-lg
+"
             >
 
               {badge}
@@ -132,18 +134,19 @@ export default function ProductCard({
 
             <div
               className="
-              absolute
-              top-4
-              right-4
-              px-3
-              py-1
-              rounded-full
-              bg-orange-500
-              text-white
-              text-xs
-              font-bold
-              shadow-lg
-              "
+absolute
+top-4
+right-4
+z-20
+px-3
+py-1
+rounded-full
+bg-orange-500
+text-white
+text-xs
+font-bold
+shadow-lg
+"
             >
 
               LOW STOCK
@@ -157,18 +160,19 @@ export default function ProductCard({
 
             <div
               className="
-              absolute
-              top-4
-              right-4
-              px-3
-              py-1
-              rounded-full
-              bg-zinc-800
-              text-white
-              text-xs
-              font-bold
-              shadow-lg
-              "
+absolute
+top-4
+right-4
+z-20
+px-3
+py-1
+rounded-full
+bg-zinc-800
+text-white
+text-xs
+font-bold
+shadow-lg
+"
             >
 
               SOLD OUT

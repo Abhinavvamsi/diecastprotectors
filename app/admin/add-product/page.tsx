@@ -449,7 +449,7 @@ export default function AddProductPage() {
                       className="
                       w-full
                       h-48
-                      object-cover
+                      object-contain
                       rounded-2xl
                       border
                       border-zinc-800

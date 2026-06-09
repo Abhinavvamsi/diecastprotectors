@@ -687,7 +687,7 @@ const [
                               }
                               fill
                               className="
-                              object-cover
+                              object-contain
                               "
                             />
 

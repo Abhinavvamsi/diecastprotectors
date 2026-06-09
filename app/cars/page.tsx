@@ -9,18 +9,13 @@ import ProductCard from "@/components/product-card"
 type Product = {
 
   id: string
-
   name: string
-
   description: string
-
   price: number
-
   images: string[]
-
   category: string
-
   stock: number
+  badge?: string
 
 }
 
@@ -102,6 +97,7 @@ export default function CarsPage() {
               image={product.images?.[0]}
               description={product.description}
               stock={product.stock}
+              badge={product.badge}
             />
 
           ))}

@@ -244,7 +244,7 @@ const hasUnavailableProducts =
                       src={item.image}
                       alt={item.name}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                     />
 
                   </div>

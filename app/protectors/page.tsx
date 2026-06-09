@@ -22,6 +22,8 @@ type Product = {
 
   stock: number
 
+  badge?: string
+
 }
 
 export default function ProtectorsPage() {
@@ -121,6 +123,7 @@ export default function ProtectorsPage() {
               image={product.images?.[0]}
               description={product.description}
               stock={product.stock}
+              badge={product.badge}
             />
 
           ))}

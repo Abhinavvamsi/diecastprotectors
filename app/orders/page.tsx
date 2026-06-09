@@ -173,7 +173,7 @@ export default async function OrdersPage() {
   product.image
 }
           alt={product.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
 
       </div>

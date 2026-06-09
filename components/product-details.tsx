@@ -67,7 +67,7 @@ const selectedPrice =
                   src={product.images[selectedImage]}
                   alt={product.name}
                   fill
-                  className="object-cover group-hover:scale-110 transition duration-700"
+                  className="object-contain group-hover:scale-110 transition duration-700"
                 />
 
               </div>
@@ -97,7 +97,7 @@ const selectedPrice =
                         src={image}
                         alt={product.name}
                         fill
-                        className="object-cover"
+                        className="object-contain"
                       />
 
                     </button>
