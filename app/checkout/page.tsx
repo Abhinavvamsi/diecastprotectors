@@ -141,6 +141,18 @@ const [validating,
   setValidating
 ] = useState(false)
 
+const [pickupEnabled,
+  setPickupEnabled
+] = useState(false)
+
+const [pickupLocation,
+  setPickupLocation
+] = useState("")
+
+const [deliveryMethod,
+  setDeliveryMethod
+] = useState("shipping")
+
 const [suggestedProducts, setSuggestedProducts] =
   useState<any[]>([])
 
@@ -157,7 +169,13 @@ useEffect(() => {
       await response.json()
 
     if (data) {
+        setPickupEnabled(
+  data.pickupEnabled || false
+)
 
+setPickupLocation(
+  data.pickupLocation || ""
+)
       setShipping(
         data.shippingCharge
       )
@@ -796,6 +814,71 @@ async function applyCoupon() {
   </div>
 
 )}
+<div className="mb-8">
+
+  <p className="mb-3 font-medium">
+
+    Delivery Method
+
+  </p>
+
+  <div className="flex gap-3">
+
+    <button
+      type="button"
+      onClick={() =>
+        setDeliveryMethod(
+          "shipping"
+        )
+      }
+      className={`
+      px-4
+      py-2
+      rounded-xl
+      border
+      ${
+        deliveryMethod === "shipping"
+          ? "bg-red-500 border-red-500 text-white"
+          : "border-zinc-700"
+      }
+      `}
+    >
+
+      🚚 Shipping
+
+    </button>
+
+    {pickupEnabled && (
+
+      <button
+        type="button"
+        onClick={() =>
+          setDeliveryMethod(
+            "pickup"
+          )
+        }
+        className={`
+        px-4
+        py-2
+        rounded-xl
+        border
+        ${
+          deliveryMethod === "pickup"
+            ? "bg-green-500 border-green-500 text-white"
+            : "border-zinc-700"
+        }
+        `}
+      >
+
+        📍 Pickup from {pickupLocation}
+
+      </button>
+
+    )}
+
+  </div>
+
+</div>
 <div className="mt-8">
 
   <p className="mb-3 font-medium">
@@ -893,17 +976,19 @@ async function applyCoupon() {
 
                   <p>Shipping</p>
 
-                 {shipping === null ? (
+                 {deliveryMethod === "pickup" ? (
 
-  <p className="text-zinc-500">
-    Loading...
+  <p className="text-green-500">
+    FREE
   </p>
+
+) : shipping === null ? (
+
+  <p>Loading...</p>
 
 ) : shipping > 0 ? (
 
-  <p>
-    ₹{shipping}
-  </p>
+  <p>₹{shipping}</p>
 
 ) : (
 
@@ -925,8 +1010,12 @@ async function applyCoupon() {
   Math.max(
     0,
     total -
-      discount +
-      (shipping || 0)
+discount +
+(
+  deliveryMethod === "pickup"
+    ? 0
+    : (shipping || 0)
+)
   )
 }
 
@@ -1135,8 +1224,12 @@ setValidating(false)
   Math.max(
     0,
     total -
-      discount +
-      (shipping || 0)
+discount +
+(
+  deliveryMethod === "pickup"
+    ? 0
+    : (shipping || 0)
+)
   )
 
                           }),
@@ -1190,7 +1283,7 @@ setValidating(false)
 
                                   body:
                                     JSON.stringify({
-
+                                        
                                       userId:
                                         user!.id,
 
@@ -1210,12 +1303,23 @@ setValidating(false)
                                         cart,
                                       couponCode,
 
+                                      deliveryMethod,
+
+pickupLocation:
+  deliveryMethod === "pickup"
+    ? pickupLocation
+    : null,
+
                                       totalAmount:
   Math.max(
     0,
     total -
-      discount +
-      (shipping || 0)
+discount +
+(
+  deliveryMethod === "pickup"
+    ? 0
+    : (shipping || 0)
+)
   ),
 
 paymentId:

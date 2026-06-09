@@ -13,6 +13,14 @@ export default function SettingsPage() {
     setShippingMessage
   ] = useState("")
 
+  const [pickupEnabled,
+  setPickupEnabled
+] = useState(false)
+
+const [pickupLocation,
+  setPickupLocation
+] = useState("")
+
   async function loadSettings() {
 
     const response =
@@ -24,6 +32,13 @@ export default function SettingsPage() {
       await response.json()
 
     if (data) {
+      setPickupEnabled(
+  data.pickupEnabled || false
+)
+
+setPickupLocation(
+  data.pickupLocation || ""
+)
 
       setShippingCharge(
         String(data.shippingCharge)
@@ -60,6 +75,9 @@ export default function SettingsPage() {
                 ),
 
               shippingMessage,
+              pickupEnabled,
+
+pickupLocation,
 
             }),
 
@@ -118,7 +136,48 @@ export default function SettingsPage() {
           }
           className="w-full border rounded-xl p-3 min-h-[120px]"
         />
+<div className="space-y-4">
 
+  <label className="flex items-center gap-3">
+
+    <input
+      type="checkbox"
+      checked={pickupEnabled}
+      onChange={(e) =>
+        setPickupEnabled(
+          e.target.checked
+        )
+      }
+    />
+
+    <span>
+      Enable Pickup Option
+    </span>
+
+  </label>
+
+  {pickupEnabled && (
+
+    <input
+      type="text"
+      placeholder="Pickup Location"
+      value={pickupLocation}
+      onChange={(e) =>
+        setPickupLocation(
+          e.target.value
+        )
+      }
+      className="
+      w-full
+      border
+      rounded-xl
+      p-3
+      "
+    />
+
+  )}
+
+</div>
         <button
           onClick={saveSettings}
           className="

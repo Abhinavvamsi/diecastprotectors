@@ -81,39 +81,45 @@ export async function POST(
 
         data: {
 
-          orderId,
+  orderId,
 
-          userId:
-            body.userId,
+  userId:
+    body.userId,
 
-          customer:
-            body.customer,
+  customer:
+    body.customer,
 
-          email:
-            body.email,
+  email:
+    body.email,
 
-          phone:
-            body.phone,
+  phone:
+    body.phone,
 
-          address:
-            body.address,
+  address:
+    body.address,
 
-          city:
-            body.city,
+  city:
+    body.city,
 
-          pincode:
-            body.pincode,
+  pincode:
+    body.pincode,
 
-          products:
-            body.products,
+  products:
+    body.products,
 
-          totalAmount:
-            body.totalAmount,
+  totalAmount:
+    body.totalAmount,
 
-          paymentId:
-            body.paymentId,
+  paymentId:
+    body.paymentId,
 
-        },
+  deliveryMethod:
+    body.deliveryMethod || "shipping",
+
+  pickupLocation:
+    body.pickupLocation || null,
+
+},
 
       })
 

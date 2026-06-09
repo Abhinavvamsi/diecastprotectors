@@ -39,6 +39,12 @@ export async function POST(
           shippingMessage:
             body.shippingMessage,
 
+          pickupEnabled:
+            body.pickupEnabled,
+
+          pickupLocation:
+            body.pickupLocation,
+
         },
 
       })
@@ -59,6 +65,12 @@ export async function POST(
 
         shippingMessage:
           body.shippingMessage,
+
+        pickupEnabled:
+          body.pickupEnabled ?? false,
+
+        pickupLocation:
+          body.pickupLocation || "",
 
       },
 

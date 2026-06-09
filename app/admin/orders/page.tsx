@@ -580,6 +580,57 @@ const [
                     )}
 
                   </p>
+                  <div className="mt-4">
+
+  <p className="text-red-500">
+
+    Delivery Method
+
+  </p>
+
+  {order.deliveryMethod === "pickup" ? (
+
+    <div
+      className="
+      inline-flex
+      items-center
+      mt-2
+      px-4
+      py-2
+      rounded-full
+      bg-green-500/20
+      text-green-400
+      "
+    >
+
+      📍 Pickup
+      {order.pickupLocation &&
+        ` - ${order.pickupLocation}`}
+
+    </div>
+
+  ) : (
+
+    <div
+      className="
+      inline-flex
+      items-center
+      mt-2
+      px-4
+      py-2
+      rounded-full
+      bg-blue-500/20
+      text-blue-400
+      "
+    >
+
+      🚚 Shipping
+
+    </div>
+
+  )}
+
+</div>
 
                   <div className="mt-6">
 

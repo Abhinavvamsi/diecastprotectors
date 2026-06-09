@@ -35,6 +35,10 @@ model Order {
   paymentId String?
 
   createdAt DateTime @default(now())
+
+  deliveryMethod String @default("shipping")
+
+  pickupLocation String?
 }
 
 model Product {
@@ -86,4 +90,7 @@ model StoreSettings {
 
   shippingMessage String?
 
+  pickupEnabled Boolean @default(false)
+
+  pickupLocation String?
 }
