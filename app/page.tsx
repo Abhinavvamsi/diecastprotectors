@@ -152,13 +152,13 @@ export default function Home() {
   ...new Set(
 
     products
-      .filter(
-        (product) =>
-          product.brand?.name
-      )
       .map(
         (product) =>
           product.brand?.name
+      )
+      .filter(
+        (brand): brand is string =>
+          Boolean(brand)
       )
 
   ),
