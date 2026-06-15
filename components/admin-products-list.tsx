@@ -11,15 +11,12 @@ export default function AdminProductsList({
   brands: any[]
 }) {
 
-  const [selectedBrand,
-    setSelectedBrand] =
+  const [selectedBrand, setSelectedBrand] =
     useState("All")
 
   const filteredProducts =
     selectedBrand === "All"
-
       ? products
-
       : products.filter(
           (product) =>
             product.brand?.name ===
@@ -27,9 +24,7 @@ export default function AdminProductsList({
         )
 
   return (
-
     <>
-
       <div className="mb-10">
 
         <select
@@ -49,7 +44,7 @@ export default function AdminProductsList({
           "
         >
 
-          <option>
+          <option value="All">
             All
           </option>
 
@@ -57,10 +52,9 @@ export default function AdminProductsList({
 
             <option
               key={brand.id}
+              value={brand.name}
             >
-
               {brand.name}
-
             </option>
 
           ))}
@@ -104,18 +98,32 @@ export default function AdminProductsList({
 
               <div className="flex gap-2 mb-3">
 
-                <span className="px-3 py-1 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] text-xs">
-
+                <span
+                  className="
+                  px-3
+                  py-1
+                  rounded-full
+                  bg-[#D4AF37]/10
+                  text-[#D4AF37]
+                  text-xs
+                  "
+                >
                   {product.category}
-
                 </span>
 
                 {product.brand && (
 
-                  <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-xs">
-
+                  <span
+                    className="
+                    px-3
+                    py-1
+                    rounded-full
+                    bg-blue-100
+                    text-blue-600
+                    text-xs
+                    "
+                  >
                     {product.brand.name}
-
                   </span>
 
                 )}
@@ -134,6 +142,62 @@ export default function AdminProductsList({
 
               </p>
 
+              <div className="flex gap-3 mt-6">
+
+                <a
+  href={`/admin/products/${product.id}/edit`}
+  className="
+  flex-1
+  h-11
+  rounded-xl
+  bg-[#D4AF37]
+  text-black
+  font-semibold
+  flex
+  items-center
+  justify-center
+  hover:bg-[#B8941F]
+  transition
+  "
+>
+  Edit
+</a>
+
+                <button
+  onClick={async () => {
+
+    const response =
+      await fetch(
+        `/api/delete-product?id=${product.id}`,
+        {
+          method: "POST",
+        }
+      )
+
+    if (response.ok) {
+
+      window.location.reload()
+
+    }
+
+  }}
+  className="
+  flex-1
+  h-11
+  rounded-xl
+  border
+  border-red-500
+  text-red-500
+  font-semibold
+  hover:bg-red-500
+  hover:text-white
+  transition
+  "
+>
+  Delete
+</button>
+              </div>
+
             </div>
 
           </div>
@@ -143,7 +207,6 @@ export default function AdminProductsList({
       </div>
 
     </>
-
   )
 
 }
