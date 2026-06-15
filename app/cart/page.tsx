@@ -146,7 +146,7 @@ const hasUnavailableProducts =
 
   return (
 
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-white text-black">
 
       {/* Global Navbar */}
       <Navbar />
@@ -157,12 +157,14 @@ const hasUnavailableProducts =
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
 
           <div>
-
+<p className="text-[#D4AF37] uppercase tracking-widest text-sm mb-3">
+  Diecast Universe
+</p>
             <h1 className="text-5xl font-bold">
               Your Cart
             </h1>
 
-            <p className="text-red-500 mt-4">
+            <p className="text-gray-600 mt-4">
 
               Review your selected products before checkout.
 
@@ -173,9 +175,17 @@ const hasUnavailableProducts =
           <Link href="/#products">
 
             <Button
-              variant="outline"
-              className="rounded-xl"
-            >
+  className="
+  mt-8
+  rounded-xl
+  px-8
+  py-6
+  text-lg
+  bg-[#D4AF37]
+  text-black
+  hover:bg-[#B8941F]
+  "
+>
 
               Continue Shopping
 
@@ -192,9 +202,9 @@ const hasUnavailableProducts =
     p-4
     rounded-xl
     border
-    border-red-500/30
-    bg-red-500/10
-    text-red-400
+    border-amber-400/30
+bg-amber-100
+text-amber-700
     "
   >
 
@@ -208,7 +218,7 @@ const hasUnavailableProducts =
 
           <div className="text-center py-24">
 
-            <p className="text-red-500 text-xl">
+            <p className="text-gray-600 text-xl">
               Your cart is empty.
             </p>
 
@@ -232,7 +242,7 @@ const hasUnavailableProducts =
 
               <div
                 key={item.id}
-                className="flex flex-col md:flex-row md:items-center md:justify-between bg-zinc-900 border border-zinc-800 rounded-3xl p-6 gap-6"
+                className="flex flex-col md:flex-row md:items-center md:justify-between bg-white border border-gray-200 shadow-sm"
               >
 
                 {/* LEFT */}
@@ -255,7 +265,7 @@ const hasUnavailableProducts =
                       {item.name}
                     </h2>
 
-                    <p className="text-red-500 mt-2">
+                    <p className="text-[#D4AF37] mt-2">
                       ₹{getCurrentPrice(item)}
                     </p>
 
@@ -292,7 +302,7 @@ const hasUnavailableProducts =
 
 )}
 
-                    <p className="text-zinc-400 mt-2">
+                    <p classNametext-gray-600=" mt-2">
 
                       Total:
                       {" "}
@@ -310,7 +320,7 @@ const hasUnavailableProducts =
                 <div className="flex items-center gap-4">
 
                   {/* Quantity Controls */}
-                  <div className="flex items-center bg-black border border-zinc-800 rounded-xl overflow-hidden">
+                  <div className="flex items-center bg-white border border-gray-300 rounded-xl overflow-hidden">
 
                     <button
                       onClick={() =>
@@ -318,7 +328,7 @@ const hasUnavailableProducts =
                           item.id
                         )
                       }
-                      className="w-12 h-12 flex items-center justify-center hover:bg-zinc-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-12 h-12 flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
 
                       <Minus size={18} />
@@ -341,7 +351,7 @@ const hasUnavailableProducts =
                           item.id
                         )
                       }
-                      className="w-12 h-12 flex items-center justify-center hover:bg-zinc-800 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-12 h-12 flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
 
                       <Plus size={18} />
@@ -373,11 +383,11 @@ const hasUnavailableProducts =
             ))}
 
             {/* Footer */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-10 border-t border-zinc-800 pt-10">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-10 border-t border-gray-200">
 
               <div>
 
-                <p className="text-red-500">
+                <p className="text-[#D4AF37]">
                   Total
                 </p>
 
@@ -398,13 +408,17 @@ const hasUnavailableProducts =
 >
 
   <Button
-    disabled={
-      hasUnavailableProducts
-    }
-    className="
-    px-8 py-6 text-lg rounded-xl
-    "
-  >
+  disabled={hasUnavailableProducts}
+  className="
+  px-8
+  py-6
+  text-lg
+  rounded-xl
+  bg-[#D4AF37]
+  text-black
+  hover:bg-[#B8941F]
+  "
+>
 
     {hasUnavailableProducts
       ? "Remove Unavailable Items"

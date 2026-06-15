@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 
 import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
 
 import Link from "next/link"
 
@@ -39,7 +40,7 @@ export default async function OrdersPage() {
 
   return (
 
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-white text-black">
 
       <Navbar />
 
@@ -50,15 +51,19 @@ export default async function OrdersPage() {
 
           <div>
 
+            <p className="text-[#D4AF37] uppercase tracking-widest text-sm mb-3">
+              Diecast Universe
+            </p>
+
             <h1 className="text-5xl font-bold">
 
               My Orders
 
             </h1>
 
-            <p className="text-red-500 mt-4">
+            <p className="text-gray-600 mt-4">
 
-              Track and manage your purchases.
+              View your order history and track your diecast collectibles.
 
             </p>
 
@@ -68,7 +73,13 @@ export default async function OrdersPage() {
 
             <Button
               variant="outline"
-              className="rounded-xl"
+              className="
+              rounded-xl
+              border-[#D4AF37]
+              text-[#D4AF37]
+              hover:bg-[#D4AF37]
+              hover:text-black
+              "
             >
 
               Continue Shopping
@@ -82,7 +93,7 @@ export default async function OrdersPage() {
         {/* Empty State */}
         {orders.length === 0 && (
 
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-12 text-center">
+          <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-12 text-center">
 
             <h2 className="text-3xl font-bold">
 
@@ -90,7 +101,7 @@ export default async function OrdersPage() {
 
             </h2>
 
-            <p className="text-red-500 mt-4">
+            <p className="text-gray-600 mt-4">
 
               Your purchase history will appear here.
 
@@ -107,7 +118,7 @@ export default async function OrdersPage() {
 
             <div
               key={order.id}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8"
+              className="bg-white border border-gray-200 shadow-sm rounded-3xl p-8"
             >
 
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
@@ -115,7 +126,7 @@ export default async function OrdersPage() {
                 {/* LEFT */}
                 <div>
 
-                  <p className="text-red-500 text-sm uppercase tracking-widest">
+                  <p className="text-[#D4AF37] text-sm uppercase tracking-widest">
 
                     Order ID
 
@@ -127,19 +138,19 @@ export default async function OrdersPage() {
 
                   </h2>
 
-                  <p className="text-red-500 mt-6">
+                  <p className="text-[#D4AF37] mt-6">
 
                     Payment ID
 
                   </p>
 
-                  <p className="break-all">
+                  <p className="break-all text-gray-700">
 
                     {order.paymentId}
 
                   </p>
 
-                  <p className="text-red-500 mt-6">
+                  <p className="text-[#D4AF37] mt-6">
 
                     Ordered On
 
@@ -154,57 +165,57 @@ export default async function OrdersPage() {
                   </p>
 
                 </div>
-{/* PRODUCTS */}
-<div className="space-y-4">
 
-  {(order.products as any[])
-    .map((product, index) => (
+                {/* PRODUCTS */}
+                <div className="space-y-4">
 
-    <div
-      key={index}
-      className="flex items-center gap-4"
-    >
+                  {(order.products as any[])
+                    .map((product, index) => (
 
-      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-black">
+                    <div
+                      key={index}
+                      className="flex items-center gap-4"
+                    >
 
-        <img
-          src={
-  product.images?.[0] ||
-  product.image
-}
-          alt={product.name}
-          className="w-full h-full object-contain"
-        />
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
 
-      </div>
+                        <img
+                          src={
+                            product.images?.[0] ||
+                            product.image
+                          }
+                          alt={product.name}
+                          className="w-full h-full object-contain"
+                        />
 
-      <div>
+                      </div>
 
-        <h3 className="font-semibold">
+                      <div>
 
-          {product.name}
+                        <h3 className="font-semibold">
 
-        </h3>
+                          {product.name}
 
-        <p className="text-red-500 text-sm">
+                        </h3>
 
-          Quantity:
-          {" "}
-          {product.quantity}
+                        <p className="text-[#D4AF37] text-sm">
 
-        </p>
+                          Quantity: {product.quantity}
 
-      </div>
+                        </p>
 
-    </div>
+                      </div>
 
-  ))}
+                    </div>
 
-</div>
+                  ))}
+
+                </div>
+
                 {/* RIGHT */}
                 <div className="md:text-right">
 
-                  <p className="text-red-500">
+                  <p className="text-[#D4AF37]">
 
                     Total Amount
 
@@ -219,20 +230,20 @@ export default async function OrdersPage() {
                   <div className="mt-8">
 
                     <span
-                      className={`px-5 py-3 rounded-full text-sm font-semibold ${
+                      className={`px-5 py-3 rounded-full text-sm font-semibold border ${
                         order.status === "Pending"
-                          ? "bg-yellow-500/20 text-yellow-400"
+                          ? "bg-yellow-500/20 text-yellow-600 border-yellow-500/30"
 
                           : order.status === "Packed"
-                          ? "bg-blue-500/20 text-blue-400"
+                          ? "bg-blue-500/20 text-blue-600 border-blue-500/30"
 
                           : order.status === "Shipped"
-                          ? "bg-purple-500/20 text-purple-400"
+                          ? "bg-purple-500/20 text-purple-600 border-purple-500/30"
 
                           : order.status === "Delivered"
-                          ? "bg-green-500/20 text-green-400"
+                          ? "bg-green-500/20 text-green-600 border-green-500/30"
 
-                          : "bg-zinc-700 text-white"
+                          : "bg-gray-100 text-gray-700 border-gray-200"
                       }`}
                     >
 
@@ -247,7 +258,13 @@ export default async function OrdersPage() {
                   >
 
                     <Button
-                      className="mt-8 rounded-xl"
+                      className="
+                      mt-8
+                      rounded-xl
+                      bg-[#D4AF37]
+                      text-black
+                      hover:bg-[#B8941F]
+                      "
                     >
 
                       Track Order
@@ -267,6 +284,8 @@ export default async function OrdersPage() {
         </div>
 
       </div>
+
+      <Footer />
 
     </main>
 

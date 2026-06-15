@@ -172,184 +172,278 @@ async function handleImageUpload(
 
   }
 
-  return (
+ return (
 
-    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6">
-
-      {/* Name */}
-      <input
-        type="text"
-        value={name}
-        onChange={(e) =>
-          setName(
-            e.target.value
-          )
-        }
-        className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4"
-      />
-
-      {/* Description */}
-      <textarea
-        value={description}
-        onChange={(e) =>
-          setDescription(
-            e.target.value
-          )
-        }
-        className="w-full rounded-xl bg-black border border-zinc-800 px-4 py-4 min-h-[140px]"
-      />
-
-      {/* Price */}
-      <input
-        type="number"
-        value={price}
-        onChange={(e) =>
-          setPrice(
-            Number(
-              e.target.value
-            )
-          )
-        }
-        className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4"
-      />
-
-      {/* Product Images */}
-<div className="space-y-4">
-
-  <label className="text-zinc-400">
-
-    Product Images
-
-  </label>
-
-  <label
+  <div
     className="
-    flex
-    items-center
-    justify-center
-    h-40
-    rounded-2xl
-    border-2
-    border-dashed
-    border-zinc-700
-    bg-black
-    cursor-pointer
-    hover:border-red-500
+    bg-white
+    border
+    border-gray-200
+    shadow-sm
+    rounded-3xl
+    p-8
+    space-y-6
     "
   >
 
-    <span>
-
-      Upload Images
-
-    </span>
-
+    {/* Name */}
     <input
-      type="file"
-      accept="image/*"
-      onChange={handleImageUpload}
-      className="hidden"
+      type="text"
+      value={name}
+      onChange={(e) =>
+        setName(e.target.value)
+      }
+      className="
+      w-full
+      h-14
+      rounded-xl
+      bg-white
+      border
+      border-gray-300
+      px-4
+      text-black
+      outline-none
+      focus:border-[#D4AF37]
+      "
     />
 
-  </label>
+    {/* Description */}
+    <textarea
+      value={description}
+      onChange={(e) =>
+        setDescription(
+          e.target.value
+        )
+      }
+      className="
+      w-full
+      min-h-[180px]
+      rounded-xl
+      bg-white
+      border
+      border-gray-300
+      px-4
+      py-4
+      text-black
+      outline-none
+      focus:border-[#D4AF37]
+      "
+    />
 
-  {uploading && (
+    {/* Price */}
+    <input
+      type="number"
+      value={price}
+      onChange={(e) =>
+        setPrice(
+          Number(e.target.value)
+        )
+      }
+      className="
+      w-full
+      h-14
+      rounded-xl
+      bg-white
+      border
+      border-gray-300
+      px-4
+      text-black
+      outline-none
+      focus:border-[#D4AF37]
+      "
+    />
 
-    <p className="text-red-500">
+    {/* Product Images */}
+    <div className="space-y-4">
 
-      Uploading...
-
-    </p>
-
-  )}
-
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-
-    {images.map((img) => (
-
-      <div
-        key={img}
-        className="relative"
+      <label
+        className="
+        text-sm
+        text-gray-500
+        uppercase
+        "
       >
 
-        <img
-          src={img}
-          alt="Preview"
-          className="
-          w-full
-          h-40
-          object-contain
-          rounded-xl
-          border
-          border-zinc-800
-          "
+        Product Images
+
+      </label>
+
+      <label
+        className="
+        flex
+        items-center
+        justify-center
+        h-40
+        rounded-2xl
+        border-2
+        border-dashed
+        border-gray-300
+        bg-gray-50
+        cursor-pointer
+        hover:border-[#D4AF37]
+        transition
+        "
+      >
+
+        <span className="text-black font-medium">
+
+          Upload Images
+
+        </span>
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
         />
 
-        <button
-          type="button"
-          onClick={() =>
-            setImages(
-              images.filter(
-                (image) =>
-                  image !== img
-              )
-            )
-          }
-          className="
-          absolute
-          top-2
-          right-2
-          w-8
-          h-8
-          rounded-full
-          bg-red-500
-          text-white
-          "
-        >
+      </label>
 
-          ×
+      {uploading && (
 
-        </button>
+        <p className="text-[#D4AF37]">
+
+          Uploading...
+
+        </p>
+
+      )}
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+        {images.map((img) => (
+
+          <div
+            key={img}
+            className="
+            relative
+            bg-gray-50
+            border
+            border-gray-200
+            rounded-xl
+            p-2
+            "
+          >
+
+            <img
+              src={img}
+              alt="Preview"
+              className="
+              w-full
+              h-40
+              object-contain
+              "
+            />
+
+            <button
+              type="button"
+              onClick={() =>
+                setImages(
+                  images.filter(
+                    (image) =>
+                      image !== img
+                  )
+                )
+              }
+              className="
+              absolute
+              top-2
+              right-2
+              w-8
+              h-8
+              rounded-full
+              bg-red-500
+              text-white
+              "
+            >
+
+              ×
+
+            </button>
+
+          </div>
+
+        ))}
 
       </div>
 
-    ))}
+    </div>
+
+    {/* Category */}
+    <select
+      value={category}
+      onChange={(e) =>
+        setCategory(
+          e.target.value
+        )
+      }
+      className="
+      w-full
+      h-14
+      rounded-xl
+      bg-white
+      border
+      border-gray-300
+      px-4
+      text-black
+      outline-none
+      focus:border-[#D4AF37]
+      "
+    >
+
+      <option value="Protectors">
+        Protectors
+      </option>
+
+      <option value="Cars">
+        Cars
+      </option>
+
+    </select>
+
+    {/* Quantity Pricing */}
+   <div className="space-y-4">
+
+  <div className="flex items-center justify-between">
+
+    <label
+      className="
+      text-sm
+      text-gray-500
+      uppercase
+      tracking-wider
+      "
+    >
+      Quantity Pricing
+    </label>
+
+    <button
+      type="button"
+      onClick={() =>
+        setQuantityPricing([
+          ...quantityPricing,
+          {
+            quantity: "",
+            price: "",
+          },
+        ])
+      }
+      className="
+      h-10
+      px-4
+      rounded-xl
+      bg-[#D4AF37]
+      text-black
+      font-semibold
+      hover:bg-[#B8941F]
+      transition
+      "
+    >
+      + Add Tier
+    </button>
 
   </div>
-
-</div>
-
-      {/* Category */}
-      <select
-        value={category}
-        onChange={(e) =>
-          setCategory(
-            e.target.value
-          )
-        }
-        className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4 text-white"
-      >
-
-        <option value="Protectors">
-
-          Protectors
-
-        </option>
-
-        <option value="Cars">
-
-          Cars
-
-        </option>
-
-      </select>
-<div className="space-y-4">
-
-  <label className="text-zinc-400">
-
-    Quantity Pricing
-
-  </label>
 
   {quantityPricing.map(
     (tier, index) => (
@@ -381,10 +475,11 @@ async function handleImageUpload(
           flex-1
           h-14
           rounded-xl
-          bg-black
+          bg-white
           border
-          border-zinc-800
+          border-gray-300
           px-4
+          text-black
           "
         />
 
@@ -410,10 +505,11 @@ async function handleImageUpload(
           flex-1
           h-14
           rounded-xl
-          bg-black
+          bg-white
           border
-          border-zinc-800
+          border-gray-300
           px-4
+          text-black
           "
         />
 
@@ -422,21 +518,20 @@ async function handleImageUpload(
           onClick={() =>
             setQuantityPricing(
               quantityPricing.filter(
-                (_, i) =>
-                  i !== index
+                (_, i) => i !== index
               )
             )
           }
           className="
+          h-14
           px-4
           rounded-xl
           bg-red-500
+          text-white
           hover:bg-red-600
           "
         >
-
           ✕
-
         </button>
 
       </div>
@@ -444,58 +539,55 @@ async function handleImageUpload(
     )
   )}
 
-  <button
-    type="button"
-    onClick={() =>
-      setQuantityPricing([
-        ...quantityPricing,
-        {
-          quantity: "",
-          price: "",
-        },
-      ])
-    }
-    className="
-    h-12
-    px-5
-    rounded-xl
-    bg-zinc-800
-    hover:bg-zinc-700
-    "
-  >
-
-    Add Tier
-
-  </button>
-
 </div>
-      {/* Stock */}
-      <input
-        type="number"
-        placeholder="Stock Quantity"
-        value={stock}
-        onChange={(e) =>
-          setStock(
-            Number(
-              e.target.value
-            )
+
+    {/* Stock */}
+    <input
+      type="number"
+      placeholder="Stock Quantity"
+      value={stock}
+      onChange={(e) =>
+        setStock(
+          Number(
+            e.target.value
           )
-        }
-        className="w-full h-16 rounded-2xl bg-black border border-zinc-800 px-6 text-lg"
-      />
+        )
+      }
+      className="
+      w-full
+      h-14
+      rounded-xl
+      bg-white
+      border
+      border-gray-300
+      px-4
+      text-black
+      outline-none
+      focus:border-[#D4AF37]
+      "
+    />
 
-      {/* Update Button */}
-      <button
-        onClick={handleUpdate}
-        className="w-full h-14 rounded-xl bg-red-500 text-white hover:bg-red-600 font-bold hover:scale-[1.02] active:scale-95 transition"
-      >
+    {/* Update Button */}
+    <button
+      onClick={handleUpdate}
+      className="
+      w-full
+      h-14
+      rounded-xl
+      bg-[#D4AF37]
+      text-black
+      font-bold
+      hover:bg-[#B8941F]
+      transition
+      "
+    >
 
-        Update Product
+      Update Product
 
-      </button>
+    </button>
 
-    </div>
+  </div>
 
-  )
+)
 
 }

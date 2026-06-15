@@ -2,6 +2,8 @@ export const dynamic = "force-dynamic"
 
 import Image from "next/image"
 import AdminNav from "@/components/admin-nav"
+import AdminProductsList
+from "@/components/admin-products-list"
 
 import { prisma } from "@/lib/prisma"
 
@@ -28,151 +30,128 @@ export default async function ProductsPage() {
   }
 
   const products =
-    await prisma.product.findMany({
+  await prisma.product.findMany({
 
-      orderBy: {
-        createdAt: "desc",
-      },
+    include: {
+      brand: true,
+    },
 
-    })
+    orderBy: {
+      createdAt: "desc",
+    },
 
+  })
+const brands =
+  await prisma.brand.findMany({
+
+    orderBy: {
+      name: "asc",
+    },
+
+  })
   return (
 
-    <main className="min-h-screen bg-black text-white p-8">
+  <main className="min-h-screen bg-white text-black p-8">
 
-  <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
 
-    <AdminNav />
+  <AdminNav />
 
-    <h1 className="text-5xl font-bold mb-12">
+  <div className="mb-12">
+
+    <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
+
+      Diecast Universe Admin
+
+    </p>
+
+    <h1 className="text-5xl font-bold mt-3">
+
       Product Management
+
     </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+    <p className="text-gray-500 mt-2">
 
-          {products.map((product) => (
+      Manage cars, protectors and collectibles.
 
-            <div
-              key={product.id}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden"
-            >
+    </p>
 
-              {/* Product Image */}
-              <div className="relative h-72">
+  </div>
 
-                <Image
-                  src={
-  Array.isArray(product.images)
-    ? String(product.images[0])
-    : "/placeholder.png"
-}
-                  alt={product.name}
-                  fill
-                  className="object-contain"
-                />
+  {/* ADD HERE */}
 
-              </div>
+  <div className="flex justify-end mb-10">
 
-              {/* Content */}
-              <div className="p-6">
+    <a href="/admin/add-product">
 
-                <p className="text-red-500 text-sm uppercase">
+      <button
 
-                  {product.category}
+        className="
 
-                </p>
+        px-6
 
-                <h2 className="text-2xl font-bold mt-2">
+        h-12
 
-                  {product.name}
+        rounded-xl
 
-                </h2>
+        bg-[#D4AF37]
 
-                <p className="text-zinc-400 mt-4 line-clamp-3">
+        text-black
 
-                  {product.description}
+        font-semibold
 
-                </p>
+        hover:bg-[#B8941F]
 
-                <p className="text-green-500 mt-4 font-semibold">
+        transition
 
-                  Stock: {product.stock}
+        "
 
-                </p>
+      >
 
-                <div className="flex items-center justify-between mt-6">
+        + Add Product
 
-                  <p className="text-3xl font-bold">
+      </button>
 
-                    ₹{product.price}
+    </a>
 
-                  </p>
+  </div>
 
-                </div>
+      {products.length === 0 && (
 
-                {/* Edit Button */}
-                <a
-                  href={`/admin/products/${product.id}/edit`}
-                >
+        <div
+          className="
+          bg-white
+          border
+          border-gray-200
+          shadow-sm
+          rounded-3xl
+          p-12
+          text-center
+          "
+        >
 
-                  <button
-                    className="
-                    w-full
-                    mt-6
-                    h-12
-                    rounded-xl
-                    bg-white
-                    text-black
-                    hover:scale-[1.02]
-                    active:scale-95
-                    transition
-                    font-semibold
-                    "
-                  >
+          <h2 className="text-2xl font-bold">
+            No Products Found
+          </h2>
 
-                    Edit Product
-
-                  </button>
-
-                </a>
-
-                {/* Delete Button */}
-                <form
-                  action={`/api/delete-product?id=${product.id}`}
-                  method="POST"
-                >
-
-                  <button
-                    className="
-                    w-full
-                    mt-4
-                    h-12
-                    rounded-xl
-                    bg-red-500
-                    hover:bg-red-600
-                    transition
-                    font-semibold
-                    "
-                  >
-
-                    Delete Product
-
-                  </button>
-
-                </form>
-
-              </div>
-
-            </div>
-
-          ))}
+          <p className="text-gray-500 mt-2">
+            Add your first product to get started.
+          </p>
 
         </div>
 
-      </div>
+      )}
 
-    </main>
+      <AdminProductsList
+  products={products}
+  brands={brands}
+/>
 
-  )
+    </div>
+
+  </main>
+
+)
 
 }

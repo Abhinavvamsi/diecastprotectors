@@ -14,6 +14,10 @@ import Navbar from "@/components/navbar"
 
 import Footer from "@/components/footer"
 
+import BrandsSection from "@/components/brands-section"
+
+import BrandMarquee from "@/components/brand-marquee"
+
 
 const bebas = Bebas_Neue({
 
@@ -38,6 +42,13 @@ type Product = {
   }[]
 
   badge?: string
+  brandId?: string
+
+brand?: {
+  id: string
+  name: string
+  logo?: string
+}
 }
 
 export default function Home() {
@@ -66,6 +77,10 @@ export default function Home() {
   const [search,
     setSearch
   ] = useState("")
+
+  const [selectedBrand,
+  setSelectedBrand
+] = useState("All")
 
   useEffect(() => {
 
@@ -130,6 +145,25 @@ export default function Home() {
     ),
 
   ]
+  const brands = [
+
+  "All",
+
+  ...new Set(
+
+    products
+      .filter(
+        (product) =>
+          product.brand?.name
+      )
+      .map(
+        (product) =>
+          product.brand?.name
+      )
+
+  ),
+
+]
 
   const filteredProducts =
   products.filter((product) => {
@@ -155,170 +189,208 @@ export default function Home() {
         ? product.stock > 0
         : product.stock === 0
 
+        const matchesBrand =
+
+  selectedBrand === "All"
+
+    ? true
+
+    : product.brand?.name ===
+      selectedBrand
+
     return (
-      matchesCategory &&
-      matchesSearch &&
-      matchesStock
-    )
+  matchesCategory &&
+  matchesBrand &&
+  matchesSearch &&
+  matchesStock
+)
 
   })
+  const sortedProducts =
+  [...filteredProducts].sort(
+    (a, b) => {
 
+      if (
+        a.stock === 0 &&
+        b.stock > 0
+      ) {
+        return 1
+      }
+
+      if (
+        a.stock > 0 &&
+        b.stock === 0
+      ) {
+        return -1
+      }
+
+      return 0
+
+    }
+  )
   return (
 
-    <main className="min-h-screen bg-black text-white overflow-x-hidden">
+    <main className="min-h-screen bg-white text-black overflow-x-hidden">
 
       {/* Navbar */}
       <Navbar />
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-24 md:py-32">
+<section className="max-w-7xl mx-auto px-4 md:px-6 py-24 md:py-32">
 
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+  <div className="grid lg:grid-cols-[1fr_1.3fr] gap-10 items-center">
 
-          {/* LEFT SIDE */}
-          <div>
+    {/* LEFT SIDE */}
+    <div>
 
-            {/* Subtitle */}
-            <p className="text-red-500 uppercase tracking-[0.3em] text-sm md:text-base">
+      <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm md:text-base">
+        Premium Diecast Collectibles
+      </p>
 
-              Premium Diecast & Protection
+      <h1
+        className={`
+          ${bebas.className}
+          text-6xl
+          sm:text-7xl
+          md:text-8xl
+          lg:text-[9rem]
+          leading-[0.9]
+          tracking-wide
+          mt-6
+          max-w-5xl
+        `}
+      >
 
-            </p>
+        PREMIUM
 
-            {/* Main Heading */}
-            <h1
-              className={`
-                ${bebas.className}
-                text-6xl
-                sm:text-7xl
-                md:text-8xl
-                lg:text-[9rem]
-                leading-[0.9]
-                tracking-wide
-                mt-6
-                max-w-5xl
-              `}
-            >
+        <span className="text-[#D4AF37]">
 
-              PREMIUM
+          {" "}DIECAST{" "}
 
-              <span className="text-red-500">
+        </span>
 
-                {" "}DIECAST CARS{" "}
+        <br />
 
-              </span>
+        COLLECTIONS
 
-              <br />
+      </h1>
 
-              & PROTECTORS
+      <p className="text-gray-600 text-lg md:text-xl mt-8 max-w-2xl leading-relaxed">
 
-            </h1>
+        Discover premium Hot Wheels, Inno 64, Mini GT and rare collectible diecast models curated for passionate collectors.
 
-            {/* Description */}
-            <p className="text-zinc-300 text-lg md:text-xl mt-8 max-w-2xl leading-relaxed">
+      </p>
 
-              Discover premium Hot Wheels, collectible diecast cars,
-              acrylic cases and soft protectors built for passionate collectors.
+      <div className="flex flex-col sm:flex-row gap-5 mt-12">
 
-            </p>
+        <a href="/protectors">
 
-            {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-5 mt-12">
+          <Button
+            className="
+            rounded-2xl
+            px-10
+            py-7
+            text-lg
+            bg-[#D4AF37]
+            hover:bg-[#B8941F]
+            hover:scale-105
+            active:scale-95
+            transition-all
+            duration-300
+            shadow-lg
+            shadow-[#D4AF37]/20
+            hover:shadow-[#D4AF37]/40
+            "
+          >
 
-              <a href="/protectors">
+            Shop Collection
 
-                <Button
-                  className="
-                  rounded-2xl
-                  px-10
-                  py-7
-                  text-lg
-                  bg-red-500
-                  hover:bg-red-600
-                  hover:scale-105
-                  active:scale-95
-                  transition-all
-                  duration-300
-                  shadow-lg
-                  shadow-red-500/20
-                  hover:shadow-red-500/40
-                  "
-                >
+          </Button>
 
-                  Shop Protectors
+        </a>
 
-                </Button>
+        <a href="/cars">
 
-              </a>
+          <Button
+            variant="outline"
+            className="
+            rounded-2xl
+            px-10
+            py-7
+            text-lg
+            bg-transparent
+            border-[#D4AF37]
+            hover:bg-transparent
+            hover:border-[#B8941F]
+            hover:scale-105
+            active:scale-95
+            transition-all
+            duration-300
+            "
+          >
 
-              <a href="/cars">
+            Explore Diecast Cars
 
-                <Button
-                  variant="outline"
-                  className="
-                  rounded-2xl
-                  px-10
-                  py-7
-                  text-lg
-                  bg-transparent
-                  border-red-500/40
-                  hover:bg-zinc-900
-                  hover:border-red-500
-                  hover:scale-105
-                  active:scale-95
-                  transition-all
-                  duration-300
-                  "
-                >
+          </Button>
 
-                  Explore Diecast Cars
+        </a>
 
-                </Button>
+      </div>
 
-              </a>
+    </div>
 
-            </div>
+    {/* RIGHT SIDE IMAGE */}
+    <div className="relative flex justify-center items-center">
 
-          </div>
+      {/* Gold Glow */}
+      <div
+        className="
+        absolute
+        -inset-10
+        bg-[#D4AF37]/10
+        blur-[120px]
+        rounded-full
+        animate-pulse
+        "
+      />
 
-          {/* RIGHT SIDE IMAGE */}
-          <div className="relative flex justify-center">
+      {/* Floating Image */}
+      <div
+        className="
+        relative
+        animate-[float_6s_ease-in-out_infinite]
+        "
+      >
 
-            {/* Red Glow */}
-            <div
-              className="
-              absolute
-              inset-0
-              bg-red-500/20
-              blur-3xl
-              rounded-full
-              "
-            />
+        <img
+          src="/hero-car.png"
+          alt="Premium Diecast"
+          className="
+          relative
+          z-10
+          w-full
+          max-w-[950px]
+          object-contain
+          drop-shadow-[0_20px_60px_rgba(212,175,55,0.30)]
+          transition-all
+          duration-700
+          hover:scale-105
+          "
+        />
 
-            {/* Hero Image */}
-            <img
-              src="/hero-car.png"
-              alt="Premium Diecast"
-              className="
-              relative
-              z-10
-              w-full
-              max-w-lg
-              object-contain
-              hover:scale-105
-              transition-all
-              duration-500
-              drop-shadow-[0_0_50px_rgba(239,68,68,0.35)]
-              "
-            />
+      </div>
 
-          </div>
+    </div>
 
-        </div>
+  </div>
 
-      </section>
+</section>
+<BrandMarquee />
+      {/* Brands Section */}
+      <BrandsSection />
 
       {/* Products Section */}
+
       <section
         id="products"
         className="max-w-7xl mx-auto px-4 md:px-6 pb-24"
@@ -327,7 +399,7 @@ export default function Home() {
         {/* Header */}
         <div className="mb-12">
 
-          <p className="text-red-500 uppercase tracking-[0.3em] text-sm">
+          <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
 
             Featured Products
 
@@ -354,7 +426,7 @@ export default function Home() {
 
           <input
             type="text"
-            placeholder="Search diecast cars & protectors..."
+            placeholder="Search diecast cars..."
             value={search}
             onChange={(e) =>
               setSearch(
@@ -365,14 +437,14 @@ export default function Home() {
             w-full
             h-16
             rounded-2xl
-            bg-zinc-900
+            bg-white
             border
-            border-zinc-800
+            border-gray-200
             px-6
-            text-white
+            text-black
             placeholder:text-zinc-500
             outline-none
-            focus:border-red-500
+            focus:border-[#D4AF37]
             transition-all
             duration-300
             "
@@ -403,9 +475,9 @@ export default function Home() {
                 ${
                   selectedCategory === category
 
-                    ? "bg-red-500 text-white border-red-500"
+                    ? "bg-[#D4AF37] text-black border-[#D4AF37]"
 
-                    : "border-zinc-700 text-zinc-400 hover:border-red-500 hover:text-white"
+                    : "border-gray-300 text-gray-600 hover:border-[#D4AF37] hover:text-black hover:bg-[#D4AF37]/5"
                 }
               `}
             >
@@ -440,8 +512,8 @@ export default function Home() {
 
         ${
           stockFilter === filter
-            ? "bg-green-500 text-white border-green-500"
-            : "border-zinc-700 text-zinc-400 hover:border-green-500 hover:text-white"
+            ? "bg-[#D4AF37] text-black border-[#D4AF37]"
+            : "border-gray-300 text-gray-600 hover:border-[#D4AF37] hover:text-[#D4AF37]"
         }
       `}
     >
@@ -451,6 +523,52 @@ export default function Home() {
     </button>
 
   ))}
+
+</div>
+<div className="mb-12">
+
+  <p className="text-[#D4AF37] uppercase tracking-wider text-sm mb-4">
+
+    Browse By Brand
+
+  </p>
+
+  <div className="flex flex-wrap gap-4">
+
+    {brands.map((brand) => (
+
+      <button
+        key={brand}
+        onClick={() =>
+          setSelectedBrand(
+            brand
+          )
+        }
+        className={`
+          px-5
+          py-2.5
+          rounded-full
+          border
+          transition-all
+          duration-300
+
+          ${
+            selectedBrand === brand
+
+              ? "bg-[#D4AF37] text-black border-[#D4AF37]"
+
+              : "border-gray-300 text-gray-600 hover:border-[#D4AF37] hover:text-[#D4AF37]"
+          }
+        `}
+      >
+
+        {brand}
+
+      </button>
+
+    ))}
+
+  </div>
 
 </div>
         {/* Skeleton */}
@@ -467,22 +585,22 @@ export default function Home() {
                 rounded-3xl
                 overflow-hidden
                 border
-                border-zinc-800
-                bg-zinc-900
+                border-gray-200
+                bg-white
                 "
               >
 
-                <div className="h-72 bg-zinc-800" />
+                <div className="h-72 bg-gray-100" />
 
                 <div className="p-6 space-y-4">
 
-                  <div className="h-6 bg-zinc-800 rounded w-2/3" />
+                  <div className="h-6 bg-gray-100 rounded w-2/3" />
 
-                  <div className="h-4 bg-zinc-800 rounded w-full" />
+                  <div className="h-4 bg-gray-100 rounded w-full" />
 
-                  <div className="h-4 bg-zinc-800 rounded w-5/6" />
+                  <div className="h-4 bg-gray-100 rounded w-5/6" />
 
-                  <div className="h-10 bg-zinc-800 rounded-xl mt-6" />
+                  <div className="h-10 bg-gray-100 rounded-xl mt-6" />
 
                 </div>
 
@@ -521,7 +639,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
-            {filteredProducts.map((product) => (
+            {sortedProducts.map((product) => (
 
              <ProductCard
   key={product.id}

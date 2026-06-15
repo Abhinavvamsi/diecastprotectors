@@ -106,7 +106,7 @@ export async function POST(
 
           <p>
             Thank you for shopping with
-            Diecast Protectors And Cars.
+            Diecast Universe.
           </p>
 
         </div>

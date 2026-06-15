@@ -248,7 +248,7 @@ if (body.couponCode) {
 
         <p>
           Thank you for shopping
-          with Diecast Protectors And Cars.
+          with Diecast Universe.
         </p>
 
       </div>

@@ -77,7 +77,7 @@ export default function TrackOrderPage() {
 
   return (
 
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-white text-black">
 
       {/* Global Navbar */}
       <Navbar />
@@ -87,13 +87,17 @@ export default function TrackOrderPage() {
         {/* Heading */}
         <div className="mb-12">
 
+        <p className="text-[#D4AF37] uppercase tracking-widest text-sm">
+  Diecast Universe
+</p>
+
           <h1 className="text-5xl font-bold">
 
             Track Your Order
 
           </h1>
 
-          <p className="text-red-500 mt-4 text-lg">
+          <p className="text-[#D4AF37] mt-4 text-lg">
 
             Enter your Order ID to check your latest order status.
 
@@ -102,9 +106,9 @@ export default function TrackOrderPage() {
         </div>
 
         {/* Search Box */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-8">
 
-          <label className="block text-zinc-400 mb-4">
+          <label className="block text-gray-600 mb-4">
 
             Order ID
 
@@ -119,7 +123,18 @@ export default function TrackOrderPage() {
                 e.target.value
               )
             }
-            className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4 outline-none focus:border-white transition"
+            className="
+w-full
+h-14
+rounded-xl
+bg-white
+border
+border-gray-300
+px-4
+outline-none
+focus:border-[#D4AF37]
+transition
+"
           />
 
           <button
@@ -130,7 +145,7 @@ export default function TrackOrderPage() {
               loading ||
               !orderId
             }
-            className="w-full mt-6 h-14 rounded-xl bg-red-500 text-white hover:bg-red-600 font-bold hover:scale-[1.02] active:scale-95 transition disabled:opacity-50"
+            className="w-full mt-6 h-14 rounded-xl bg-[#D4AF37] text-black hover:bg-[#B8941F] font-bold hover:scale-[1.02] active:scale-95 transition disabled:opacity-50"
           >
 
             {loading
@@ -144,7 +159,7 @@ export default function TrackOrderPage() {
         {/* Order Details */}
         {order && (
 
-          <div className="mt-10 bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+          <div className="mt-10 bg-white border border-gray-200 shadow-sm rounded-3xl p-8">
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 
@@ -156,7 +171,7 @@ export default function TrackOrderPage() {
 
                 </h2>
 
-                <p className="text-zinc-400 mt-4">
+                <p className="text-gray-600 mt-4">
 
                   Order ID:
                   <br />
@@ -165,7 +180,7 @@ export default function TrackOrderPage() {
 
                 </p>
 
-                <p className="text-zinc-400 mt-4 break-all">
+                <p className="text-gray-600 mt-4 break-all">
 
                   Payment ID:
                   <br />
@@ -174,7 +189,7 @@ export default function TrackOrderPage() {
 
                 </p>
 
-                <p className="text-zinc-400 mt-4">
+                <p className="text-gray-600 mt-4">
 
                   Ordered On:
                   <br />
@@ -201,7 +216,7 @@ export default function TrackOrderPage() {
 
               <div>
 
-                <p className="text-red-500">
+                <p className="text-[#D4AF37]">
 
                   Total Amount
 
@@ -234,7 +249,7 @@ export default function TrackOrderPage() {
                       order.status
                     )
                       ? "bg-green-500"
-                      : "bg-zinc-700"
+                      : "bg-gray-300"
                   }`}
                 />
 

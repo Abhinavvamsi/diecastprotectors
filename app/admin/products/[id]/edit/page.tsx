@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 
 import EditProductForm from "@/components/edit-product-form"
 
+import AdminNav from "@/components/admin-nav"
+
 import {
   currentUser,
 } from "@clerk/nextjs/server"
@@ -54,34 +56,66 @@ export default async function EditPage({
 
   return (
 
-    <main className="min-h-screen bg-black text-white p-8">
+  <main className="min-h-screen bg-white text-black p-8">
 
-      <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto">
 
-        <h1 className="text-5xl font-bold mb-12">
+      <AdminNav />
+
+      <div className="mb-12">
+
+        <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
+
+          Diecast Universe Admin
+
+        </p>
+
+        <h1 className="text-5xl font-bold mt-3">
 
           Edit Product
 
         </h1>
 
-        <EditProductForm
-  product={{
-    ...product,
+        <p className="text-gray-500 mt-2">
 
-    images:
-      (product.images as string[]) || [],
+          Update product information, pricing, stock and images.
 
-    quantityPricing:
-      (product.quantityPricing as {
-        quantity: string
-        price: string
-      }[]) || [],
-  }}
-/>
+        </p>
+
       </div>
 
-    </main>
+      <div
+        className="
+        bg-white
+        border
+        border-gray-200
+        shadow-sm
+        rounded-[2rem]
+        p-6
+        md:p-10
+        "
+      >
 
-  )
+        <EditProductForm
+          product={{
+            ...product,
 
+            images:
+              (product.images as string[]) || [],
+
+            quantityPricing:
+              (product.quantityPricing as {
+                quantity: string
+                price: string
+              }[]) || [],
+          }}
+        />
+
+      </div>
+
+    </div>
+
+  </main>
+
+)
 }

@@ -63,6 +63,33 @@ export default function AddProductPage() {
   const [stock, setStock] =
     useState("")
 
+  
+  const [brandId, setBrandId] =
+  useState("")
+
+  const [brands, setBrands] =
+  useState<any[]>([])
+
+  useEffect(() => {
+
+  async function loadBrands() {
+
+    const response =
+      await fetch(
+        "/api/admin/brands"
+      )
+
+    const data =
+      await response.json()
+
+    setBrands(data)
+
+  }
+
+  loadBrands()
+
+}, [])
+
   const [quantityPricing,
   setQuantityPricing
 ] = useState([
@@ -173,6 +200,8 @@ export default function AddProductPage() {
 
   badge,
 
+  brandId,
+
   stock: Number(stock),
 
   quantityPricing:
@@ -218,7 +247,7 @@ export default function AddProductPage() {
 
   return (
 
-    <main className="min-h-screen bg-black text-white p-6 md:p-8">
+    <main className="min-h-screen bg-white text-black p-6 md:p-8">
 
       <div className="max-w-4xl mx-auto">
 
@@ -226,26 +255,27 @@ export default function AddProductPage() {
         {/* Header */}
         <div className="mb-12">
 
-          <p className="text-red-500 uppercase tracking-[0.3em] text-sm">
+          <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
+  Diecast Universe Admin
+</p>
 
-            Admin Dashboard
+        <h1 className="text-5xl md:text-6xl font-bold mt-4">
+  Add New Product
+</h1>
 
-          </p>
-
-          <h1 className="text-5xl md:text-6xl font-bold mt-4">
-
-            Add Product
-
-          </h1>
+<p className="text-zinc-400 mt-3">
+  Manage diecast cars, protectors and collectibles.
+</p>
 
         </div>
 
         {/* Form */}
         <div
           className="
-          bg-gradient-to-b
-          from-zinc-900
-          to-zinc-950
+          bg-white
+border
+border-gray-200
+shadow-sm
           border
           border-zinc-800
           rounded-[2rem]
@@ -278,15 +308,15 @@ export default function AddProductPage() {
               w-full
               h-14
               rounded-2xl
-              bg-black
+              bg-white
               border
               border-zinc-800
               px-5
-              text-white
+              text-black
               outline-none
-              focus:border-red-500
+              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-red-500/20
+              focus:ring-[#D4AF37]/20
               transition-all
               "
             />
@@ -313,17 +343,17 @@ export default function AddProductPage() {
               className="
               w-full
               rounded-2xl
-              bg-black
+              bg-white
               border
-              border-zinc-800
+              border-gray-300
+              text-black
               px-5
               py-5
               min-h-[180px]
-              text-white
               outline-none
-              focus:border-red-500
+              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-red-500/20
+              focus:ring-[#D4AF37]/20
               transition-all
               "
             />
@@ -352,15 +382,15 @@ export default function AddProductPage() {
               w-full
               h-14
               rounded-2xl
-              bg-black
+              bg-white
               border
               border-zinc-800
               px-5
-              text-white
+              text-black
               outline-none
-              focus:border-red-500
+              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-red-500/20
+              focus:ring-[#D4AF37]/20
               transition-all
               "
             />
@@ -387,10 +417,10 @@ export default function AddProductPage() {
               border-2
               border-dashed
               border-zinc-700
-              bg-black
+              bg-white
               cursor-pointer
-              hover:border-red-500
-              hover:bg-zinc-950
+              hover:border-[#D4AF37]
+              hover:bg-[#FFFBEF]
               transition-all
               duration-300
               "
@@ -398,13 +428,13 @@ export default function AddProductPage() {
 
               <div className="text-center">
 
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-black">
 
                   Upload Product Images
 
                 </p>
 
-                <p className="text-zinc-500 mt-3">
+                <p className="text-gray-500 mt-3">
 
                   Click to browse images
 
@@ -474,7 +504,7 @@ export default function AddProductPage() {
                       rounded-full
                       bg-red-500
                       hover:bg-red-600
-                      text-white
+                      text-black
                       text-lg
                       font-bold
                       transition
@@ -515,15 +545,15 @@ export default function AddProductPage() {
               w-full
               h-14
               rounded-2xl
-              bg-black
+              bg-white
               border
               border-zinc-800
               px-5
-              text-white
+              text-black
               outline-none
-              focus:border-red-500
+              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-red-500/20
+              focus:ring-[#D4AF37]/20
               transition-all
               "
             >
@@ -543,7 +573,64 @@ export default function AddProductPage() {
             </select>
 
           </div>
+<div className="space-y-3">
 
+  <label
+    className="
+    text-sm
+    text-gray-500
+    uppercase
+    tracking-wider
+    "
+  >
+
+    Brand
+
+  </label>
+
+  <select
+    value={brandId}
+    onChange={(e) =>
+      setBrandId(
+        e.target.value
+      )
+    }
+    className="
+    w-full
+    h-14
+    rounded-2xl
+    bg-white
+    border
+    border-gray-300
+    px-5
+    text-black
+    outline-none
+    focus:border-[#D4AF37]
+    focus:ring-2
+    focus:ring-[#D4AF37]/20
+    "
+  >
+
+    <option value="">
+      Select Brand
+    </option>
+
+    {brands.map((brand) => (
+
+      <option
+        key={brand.id}
+        value={brand.id}
+      >
+
+        {brand.name}
+
+      </option>
+
+    ))}
+
+  </select>
+
+</div>
           {/* Badge */}
           <div className="space-y-3">
 
@@ -562,15 +649,15 @@ export default function AddProductPage() {
               w-full
               h-14
               rounded-2xl
-              bg-black
+              bg-white
               border
               border-zinc-800
               px-5
-              text-white
+              text-black
               outline-none
-              focus:border-red-500
+              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-red-500/20
+              focus:ring-[#D4AF37]/20
               transition-all
               "
             >
@@ -636,7 +723,7 @@ export default function AddProductPage() {
           flex-1
           h-14
           rounded-2xl
-          bg-black
+          bg-white
           border
           border-zinc-800
           px-5
@@ -665,7 +752,7 @@ export default function AddProductPage() {
   flex-1
   h-14
   rounded-2xl
-  bg-black
+  bg-white
   border
   border-zinc-800
   px-5
@@ -690,9 +777,10 @@ export default function AddProductPage() {
   h-14
   px-4
   rounded-2xl
-  bg-red-500
-  hover:bg-red-600
-  text-white
+  bg-[#D4AF37]
+text-black
+hover:bg-[#B8941F]
+  text-black
   font-bold
   disabled:opacity-50
   disabled:cursor-not-allowed
@@ -708,7 +796,12 @@ export default function AddProductPage() {
   )}
 
   <Button
-    type="button"
+  type="button"
+  className="
+  bg-[#D4AF37]
+  text-black
+  hover:bg-[#B8941F]
+  "
     onClick={() =>
       setQuantityPricing([
         ...quantityPricing,
@@ -747,21 +840,39 @@ export default function AddProductPage() {
               w-full
               h-14
               rounded-2xl
-              bg-black
+              bg-white
               border
               border-zinc-800
               px-5
-              text-white
+              text-black
               outline-none
-              focus:border-red-500
+              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-red-500/20
+              focus:ring-[#D4AF37]/20
               transition-all
               "
             />
 
           </div>
+<div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
 
+  <h3 className="font-bold text-lg mb-4">
+    Product Preview
+  </h3>
+
+  <p className="font-semibold">
+    {name || "Product Name"}
+  </p>
+
+  <p className="text-[#D4AF37] font-bold mt-2">
+    ₹{price || "0"}
+  </p>
+
+  <p className="text-gray-500 mt-2">
+    {category || "Category"}
+  </p>
+
+</div>
           {/* Submit */}
           <Button
             onClick={
@@ -773,15 +884,19 @@ export default function AddProductPage() {
             rounded-2xl
             text-lg
             font-bold
-            bg-red-500
-            hover:bg-red-600
+            bg-[#D4AF37]
+            text-black
             hover:scale-[1.01]
             active:scale-95
             transition-all
             duration-300
             shadow-lg
-            shadow-red-500/20
-            hover:shadow-red-500/40
+            hover:bg-[#B8941F]
+
+shadow-[#D4AF37]/20
+
+hover:shadow-[#D4AF37]/40
+            
             "
           >
 

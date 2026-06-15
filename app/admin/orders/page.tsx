@@ -159,7 +159,7 @@ const [
 ])
   return (
 
-    <main className="min-h-screen bg-black text-white p-8">
+    <main className="min-h-screen bg-white text-black p-8">
 
       <div className="max-w-7xl mx-auto">
 
@@ -189,8 +189,9 @@ const [
       px-6
       py-3
       rounded-xl
-      bg-green-500
-      hover:bg-green-600
+      bg-[#D4AF37]
+text-black
+      hover:bg-[#B8941F]
       font-bold
       "
     >
@@ -214,15 +215,16 @@ const [
 
   <div
     className="
-    bg-zinc-900
+    bg-white
     border
-    border-zinc-800
+    border-gray-200
+    shadow-sm
     rounded-3xl
     p-6
     "
   >
 
-    <p className="text-zinc-400">
+    <p className="text-gray-600">
 
       Total Orders
 
@@ -238,21 +240,23 @@ const [
 
   <div
     className="
-    bg-zinc-900
+    bg-white
     border
-    border-zinc-800
+    border-gray-200
+
+shadow-sm
     rounded-3xl
     p-6
     "
   >
 
-    <p className="text-zinc-400">
+    <p className="text-gray-600">
 
       Revenue
 
     </p>
 
-    <h2 className="text-4xl font-bold mt-2 text-green-500">
+    <h2 className="text-4xl font-bold mt-2 text-[#D4AF37]">
 
       ₹
       {
@@ -266,15 +270,17 @@ const [
 
   <div
     className="
-    bg-zinc-900
+    bg-white
     border
-    border-zinc-800
+    border-gray-200
+
+shadow-sm
     rounded-3xl
     p-6
     "
   >
 
-    <p className="text-zinc-400">
+    <p className="text-gray-600">
 
       Pending
 
@@ -290,21 +296,23 @@ const [
 
   <div
     className="
-    bg-zinc-900
+    bg-white
     border
-    border-zinc-800
+    border-gray-200
+
+shadow-sm
     rounded-3xl
     p-6
     "
   >
 
-    <p className="text-zinc-400">
+    <p className="text-gray-600">
 
       Delivered
 
     </p>
 
-    <h2 className="text-4xl font-bold mt-2 text-green-500">
+    <h2 className="text-4xl font-bold mt-2 text-[#D4AF37]">
 
       {deliveredOrders}
 
@@ -362,8 +370,8 @@ const [
     gap-2
     ${
       status === item.name
-        ? "bg-red-500 border-red-500 text-white"
-        : "border-zinc-700 text-zinc-400 hover:border-red-500"
+        ? "bg-[#D4AF37] border-[#D4AF37] text-black text-white"
+        : "border-gray-300 text-gray-600 hover:border-[#D4AF37] hover:text-[#D4AF37]"
     }
   `}
 >
@@ -416,26 +424,30 @@ const [
   name="status"
   value={status}
 />
-  <input
-    type="text"
-    name="search"
-    defaultValue={search}
-    placeholder="
-    Search Order ID,
-    Customer Name,
-    Phone Number
-    "
-    className="
-    w-full
-    h-14
-    rounded-2xl
-    bg-zinc-900
-    border
-    border-zinc-800
-    px-5
-    text-white
-    "
-  />
+
+<input
+  type="text"
+  name="search"
+  defaultValue={search}
+  placeholder="Search Order ID, Customer Name, Phone Number"
+  className="
+  w-full
+  h-14
+  rounded-2xl
+  bg-white
+  border
+  border-gray-300
+  shadow-sm
+  px-5
+  text-black
+  placeholder:text-gray-400
+  outline-none
+  focus:border-[#D4AF37]
+  focus:ring-2
+  focus:ring-[#D4AF37]/20
+  transition-all
+  "
+/>
 
 </form>
 
@@ -443,37 +455,44 @@ const [
 
   <div
     className="
-    bg-zinc-900
+    bg-white
     border
-    border-zinc-800
+    border-gray-200
+    shadow-sm
     rounded-3xl
     p-10
     text-center
     "
   >
 
-    No orders found
+    <p className="text-gray-500">
+      No orders found
+    </p>
 
   </div>
 
 )}
-        <div className="space-y-8">
 
-          {orders.map((order) => (
+<div className="space-y-8">
 
-            <div
-  key={order.id}
-  className="
-  bg-zinc-900
-  border
-  border-zinc-800
-  rounded-3xl
-  p-8
-  "
->
+  {orders.map((order) => (
 
+    <div
+      key={order.id}
+      className="
+      bg-white
+      border
+      border-gray-200
+      shadow-sm
+      rounded-3xl
+      p-8
+      hover:shadow-md
+      transition-all
+      duration-300
+      "
+    >
 
-              <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
 
                 {/* Customer Details */}
                 <div>
@@ -484,25 +503,25 @@ const [
 
                   </h2>
 
-                  <p className="text-zinc-400 mt-2">
+                  <p className="text-gray-600 mt-2">
 
                     {order.email}
 
                   </p>
 
-                  <p className="text-zinc-400">
+                  <p className="text-gray-600">
 
                     {order.phone}
 
                   </p>
 
-                  <p className="text-zinc-400">
+                  <p className="text-gray-600">
 
                     {order.address}
 
                   </p>
 
-                  <p className="text-zinc-400">
+                  <p className="text-gray-600">
 
                     {order.city}
                     {" - "}
@@ -515,7 +534,7 @@ const [
                 {/* Order Details */}
                 <div>
 
-                  <p className="text-2xl font-bold text-green-500">
+                  <p className="text-2xl font-bold text-[#D4AF37]">
 
                     Total:
                     {" "}
@@ -523,35 +542,31 @@ const [
 
                   </p>
 
-                  <p className="text-red-500 mt-4">
+                  <p className="text-[#D4AF37] mt-4">
 
                     Order ID
 
                     <br />
 
-                    <span className="text-white break-all">
-
-                      {order.orderId}
-
-                    </span>
+                    <span className="text-black break-all font-medium">
+  {order.orderId}
+</span>
 
                   </p>
 
-                  <p className="text-red-500 mt-2 break-all">
+                  <p className="text-[#D4AF37] mt-2 break-all">
 
                     Payment ID
 
                     <br />
 
-                    <span className="text-white">
-
-                      {order.paymentId}
-
-                    </span>
+                    <span className="text-black break-all font-medium">
+  {order.paymentId}
+</span>
 
                   </p>
 
-                  <p className="text-red-500 mt-4">
+                  <p className="text-[#D4AF37] mt-4">
 
                     Ordered On
 
@@ -582,7 +597,7 @@ const [
                   </p>
                   <div className="mt-4">
 
-  <p className="text-red-500">
+  <p className="text-[#D4AF37]">
 
     Delivery Method
 
@@ -591,42 +606,43 @@ const [
   {order.deliveryMethod === "pickup" ? (
 
     <div
-      className="
-      inline-flex
-      items-center
-      mt-2
-      px-4
-      py-2
-      rounded-full
-      bg-green-500/20
-      text-green-400
-      "
-    >
-
-      📍 Pickup
-      {order.pickupLocation &&
-        ` - ${order.pickupLocation}`}
-
-    </div>
-
+  className="
+  inline-flex
+  items-center
+  mt-2
+  px-4
+  py-2
+  rounded-full
+  bg-[#FFF8E1]
+  border
+  border-[#D4AF37]/40
+  text-[#B8941F]
+  font-medium
+  "
+>
+  📍 Pickup
+  {order.pickupLocation &&
+    ` - ${order.pickupLocation}`}
+</div>
   ) : (
 
     <div
-      className="
-      inline-flex
-      items-center
-      mt-2
-      px-4
-      py-2
-      rounded-full
-      bg-blue-500/20
-      text-blue-400
-      "
-    >
-
-      🚚 Shipping
-
-    </div>
+  className="
+  inline-flex
+  items-center
+  mt-2
+  px-4
+  py-2
+  rounded-full
+  bg-blue-50
+  border
+  border-blue-200
+  text-blue-700
+  font-medium
+  "
+>
+  🚚 Shipping
+</div>
 
   )}
 
@@ -634,45 +650,39 @@ const [
 
                   <div className="mt-6">
 
-                    <span
-                      className={`
-                        px-4
-                        py-2
-                        rounded-full
-                        text-sm
-                        font-semibold
+  <span
+    className={`
+      px-4
+      py-2
+      rounded-full
+      text-sm
+      font-semibold
+      border
 
-                        ${
-                          order.status === "Pending"
+      ${
+        order.status === "Pending"
+          ? "bg-yellow-50 border-yellow-200 text-yellow-700"
 
-                            ? "bg-yellow-500/20 text-yellow-400"
+          : order.status === "Packed"
+          ? "bg-blue-50 border-blue-200 text-blue-700"
 
-                            : order.status === "Packed"
+          : order.status === "Shipped"
+          ? "bg-purple-50 border-purple-200 text-purple-700"
 
-                            ? "bg-blue-500/20 text-blue-400"
+          : order.status === "Delivered"
+          ? "bg-green-50 border-green-200 text-green-700"
 
-                            : order.status === "Shipped"
+          : order.status === "Cancelled"
+          ? "bg-red-50 border-red-200 text-red-700"
 
-                            ? "bg-purple-500/20 text-purple-400"
+          : "bg-gray-50 border-gray-200 text-gray-700"
+      }
+    `}
+  >
+    {order.status}
+  </span>
 
-                            : order.status === "Delivered"
-
-                            ? "bg-green-500/20 text-green-400"
-
-                            : order.status === "Cancelled"
-
-                            ? "bg-red-500/20 text-red-400"
-
-                            : "bg-zinc-700 text-white"
-                        }
-                      `}
-                    >
-
-                      {order.status}
-
-                    </span>
-
-                  </div>
+</div>
 
                   <OrderStatusSelect
                     orderId={order.id}
@@ -687,7 +697,9 @@ const [
 
               {/* Ordered Products */}
 
-              <div className="mt-8 border-t border-zinc-800 pt-8">
+              <div className="mt-8 border-t border-gray-200
+
+shadow-sm pt-8">
 
                 <h3 className="text-xl font-bold mb-6">
 
@@ -710,9 +722,11 @@ const [
                           flex
                           items-center
                           gap-4
-                          bg-black
+                          bg-gray-50
                           border
-                          border-zinc-800
+                          border-gray-200
+
+shadow-sm
                           rounded-2xl
                           p-4
                           "
@@ -752,7 +766,7 @@ const [
 
                             </h4>
 
-                            <p className="text-zinc-400">
+                            <p className="text-gray-600">
 
                               Quantity:
                               {" "}
@@ -760,7 +774,7 @@ const [
 
                             </p>
 
-                            <p className="text-green-500">
+                            <p className="text-[#D4AF37]">
 
                               Unit Price:
                               {" "}

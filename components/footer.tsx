@@ -4,7 +4,7 @@ export default function Footer() {
 
   return (
 
-    <footer className="border-t border-zinc-800 bg-black text-white mt-20">
+    <footer className="border-t border-gray-200 bg-white text-black mt-20">
 
       <div className="max-w-7xl mx-auto px-6 py-14">
 
@@ -15,13 +15,13 @@ export default function Footer() {
 
             <h2 className="text-3xl font-bold">
 
-              Diecast Protectors And Cars
+              Diecast Universe
 
             </h2>
 
-            <p className="text-red-500 mt-4 leading-relaxed">
+            <p className="text-[#D4AF37] mt-4 leading-relaxed">
 
-              Premium diecast cars, Hot Wheels protectors and collector accessories for passionate collectors.
+              Premium Hot Wheels, Mini GT, Inno64 and collectible diecast models curated for passionate collectors.
 
             </p>
 
@@ -36,25 +36,28 @@ export default function Footer() {
 
             </h3>
 
-            <div className="flex flex-col gap-3 text-zinc-400">
+            <div className="flex flex-col gap-3 text-gray-600">
 
-              <Link href="/protectors">
+              <Link
+  href="/orders"
+  className="hover:text-[#D4AF37] transition-colors"
+>
+  Home
+</Link>
 
-                Protectors
+              <Link
+  href="/orders"
+  className="hover:text-[#D4AF37] transition-colors"
+>
+  Diecast Cars
+</Link>
 
-              </Link>
-
-              <Link href="/cars">
-
-                Diecast Cars
-
-              </Link>
-
-              <Link href="/orders">
-
-                My Orders
-
-              </Link>
+              <Link
+  href="/orders"
+  className="hover:text-[#D4AF37] transition-colors"
+>
+  My Orders
+</Link>
 
             </div>
 
@@ -102,11 +105,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-zinc-800 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-red-500 text-sm">
+        <div className="border-t border-gray-200 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-gray-500 text-sm">
 
           <p>
 
-            © 2026 Diecast Protectors. All rights reserved.
+           © 2026 Diecast Universe. All rights reserved.
 
           </p>
 

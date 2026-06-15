@@ -1,8 +1,11 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export default function AdminNav() {
+
+  const pathname = usePathname()
 
   const links = [
 
@@ -25,7 +28,10 @@ export default function AdminNav() {
       href: "/admin/products",
       label: "Products",
     },
-
+    {
+  href: "/admin/brands",
+  label: "Brands",
+},
     {
       href: "/admin/coupons",
       label: "Coupons",
@@ -40,36 +46,63 @@ export default function AdminNav() {
 
   return (
 
-    <div className="flex flex-wrap gap-3 mb-12 mt-6">
+    <div className="flex flex-wrap gap-4 mb-12 mt-6">
 
-      {links.map((link) => (
+      {links.map((link) => {
 
-        <Link
-          key={link.href}
-          href={link.href}
-        >
+        const isActive =
+          pathname === link.href
 
-          <button
-            className="
-            px-5
-            py-3
-            rounded-xl
-            bg-zinc-900
-            border
-            border-zinc-800
-            hover:border-red-500
-            hover:text-red-500
-            transition
-            "
+        return (
+
+          <Link
+            key={link.href}
+            href={link.href}
           >
 
-            {link.label}
+            <button
+              className={`
+              px-6
+              py-3
+              rounded-2xl
+              font-semibold
+              border
+              transition-all
+              duration-300
+              shadow-sm
 
-          </button>
+              ${
+                isActive
+                  ? `
+                    bg-[#D4AF37]
+                    text-black
+                    border-[#D4AF37]
+                    shadow-lg
+                    shadow-[#D4AF37]/20
+                  `
+                  : `
+                    bg-white
+                    text-black
+                    border-gray-200
+                    hover:border-[#D4AF37]
+                    hover:bg-[#FFFBEF]
+                    hover:text-[#D4AF37]
+                    hover:-translate-y-1
+                    hover:shadow-md
+                  `
+              }
+              `}
+            >
 
-        </Link>
+              {link.label}
 
-      ))}
+            </button>
+
+          </Link>
+
+        )
+
+      })}
 
     </div>
 

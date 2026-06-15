@@ -61,6 +61,10 @@ model Product {
   createdAt DateTime @default(now())
 
   badge String?
+
+brandId String?
+
+brand Brand? @relation(fields: [brandId], references: [id])
 }
 model Coupon {
 
@@ -93,4 +97,16 @@ model StoreSettings {
   pickupEnabled Boolean @default(false)
 
   pickupLocation String?
+}
+
+
+model Brand {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  logo        String?
+  description String?
+
+  products    Product[]
+
+  createdAt   DateTime @default(now())
 }

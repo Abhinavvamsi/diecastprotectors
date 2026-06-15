@@ -1,25 +1,16 @@
 "use client"
 
-import { useRouter }
-from "next/navigation"
+import { useRouter } from "next/navigation"
 
-export default function
-OrderStatusSelect({
-
+export default function OrderStatusSelect({
   orderId,
-
   currentStatus,
-
 }: {
-
   orderId: string
-
   currentStatus: string
-
 }) {
 
-  const router =
-    useRouter()
+  const router = useRouter()
 
   async function updateStatus(
     status: string
@@ -28,7 +19,6 @@ OrderStatusSelect({
     await fetch(
       "/api/update-order-status",
       {
-
         method: "POST",
 
         headers: {
@@ -37,13 +27,9 @@ OrderStatusSelect({
         },
 
         body: JSON.stringify({
-
           orderId,
-
           status,
-
         }),
-
       }
     )
 
@@ -55,14 +41,31 @@ OrderStatusSelect({
 
     <select
       value={currentStatus}
-
       onChange={(e) =>
         updateStatus(
           e.target.value
         )
       }
-
-      className="mt-6 bg-black border border-red-500/40 rounded-xl px-4 py-3 text-white"
+      className="
+      mt-6
+      w-full
+      md:w-auto
+      min-w-[180px]
+      h-12
+      px-4
+      rounded-xl
+      bg-white
+      text-black
+      border
+      border-gray-300
+      shadow-sm
+      outline-none
+      cursor-pointer
+      focus:border-[#D4AF37]
+      focus:ring-2
+      focus:ring-[#D4AF37]/20
+      transition-all
+      "
     >
 
       <option value="Pending">

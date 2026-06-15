@@ -54,6 +54,8 @@ if (!isAdmin) {
 
   stock: body.stock,
 
+  brandId: body.brandId,
+
   quantityPricing:
 
     body.quantityPricing || null,

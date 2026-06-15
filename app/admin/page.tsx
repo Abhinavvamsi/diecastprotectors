@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Navbar from "@/components/navbar"
+
 import {
   currentUser,
 } from "@clerk/nextjs/server"
@@ -26,292 +27,495 @@ export default async function AdminPage() {
 
   return (
 
-    <main className="min-h-screen bg-black text-white">
+  <main className="min-h-screen bg-white text-black">
 
-      {/* Global Navbar */}
-      <Navbar />
+    <Navbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-16">
+    <div className="max-w-7xl mx-auto px-6 py-16">
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-14">
+      {/* Header */}
 
-          <div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-14">
 
-            <p className="text-red-500 uppercase tracking-widest text-sm">
+        <div>
 
-              HW Shield Admin
+          <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
 
-            </p>
+            Diecast Universe Admin
 
-            <h1 className="text-5xl font-bold mt-3">
+          </p>
 
-              Admin Dashboard
+          <h1 className="text-5xl font-bold mt-3">
 
-            </h1>
+            Admin Dashboard
 
-            <p className="text-red-500 mt-4 text-lg">
+          </h1>
 
-              Manage products, orders, inventory and store operations.
+          <p className="text-gray-500 mt-4 text-lg">
 
-            </p>
+            Manage products, orders, inventory and store operations.
 
-          </div>
-
-          <Link href="/">
-
-            <button className="h-14 px-8 rounded-2xl border border-zinc-800 hover:border-white transition">
-
-              Back to Store
-
-            </button>
-
-          </Link>
+          </p>
 
         </div>
 
-        {/* Dashboard Cards */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
+        <Link href="/">
 
-          {/* Add Product */}
-          <Link
-            href="/admin/add-product"
-            className="group bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-white hover:-translate-y-2 transition-all duration-300"
+          <button
+            className="
+            h-14
+            px-8
+            rounded-2xl
+            border
+            border-gray-300
+            hover:border-[#D4AF37]
+            hover:text-[#D4AF37]
+            transition
+            "
           >
 
-            <div className="space-y-6">
+            Back to Store
 
-              <div className="w-16 h-16 rounded-2xl bg-red-500 text-white hover:bg-red-600 flex items-center justify-center text-3xl font-bold">
+          </button>
 
-                +
+        </Link>
 
-              </div>
+      </div>
 
-              <div>
+      {/* Quick Overview */}
 
-                <h2 className="text-3xl font-bold">
+      <div className="grid md:grid-cols-3 gap-6 mb-12">
 
-                  Add Product
+        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
 
-                </h2>
+          <p className="text-gray-500">
 
-                <p className="text-red-500 mt-4 leading-relaxed">
+            Products
 
-                  Create new products with Cloudinary image uploads and stock management.
+          </p>
 
-                </p>
+          <h2 className="text-3xl font-bold mt-2">
 
-              </div>
+            Manage Catalog
 
-            </div>
+          </h2>
 
-          </Link>
+        </div>
 
-          {/* Orders */}
-          <Link
-            href="/admin/orders"
-            className="group bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-white hover:-translate-y-2 transition-all duration-300"
-          >
+        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
 
-            <div className="space-y-6">
+          <p className="text-gray-500">
 
-              <div className="w-16 h-16 rounded-2xl bg-red-500 text-white hover:bg-red-600 flex items-center justify-center text-3xl font-bold">
+            Orders
 
-                📦
+          </p>
 
-              </div>
+          <h2 className="text-3xl font-bold mt-2">
 
-              <div>
+            Track Sales
 
-                <h2 className="text-3xl font-bold">
+          </h2>
 
-                  Orders
+        </div>
 
-                </h2>
+        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
 
-                <p className="text-red-500 mt-4 leading-relaxed">
+          <p className="text-gray-500">
 
-                  Track customer purchases, update statuses and monitor deliveries.
+            Store
 
-                </p>
+          </p>
 
-              </div>
+          <h2 className="text-3xl font-bold mt-2">
 
-            </div>
+            Settings & Coupons
 
-          </Link>
+          </h2>
 
-          {/* Product Management */}
-          <Link
-            href="/admin/products"
-            className="group bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-white hover:-translate-y-2 transition-all duration-300"
-          >
-
-            <div className="space-y-6">
-
-              <div className="w-16 h-16 rounded-2xl bg-red-500 text-white hover:bg-red-600 flex items-center justify-center text-3xl font-bold">
-
-                🛠
-
-              </div>
-
-              <div>
-
-                <h2 className="text-3xl font-bold">
-
-                  Product Management
-
-                </h2>
-
-                <p className="text-red-500 mt-4 leading-relaxed">
-
-                  Edit pricing, update inventory and manage your catalog.
-
-                </p>
-
-              </div>
-
-            </div>
-
-          </Link>
-
-          {/* Coupon Management */}
-<Link
-  href="/admin/coupons"
-  className="
-  group
-  bg-zinc-900
-  border
-  border-zinc-800
-  rounded-3xl
-  p-8
-  hover:border-white
-  hover:-translate-y-2
-  transition-all
-  duration-300
-  "
->
-
-  <div className="space-y-6">
-
-    <div
-      className="
-      w-16
-      h-16
-      rounded-2xl
-      bg-red-500
-      text-white
-      hover:bg-red-600
-      flex
-      items-center
-      justify-center
-      text-3xl
-      font-bold
-      "
-    >
-
-      🎟
-
-    </div>
-
-    <div>
-
-      <h2 className="text-3xl font-bold">
-
-        Coupon Management
-
-      </h2>
-
-      <p
-        className="
-        text-red-500
-        mt-4
-        leading-relaxed
-        "
-      >
-
-        Create, enable, disable and
-        monitor coupon usage across
-        your store.
-
-      </p>
-
-    </div>
-
-  </div>
-
-</Link>
-{/* Store Settings */}
-<Link
-  href="/admin/settings"
-  className="
-  group
-  bg-zinc-900
-  border
-  border-zinc-800
-  rounded-3xl
-  p-8
-  hover:border-white
-  hover:-translate-y-2
-  transition-all
-  duration-300
-  "
->
-
-  <div className="space-y-6">
-
-    <div
-      className="
-      w-16
-      h-16
-      rounded-2xl
-      bg-red-500
-      text-white
-      hover:bg-red-600
-      flex
-      items-center
-      justify-center
-      text-3xl
-      font-bold
-      "
-    >
-
-      ⚙️
-
-    </div>
-
-    <div>
-
-      <h2 className="text-3xl font-bold">
-
-        Store Settings
-
-      </h2>
-
-      <p
-        className="
-        text-red-500
-        mt-4
-        leading-relaxed
-        "
-      >
-
-        Manage shipping charges and
-        store configuration.
-
-      </p>
-
-    </div>
-
-  </div>
-
-</Link>
         </div>
 
       </div>
 
-    </main>
+      {/* Dashboard Cards */}
 
-  )
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+        {/* Add Product */}
+
+        <Link
+          href="/admin/add-product"
+          className="
+          group
+          bg-white
+          border
+          border-gray-200
+          shadow-sm
+          rounded-3xl
+          p-8
+          hover:border-[#D4AF37]
+          hover:shadow-md
+          hover:-translate-y-1
+          transition-all
+          duration-300
+          "
+        >
+
+          <div className="space-y-6">
+
+            <div
+              className="
+              w-16
+              h-16
+              rounded-2xl
+              bg-[#D4AF37]
+              text-black
+              flex
+              items-center
+              justify-center
+              text-3xl
+              font-bold
+              "
+            >
+
+              +
+
+            </div>
+
+            <div>
+
+              <h2 className="text-3xl font-bold">
+
+                Add Product
+
+              </h2>
+
+              <p className="text-gray-500 mt-4 leading-relaxed">
+
+                Create new products with image uploads and stock management.
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </Link>
+
+        {/* Orders */}
+
+        <Link
+          href="/admin/orders"
+          className="
+          group
+          bg-white
+          border
+          border-gray-200
+          shadow-sm
+          rounded-3xl
+          p-8
+          hover:border-[#D4AF37]
+          hover:shadow-md
+          hover:-translate-y-1
+          transition-all
+          duration-300
+          "
+        >
+
+          <div className="space-y-6">
+
+            <div
+              className="
+              w-16
+              h-16
+              rounded-2xl
+              bg-[#D4AF37]
+              text-black
+              flex
+              items-center
+              justify-center
+              text-3xl
+              font-bold
+              "
+            >
+
+              📦
+
+            </div>
+
+            <div>
+
+              <h2 className="text-3xl font-bold">
+
+                Orders
+
+              </h2>
+
+              <p className="text-gray-500 mt-4 leading-relaxed">
+
+                Track customer purchases and manage deliveries.
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </Link>
+
+        {/* Products */}
+
+        <Link
+          href="/admin/products"
+          className="
+          group
+          bg-white
+          border
+          border-gray-200
+          shadow-sm
+          rounded-3xl
+          p-8
+          hover:border-[#D4AF37]
+          hover:shadow-md
+          hover:-translate-y-1
+          transition-all
+          duration-300
+          "
+        >
+
+          <div className="space-y-6">
+
+            <div
+              className="
+              w-16
+              h-16
+              rounded-2xl
+              bg-[#D4AF37]
+              text-black
+              flex
+              items-center
+              justify-center
+              text-3xl
+              font-bold
+              "
+            >
+
+              🛠
+
+            </div>
+
+            <div>
+
+              <h2 className="text-3xl font-bold">
+
+                Product Management
+
+              </h2>
+
+              <p className="text-gray-500 mt-4 leading-relaxed">
+
+                Edit pricing, inventory and catalog details.
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </Link>
+{/* Brand Management */}
+<Link
+  href="/admin/brands"
+  className="
+  group
+  bg-white
+  border
+  border-gray-200
+  rounded-3xl
+  p-8
+  hover:border-[#D4AF37]
+  hover:-translate-y-2
+  hover:shadow-md
+  transition-all
+  duration-300
+  "
+>
+
+  <div className="space-y-6">
+
+    <div
+      className="
+      w-16
+      h-16
+      rounded-2xl
+      bg-[#D4AF37]
+      text-black
+      flex
+      items-center
+      justify-center
+      text-3xl
+      font-bold
+      "
+    >
+
+      🏷️
+
+    </div>
+
+    <div>
+
+      <h2 className="text-3xl font-bold">
+
+        Brand Management
+
+      </h2>
+
+      <p
+        className="
+        text-gray-500
+        mt-4
+        leading-relaxed
+        "
+      >
+
+        Create, edit and manage
+        Hot Wheels, Mini GT,
+        Inno64 and other brands.
+
+      </p>
+
+    </div>
+
+  </div>
+
+</Link>
+        {/* Coupons */}
+
+        <Link
+          href="/admin/coupons"
+          className="
+          group
+          bg-white
+          border
+          border-gray-200
+          shadow-sm
+          rounded-3xl
+          p-8
+          hover:border-[#D4AF37]
+          hover:shadow-md
+          hover:-translate-y-1
+          transition-all
+          duration-300
+          "
+        >
+
+          <div className="space-y-6">
+
+            <div
+              className="
+              w-16
+              h-16
+              rounded-2xl
+              bg-[#D4AF37]
+              text-black
+              flex
+              items-center
+              justify-center
+              text-3xl
+              font-bold
+              "
+            >
+
+              🎟
+
+            </div>
+
+            <div>
+
+              <h2 className="text-3xl font-bold">
+
+                Coupon Management
+
+                </h2>
+
+              <p className="text-gray-500 mt-4 leading-relaxed">
+
+                Create and manage discount campaigns.
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </Link>
+
+        {/* Settings */}
+
+        <Link
+          href="/admin/settings"
+          className="
+          group
+          bg-white
+          border
+          border-gray-200
+          shadow-sm
+          rounded-3xl
+          p-8
+          hover:border-[#D4AF37]
+          hover:shadow-md
+          hover:-translate-y-1
+          transition-all
+          duration-300
+          "
+        >
+
+          <div className="space-y-6">
+
+            <div
+              className="
+              w-16
+              h-16
+              rounded-2xl
+              bg-[#D4AF37]
+              text-black
+              flex
+              items-center
+              justify-center
+              text-3xl
+              font-bold
+              "
+            >
+
+              ⚙️
+
+            </div>
+
+            <div>
+
+              <h2 className="text-3xl font-bold">
+
+                Store Settings
+
+              </h2>
+
+              <p className="text-gray-500 mt-4 leading-relaxed">
+
+                Configure shipping, pickup and store settings.
+
+              </p>
+
+            </div>
+
+          </div>
+
+        </Link>
+
+      </div>
+
+    </div>
+
+  </main>
+
+)
 
 }

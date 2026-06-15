@@ -27,7 +27,7 @@ const bebas = Bebas_Neue({
 export const metadata: Metadata = {
 
   title:
-    "Diecast Protectors | Premium Hot Wheels Protectors & Diecast Cars",
+    "Diecast Universe",
 
   description:
     "Shop premium Hot Wheels protectors, acrylic cases and collectible diecast cars for passionate collectors.",
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   openGraph: {
 
     title:
-      "Diecast Protectors and Cars",
+      "Diecast Universe",
 
     description:
       "Premium diecast cars and Hot Wheels protectors.",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
       "https://diecastprotectors.in",
 
     siteName:
-      "Diecast Protectors And Cars",
+      "Diecast Universe",
 
     locale:
       "en_IN",

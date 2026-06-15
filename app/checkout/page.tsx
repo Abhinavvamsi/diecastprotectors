@@ -416,14 +416,16 @@ async function applyCoupon() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
 
           <div>
-
+<p className="text-[#D4AF37] uppercase tracking-widest text-sm mb-3">
+  Diecast Universe
+</p>
             <h1 className="text-4xl md:text-5xl font-bold">
 
               Checkout
 
             </h1>
 
-            <p className="text-red-500 mt-4">
+            <p className="text-[#D4AF37] mt-4">
 
               Complete your order securely.
 
@@ -434,9 +436,15 @@ async function applyCoupon() {
           <Link href="/cart">
 
             <Button
-              variant="outline"
-              className="rounded-xl"
-            >
+  variant="outline"
+  className="
+  rounded-xl
+  border-[#D4AF37]
+  text-[#D4AF37]
+  hover:bg-[#D4AF37]
+  hover:text-black
+  "
+>
 
               Back to Cart
 
@@ -446,384 +454,492 @@ async function applyCoupon() {
 
         </div>
 
+
         <div className="grid lg:grid-cols-2 gap-12">
-
           {/* LEFT SIDE */}
-          <div>
+<div>
 
-            <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800">
+         <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
 
-              <h2 className="text-2xl font-bold mb-8">
+  <h2 className="text-2xl font-bold text-black mb-8">
+    Shipping Details
+  </h2>
 
-                Shipping Details
+  <div className="space-y-5">
 
-              </h2>
+    {/* Row 1 */}
+    <div className="grid md:grid-cols-2 gap-4">
 
-              <div className="space-y-6">
+      <input
+        type="text"
+        placeholder="Full Name"
+        value={customer}
+        onChange={(e) => setCustomer(e.target.value)}
+        className="
+        w-full
+        h-16
+        rounded-xl
+        bg-white
+        text-black
+        placeholder:text-gray-400
+        border
+        border-gray-300
+        px-5
+        outline-none
+        focus:border-[#D4AF37]
+        transition
+        "
+      />
 
-                {/* Full Name */}
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={customer}
-                  onChange={(e) =>
-                    setCustomer(
-                      e.target.value
-                    )
-                  }
-                  className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4 outline-none focus:border-red-500 transition"
-                />
+      <input
+        type="tel"
+        inputMode="numeric"
+        maxLength={10}
+        placeholder="Phone Number"
+        value={phone}
+        onChange={(e) =>
+          setPhone(
+            e.target.value.replace(/\D/g, "")
+          )
+        }
+        className="
+        w-full
+        h-16
+        rounded-xl
+        bg-white
+        text-black
+        placeholder:text-gray-400
+        border
+        border-gray-300
+        px-5
+        outline-none
+        focus:border-[#D4AF37]
+        transition
+        "
+      />
 
-                {/* Email */}
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) =>
-                    setEmail(
-                      e.target.value
-                    )
-                  }
-                  className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4 outline-none focus:border-red-500 transition"
-                />
+    </div>
 
-                {/* Phone */}
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={10}
-                  placeholder="Phone Number"
-                  value={phone}
-                  onChange={(e) =>
-                    setPhone(
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4 outline-none focus:border-red-500 transition"
-                />
-
-                {/* Address */}
-               {/* Address */}
-<div className="relative">
-
-  <textarea
-    placeholder="Start typing your address..."
-    value={address}
-    onChange={(e) =>
-      searchAddress(
-        e.target.value
-      )
-    }
-    className="
-    w-full
-    rounded-xl
-    bg-black
-    border
-    border-zinc-800
-    px-4
-    py-4
-    outline-none
-    focus:border-red-500
-    transition
-    min-h-[120px]
-    "
-  />
-
-  {suggestions.length > 0 && (
-
-    <div
+    {/* Row 2 */}
+    <input
+      type="email"
+      placeholder="Email Address"
+      value={email}
+      onChange={(e) =>
+        setEmail(e.target.value)
+      }
       className="
-      absolute
-      z-50
-      mt-2
       w-full
+      h-16
       rounded-xl
+      bg-white
+      text-black
+      placeholder:text-gray-400
       border
-      border-zinc-800
-      bg-zinc-900
-      max-h-60
-      overflow-y-auto
-      shadow-xl
+      border-gray-300
+      px-5
+      outline-none
+      focus:border-[#D4AF37]
+      transition
       "
-    >
+    />
 
-      {suggestions.map(
-        (item, index) => (
+    {/* Address */}
+    <div className="relative">
 
-          <button
-            key={index}
-            type="button"
-            onClick={() => {
+      <textarea
+        placeholder="Start typing your address..."
+        value={address}
+        onChange={(e) =>
+          searchAddress(
+            e.target.value
+          )
+        }
+        className="
+        w-full
+        min-h-[140px]
+        rounded-xl
+        bg-white
+        text-black
+        placeholder:text-gray-400
+        border
+        border-gray-300
+        px-5
+        py-4
+        outline-none
+        focus:border-[#D4AF37]
+        transition
+        "
+      />
 
-              setAddress(
-                item.properties.formatted
-              )
+      {suggestions.length > 0 && (
 
-              setCity(
-                item.properties.city ||
-                item.properties.county ||
-                ""
-              )
+        <div
+          className="
+          absolute
+          z-50
+          mt-2
+          w-full
+          bg-white
+          border
+          border-gray-200
+          rounded-xl
+          shadow-xl
+          overflow-hidden
+          "
+        >
 
-              setPincode(
-                item.properties.postcode ||
-                ""
-              )
+          {suggestions.map(
+            (item, index) => (
 
-              setSuggestions([])
+            <button
+              key={index}
+              type="button"
+              onClick={() => {
 
-            }}
-            className="
-            w-full
-            text-left
-            px-4
-            py-3
-            hover:bg-zinc-800
-            transition
-            "
-          >
+                setAddress(
+                  item.properties.formatted
+                )
 
-            {item.properties.formatted}
+                setCity(
+                  item.properties.city ||
+                  item.properties.county ||
+                  ""
+                )
 
-          </button>
+                setPincode(
+                  item.properties.postcode ||
+                  ""
+                )
 
-        )
+                setSuggestions([])
+
+              }}
+              className="
+              w-full
+              text-left
+              px-4
+              py-3
+              text-black
+              hover:bg-gray-100
+              transition
+              "
+            >
+
+              {item.properties.formatted}
+
+            </button>
+
+          ))}
+
+        </div>
+
       )}
 
     </div>
 
-  )}
+    {/* Row 3 */}
+    <div className="grid md:grid-cols-2 gap-4">
+
+      <input
+        type="text"
+        placeholder="City"
+        value={city}
+        onChange={(e) =>
+          setCity(
+            e.target.value
+          )
+        }
+        className="
+        w-full
+        h-16
+        rounded-xl
+        bg-white
+        text-black
+        placeholder:text-gray-400
+        border
+        border-gray-300
+        px-5
+        outline-none
+        focus:border-[#D4AF37]
+        transition
+        "
+      />
+
+      <input
+        type="tel"
+        inputMode="numeric"
+        maxLength={6}
+        placeholder="Pincode"
+        value={pincode}
+        onChange={(e) =>
+          setPincode(
+            e.target.value.replace(/\D/g, "")
+          )
+        }
+        className="
+        w-full
+        h-16
+        rounded-xl
+        bg-white
+        text-black
+        placeholder:text-gray-400
+        border
+        border-gray-300
+        px-5
+        outline-none
+        focus:border-[#D4AF37]
+        transition
+        "
+      />
+
+    </div>
+
+  </div>
 
 </div>
+</div>
 
-                <div className="grid grid-cols-2 gap-4">
 
-                  {/* City */}
-                  <input
-                    type="text"
-                    placeholder="City"
-                    value={city}
-                    onChange={(e) =>
-                      setCity(
-                        e.target.value
-                      )
-                    }
-                    className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4 outline-none focus:border-red-500 transition"
-                  />
 
-                  {/* Pincode */}
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    maxLength={6}
-                    placeholder="Pincode"
-                    value={pincode}
-                    onChange={(e) =>
-                      setPincode(
-                        e.target.value.replace(/\D/g, "")
-                      )
-                    }
-                    className="w-full h-14 rounded-xl bg-black border border-zinc-800 px-4 outline-none focus:border-red-500 transition"
-                  />
 
-                </div>
+          {/* RIGHT SIDE */}
+<div>
 
-              </div>
+  <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm sticky top-24">
+
+    <h2 className="text-2xl font-bold text-black mb-8">
+      Order Summary
+    </h2>
+
+    <div className="space-y-6">
+
+      {cart.map((item) => (
+
+        <div
+          key={item.id}
+          className="flex items-center gap-4"
+        >
+
+          {/* Product Image */}
+          <div
+            className="
+            relative
+            w-20
+            h-20
+            rounded-xl
+            overflow-hidden
+            bg-gray-100
+            border
+            border-gray-200
+            "
+          >
+
+            <Image
+              src={item.image}
+              alt={item.name}
+              fill
+              className="object-contain"
+            />
+
+          </div>
+
+          {/* Product Info */}
+          <div className="flex-1">
+
+            <h3 className="font-semibold text-black">
+
+              {item.name}
+
+            </h3>
+
+            <p className="text-[#D4AF37] text-sm font-medium">
+
+              Premium Diecast Collectible
+
+            </p>
+
+            {/* Quantity Controls */}
+            <div className="flex items-center gap-2 mt-3">
+
+              <button
+  onClick={() =>
+    decreaseQuantity(
+      item.id
+    )
+  }
+  className="
+  w-8
+  h-8
+  rounded-lg
+  border
+  border-[#D4AF37]
+  text-black
+  flex
+  items-center
+  justify-center
+  hover:bg-[#D4AF37]
+  hover:text-black
+  transition
+  "
+>
+
+  <Minus
+    size={14}
+    strokeWidth={3}
+    className="text-black"
+  />
+
+</button>
+
+              <span
+                className="
+                w-6
+                text-center
+                font-semibold
+                text-black
+                "
+              >
+
+                {item.quantity}
+
+              </span>
+
+              <button
+  disabled={
+    item.quantity >=
+    item.stock
+  }
+  onClick={() =>
+    increaseQuantity(
+      item.id
+    )
+  }
+  className="
+  w-8
+  h-8
+  rounded-lg
+  border
+  border-[#D4AF37]
+  text-black
+  flex
+  items-center
+  justify-center
+  hover:bg-[#D4AF37]
+  hover:text-black
+  transition
+  disabled:opacity-40
+  "
+>
+
+  <Plus
+    size={14}
+    strokeWidth={3}
+    className="text-black"
+  />
+
+</button>
+
+              <button
+                onClick={() =>
+                  removeFromCart(
+                    item.id
+                  )
+                }
+                className="
+                ml-3
+                text-[#D4AF37]
+                hover:text-[#B8941F]
+                transition
+                "
+              >
+
+                <Trash2 size={16} />
+
+              </button>
 
             </div>
 
           </div>
 
-          {/* RIGHT SIDE */}
-          <div>
+          {/* Price */}
+          <div className="text-right">
 
-            <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800 sticky top-24">
+            <p
+              className="
+              font-bold
+              text-black
+              text-lg
+              "
+            >
 
-              <h2 className="text-2xl font-bold mb-8">
+              ₹{
+                (
+                  item.quantityPricing
+                    ?.filter(
+                      (tier) =>
+                        item.quantity >=
+                        Number(
+                          tier.quantity
+                        )
+                    )
+                    .sort(
+                      (a, b) =>
+                        Number(
+                          b.quantity
+                        ) -
+                        Number(
+                          a.quantity
+                        )
+                    )[0]?.price ||
+                  item.originalPrice
+                )
+              }
 
-                Order Summary
+            </p>
 
-              </h2>
+          </div>
 
-              <div className="space-y-6">
+        </div>
 
-                {cart.map((item) => (
+      ))}
 
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-4"
-                  >
+    </div>
 
-                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-black">
+    {/* Empty Cart */}
+    {cart.length === 0 && (
 
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-contain"
-                      />
+      <div
+        className="
+        mt-6
+        p-4
+        rounded-xl
+        border
+        border-amber-300
+        bg-amber-50
+        text-amber-700
+        "
+      >
 
-                    </div>
+        Your cart is empty.
+        Add at least one product before checkout.
 
-                   <div className="flex-1">
+      </div>
 
-  <h3 className="font-semibold">
+    )}
 
-    {item.name}
 
-  </h3>
-
-  <p className="text-red-500 text-sm">
-
-    Premium Hot Wheels Protector
-
-  </p>
-
-  <div className="flex items-center gap-2 mt-3">
-
-    <button
-      onClick={() =>
-        decreaseQuantity(
-          item.id
-        )
-      }
-      className="
-      w-8
-      h-8
-      rounded-lg
-      border
-      border-zinc-700
-      flex
-      items-center
-      justify-center
-      "
-    >
-
-      <Minus size={14} />
-
-    </button>
-
-    <span className="w-6 text-center">
-
-      {item.quantity}
-
-    </span>
-
-    <button
-      disabled={
-        item.quantity >=
-        item.stock
-      }
-      onClick={() =>
-        increaseQuantity(
-          item.id
-        )
-      }
-      className="
-      w-8
-      h-8
-      rounded-lg
-      border
-      border-zinc-700
-      flex
-      items-center
-      justify-center
-      disabled:opacity-40
-      "
-    >
-
-      <Plus size={14} />
-
-    </button>
-
-    <button
-      onClick={() =>
-        removeFromCart(
-          item.id
-        )
-      }
-      className="
-      ml-3
-      text-red-500
-      "
-    >
-
-      <Trash2 size={16} />
-
-    </button>
-
-  </div>
-
-</div>
-
-<div className="text-right">
-
-  <p className="font-bold">
-
-    ₹{
-      (
-        item.quantityPricing
-          ?.filter(
-            (tier) =>
-              item.quantity >=
-              Number(
-                tier.quantity
-              )
-          )
-          .sort(
-            (a, b) =>
-              Number(
-                b.quantity
-              ) -
-              Number(
-                a.quantity
-              )
-          )[0]?.price ||
-        item.originalPrice
-      )
-    }
-
-  </p>
-
-</div>
-
-                  </div>
-                  
-
-                ))}
-
-              </div>
-{cart.length === 0 && (
-
-  <div
-    className="
-    p-4
-    rounded-xl
-    border
-    border-red-500/30
-    bg-red-500/10
-    text-red-400
-    mb-6
-    "
-  >
-
-    Your cart is empty.
-    Add at least one product
-    before checkout.
-
-  </div>
-
-)}
 <div className="mb-8">
 
-  <p className="mb-3 font-medium">
+  <p className="mb-3 font-semibold text-black">
 
     Delivery Method
 
   </p>
 
-  <div className="flex gap-3">
+  <div className="flex flex-wrap gap-3">
 
+    {/* Shipping */}
     <button
       type="button"
       onClick={() =>
@@ -832,14 +948,18 @@ async function applyCoupon() {
         )
       }
       className={`
-      px-4
-      py-2
+      px-5
+      py-3
       rounded-xl
       border
+      font-medium
+      transition-all
+      duration-300
+
       ${
         deliveryMethod === "shipping"
-          ? "bg-red-500 border-red-500 text-white"
-          : "border-zinc-700"
+          ? "bg-[#D4AF37] border-[#D4AF37] text-black shadow-md"
+          : "bg-white border-gray-300 text-black hover:border-[#D4AF37]"
       }
       `}
     >
@@ -848,6 +968,7 @@ async function applyCoupon() {
 
     </button>
 
+    {/* Pickup */}
     {pickupEnabled && (
 
       <button
@@ -858,14 +979,18 @@ async function applyCoupon() {
           )
         }
         className={`
-        px-4
-        py-2
+        px-5
+        py-3
         rounded-xl
         border
+        font-medium
+        transition-all
+        duration-300
+
         ${
           deliveryMethod === "pickup"
-            ? "bg-green-500 border-green-500 text-white"
-            : "border-zinc-700"
+            ? "bg-green-500 border-green-500 text-white shadow-md"
+            : "bg-white border-gray-300 text-black hover:border-green-500"
         }
         `}
       >
@@ -881,7 +1006,7 @@ async function applyCoupon() {
 </div>
 <div className="mt-8">
 
-  <p className="mb-3 font-medium">
+  <p className="mb-3 font-semibold text-black">
 
     Coupon Code
 
@@ -894,37 +1019,51 @@ async function applyCoupon() {
       placeholder="WELCOME10"
       value={couponCode}
       onChange={(e) =>
-
-  setCouponCode(
-    e.target.value
-      .toUpperCase()
-  )
-
-}
+        setCouponCode(
+          e.target.value.toUpperCase()
+        )
+      }
       className="
       flex-1
-      h-12
+      h-14
       rounded-xl
-      bg-black
+      bg-white
+      text-black
+      placeholder:text-gray-400
       border
-      border-zinc-800
-      px-4
+      border-gray-300
+      px-5
       outline-none
-      focus:border-red-500
+      focus:border-[#D4AF37]
+      transition
       "
     />
 
     <Button
-  type="button"
-  onClick={applyCoupon}
-  disabled={
-    couponLoading ||
-    cart.length === 0
-  }
->
+      type="button"
+      onClick={applyCoupon}
+      disabled={
+        couponLoading ||
+        cart.length === 0
+      }
+      className="
+      h-14
+      px-6
+      rounded-xl
+      bg-[#D4AF37]
+      text-black
+      font-semibold
+      hover:bg-[#B8941F]
+      hover:shadow-lg
+      hover:shadow-[#D4AF37]/20
+      transition-all
+      duration-300
+      disabled:opacity-50
+      "
+    >
 
       {couponLoading
-        ? "..."
+        ? "Applying..."
         : "Apply"}
 
     </Button>
@@ -932,99 +1071,113 @@ async function applyCoupon() {
   </div>
 
 </div>
-              {/* Totals */}
-              <div className="border-t border-zinc-800 mt-8 pt-8 space-y-4">
+             {/* Totals */}
+<div className="border-t border-gray-200 mt-8 pt-8 space-y-4">
 
-                <div className="flex items-center justify-between text-zinc-400">
+  {/* Subtotal */}
+  <div className="flex items-center justify-between text-gray-600">
 
-                  <p>Subtotal</p>
+    <p>Subtotal</p>
 
-                  <p>₹{total}</p>
-
-                </div>
-                <div className="flex items-center justify-between text-green-500">
-
-  <p>Discount</p>
-
-  <p>
-
-    -₹{discount}
-
-  </p>
-
-</div>
-{discount > 0 && (
-
-  <div
-    className="
-    bg-green-500/10
-    border
-    border-green-500/30
-    rounded-xl
-    p-3
-    text-green-400
-    text-sm
-    "
-  >
-
-    🎉 You Saved ₹{discount}
+    <p className="font-medium">
+      ₹{total}
+    </p>
 
   </div>
 
-)}
-                <div className="flex items-center justify-between text-zinc-400">
+  {/* Discount */}
+  <div className="flex items-center justify-between text-green-600">
 
-                  <p>Shipping</p>
+    <p>Discount</p>
 
-                 {deliveryMethod === "pickup" ? (
+    <p className="font-medium">
+      -₹{discount}
+    </p>
 
-  <p className="text-green-500">
-    FREE
-  </p>
+  </div>
 
-) : shipping === null ? (
+  {/* Saved Banner */}
+  {discount > 0 && (
 
-  <p>Loading...</p>
+    <div
+      className="
+      bg-green-50
+      border
+      border-green-200
+      rounded-xl
+      p-3
+      text-green-700
+      text-sm
+      "
+    >
 
-) : shipping > 0 ? (
+      🎉 You Saved ₹{discount}
 
-  <p>₹{shipping}</p>
+    </div>
 
-) : (
+  )}
 
-  <p className="text-yellow-500">
-    Actual Charges
-  </p>
+  {/* Shipping */}
+  <div className="flex items-center justify-between text-gray-600">
 
-)}
+    <p>Shipping</p>
 
-                </div>
+    {deliveryMethod === "pickup" ? (
 
-                <div className="flex items-center justify-between text-2xl font-bold pt-4">
+      <p className="text-green-600 font-medium">
+        FREE
+      </p>
 
-                  <p>Total</p>
+    ) : shipping === null ? (
 
-                  <p>
+      <p>Loading...</p>
 
- ₹{
-  Math.max(
-    0,
-    total -
-discount +
-(
-  deliveryMethod === "pickup"
-    ? 0
-    : (shipping || 0)
-)
-  )
-}
+    ) : shipping > 0 ? (
 
-</p>
+      <p className="font-medium">
+        ₹{shipping}
+      </p>
 
-                </div>
+    ) : (
 
-              </div>
-                {shipping === 0 && (
+      <p className="text-[#D4AF37] font-medium">
+        Actual Charges
+      </p>
+
+    )}
+
+  </div>
+
+  {/* Total */}
+  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+
+    <p className="text-xl font-semibold text-black">
+      Total
+    </p>
+
+    <p className="text-3xl font-bold text-[#D4AF37]">
+
+      ₹{
+        Math.max(
+          0,
+          total -
+          discount +
+          (
+            deliveryMethod === "pickup"
+              ? 0
+              : (shipping || 0)
+          )
+        )
+      }
+
+    </p>
+
+  </div>
+
+</div>
+
+{/* Shipping Message */}
+{shipping === 0 && (
 
   <div
     className="
@@ -1032,12 +1185,12 @@ discount +
     p-4
     rounded-xl
     border
-    border-yellow-500/30
-    bg-yellow-500/10
+    border-[#D4AF37]/30
+    bg-[#D4AF37]/10
     "
   >
 
-    <p className="text-yellow-400 text-sm">
+    <p className="text-[#B8941F] text-sm font-medium">
 
       {shippingMessage}
 
@@ -1056,21 +1209,24 @@ discount +
   }
   
   className="
-  w-full
-  h-14
-  rounded-xl
-  text-lg
-  mt-10
-  font-bold
-  transition-all
-  duration-300
-  hover:scale-[1.02]
-  hover:shadow-lg
-  hover:shadow-red-500/30
-  active:scale-95
-  disabled:opacity-50
-  disabled:cursor-not-allowed
-  "
+bg-black
+h-14
+rounded-xl
+text-lg
+mt-10
+font-bold
+bg-[#D4AF37]
+text-black
+transition-all
+duration-300
+hover:bg-[#B8941F]
+hover:scale-[1.02]
+hover:shadow-lg
+hover:shadow-[#D4AF37]/30
+active:scale-95
+disabled:opacity-50
+disabled:cursor-not-allowed
+"
 
                 onClick={async () => {
 
@@ -1252,11 +1408,8 @@ discount +
                       currency:
                         order.currency,
 
-                      name:
-                        "HW Shield",
-
-                      description:
-                        "Hot Wheels Protector Purchase",
+                      name: "Diecast Universe",
+description: "Premium Diecast Collectibles",
 
                       order_id:
                         order.id,
@@ -1371,9 +1524,8 @@ paymentId:
                       },
 
                       theme: {
-                        color:
-                          "#000000",
-                      },
+  color: "#D4AF37",
+},
 
                     }
                                         const stockResponse =
@@ -1501,7 +1653,9 @@ if (
   mt-4
   text-center
   text-xs
-  text-zinc-500
+  border-[#D4AF37]/30
+bg-[#D4AF37]/10
+text-[#D4AF37]
   "
 >
   🔒 Secure Payment Powered by Razorpay
@@ -1512,8 +1666,9 @@ if (
   p-6
   rounded-2xl
   border
-  border-green-500/30
-  bg-green-500/10
+  border-[#D4AF37]/30
+bg-[#D4AF37]/10
+text-[#D4AF37]
   text-center
   "
 >
@@ -1526,20 +1681,20 @@ if (
     "
   >
 
-    🎉 Join The diecast protectors Community
+    🎉 Join The Diecast Universe Community
 
   </h3>
 
   <p
     className="
-    text-zinc-300
+    text-gray-600
     mt-3
     "
   >
 
     Stay updated with:
     <br />
-    ✅ Protector Restocks
+    ✅ New Arrivals
     <br />
     ✅ New Product Launches
     <br />
@@ -1560,7 +1715,7 @@ if (
     py-3
     rounded-xl
     bg-green-500
-    text-white
+    text-black
     font-bold
     hover:bg-green-600
     "
@@ -1571,9 +1726,9 @@ if (
   </a>
 
 </div>
-<div className="mt-8">
+<div className="mt-10">
 
-  <h3 className="text-xl font-bold mb-4">
+  <h3 className="text-xl font-bold text-black mb-5">
 
     You May Also Like
 
@@ -1595,15 +1750,30 @@ if (
             items-center
             gap-4
             p-3
-            rounded-xl
+            rounded-2xl
+            bg-white
             border
-            border-zinc-800
-            hover:border-red-500
-            transition
+            border-gray-200
+            shadow-sm
+            hover:border-[#D4AF37]
+            hover:shadow-md
+            transition-all
+            duration-300
             "
           >
 
-            <div className="relative w-16 h-16">
+            <div
+              className="
+              relative
+              w-16
+              h-16
+              rounded-xl
+              overflow-hidden
+              bg-gray-100
+              border
+              border-gray-200
+              "
+            >
 
               <Image
                 src={product.images?.[0]}
@@ -1614,15 +1784,15 @@ if (
 
             </div>
 
-            <div>
+            <div className="flex-1">
 
-              <p className="font-medium">
+              <p className="font-medium text-black line-clamp-2">
 
                 {product.name}
 
               </p>
 
-              <p className="text-red-500">
+              <p className="text-[#D4AF37] font-semibold mt-1">
 
                 ₹{product.price}
 

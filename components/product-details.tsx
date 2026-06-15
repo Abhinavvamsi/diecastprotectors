@@ -51,7 +51,7 @@ const selectedPrice =
 
       <Navbar />
 
-      <main className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-32 md:pb-0">
+      <main className="min-h-screen bg-white text-black pb-32 md:pb-0">
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
 
@@ -61,7 +61,18 @@ const selectedPrice =
             <div>
 
               {/* Main Product Image */}
-              <div className="relative h-[400px] md:h-[700px] rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-900 group">
+              <div className="
+relative
+h-[400px]
+md:h-[700px]
+rounded-3xl
+overflow-hidden
+border
+border-gray-200
+bg-white
+shadow-sm
+group
+">
 
                 <Image
                   src={product.images[selectedImage]}
@@ -88,8 +99,8 @@ const selectedPrice =
                       }
                       className={`relative w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all duration-300 shrink-0 ${
                         selectedImage === index
-                          ? "border-white scale-105"
-                          : "border-zinc-800 hover:border-zinc-500"
+                         ? "border-[#D4AF37] scale-105"
+                          : "border-gray-200 hover:border-[#D4AF37]"
                       }`}
                     >
 
@@ -112,11 +123,25 @@ const selectedPrice =
             {/* RIGHT SIDE */}
             <div className="flex flex-col justify-center">
 
-              <p className="text-red-500 uppercase tracking-widest text-sm">
+             {product.brand?.logo && (
 
-                {product.category}
+  <img
+    src={product.brand.logo}
+    alt={product.brand.name}
+    className="
+      h-14
+      object-contain
+      mb-6
+    "
+  />
 
-              </p>
+)}
+
+<p className="text-[#D4AF37] uppercase tracking-widest text-sm font-semibold">
+
+  {product.category}
+
+</p>
 
               <h1 className="text-4xl md:text-6xl font-bold mt-4 leading-tight">
 
@@ -124,13 +149,13 @@ const selectedPrice =
 
               </h1>
 
-              <p className="text-4xl font-bold mt-6">
+              <p className="text-5xl font-bold mt-6 text-[#D4AF37]">
 
-                ₹{product.price}
+  ₹{selectedPrice}
 
-              </p>
+</p>
 
-              <p className="text-red-500 mt-8 leading-relaxed text-lg">
+              <p className="text-gray-600 mt-8 leading-relaxed text-lg">
 
                 {product.description}
 
@@ -232,7 +257,7 @@ const selectedPrice =
               {/* Quantity */}
               <div className="mt-10">
 
-                <p className="text-sm text-red-500 mb-4">
+                <p className="text-sm text-[#D4AF37] uppercase tracking-wide mb-4">
 
                   Quantity
 
@@ -304,8 +329,21 @@ const selectedPrice =
 
                 {/* Add To Cart */}
                 <Button
-                  disabled={product.stock === 0}
-                  className="px-8 py-6 text-lg rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
+  disabled={product.stock === 0}
+  className="
+  px-8
+  py-6
+  text-lg
+  rounded-xl
+  bg-[#D4AF37]
+  text-black
+  hover:bg-[#B8941F]
+  transition-all
+  duration-200
+  hover:scale-105
+  active:scale-95
+  disabled:opacity-50
+  "
                   onClick={() => {
 if (
   quantity > product.stock
@@ -360,7 +398,11 @@ if (
                 <Button
                   disabled={product.stock === 0}
                   variant="outline"
-                  className="px-8 py-6 text-lg rounded-xl bg-transparent border-red-500/40 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
+                  className="px-8 py-6 text-lg rounded-xl bg-white border-[#D4AF37] text-[#D4AF37]
+
+hover:bg-[#D4AF37]
+
+hover:text-black transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
                   onClick={() => {
 if (
   quantity > product.stock
@@ -428,8 +470,8 @@ if (
           md:hidden
           z-50
           border-t
-          border-zinc-800
-          bg-black/95
+          border-gray-200
+          bg-white/95
           backdrop-blur-xl
           px-4
           py-4
@@ -449,7 +491,7 @@ if (
 
             </p>
 
-            <h3 className="text-2xl font-bold text-white">
+            <h3 className="text-2xl font-bold text-black">
 
               ₹{product.price}
 
@@ -509,9 +551,9 @@ if (
             flex-1
             h-14
             rounded-2xl
-            bg-red-500
-            hover:bg-red-600
-            text-white
+            bg-[#D4AF37]
+            hover:bg-[#B8941F]
+            text-black
             font-bold
             text-lg
             transition-all

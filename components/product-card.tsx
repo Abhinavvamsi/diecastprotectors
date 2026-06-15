@@ -57,14 +57,15 @@ export default function ProductCard({
       <div
         className="
         group
-        bg-zinc-900
+        bg-white
         rounded-3xl
         overflow-hidden
         border
-        border-zinc-800
-        hover:border-red-500/40
-        hover:-translate-y-2
-        hover:shadow-[0_0_40px_rgba(239,68,68,0.12)]
+        border-gray-200
+        shadow-sm
+        hover:border-[#D4AF37]
+        hover:-translate-y-1
+        hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)]
         transition-all
         duration-500
         cursor-pointer
@@ -93,7 +94,7 @@ export default function ProductCard({
   inset-0
   z-10
   bg-gradient-to-t
-  from-black/70
+  from-[#111111]/50
   to-transparent
   opacity-0
   group-hover:opacity-100
@@ -114,8 +115,8 @@ z-20
 px-3
 py-1
 rounded-full
-bg-red-500
-text-white
+bg-[#D4AF37]
+text-black
 text-xs
 font-bold
 tracking-wider
@@ -167,8 +168,8 @@ z-20
 px-3
 py-1
 rounded-full
-bg-zinc-800
-text-white
+bg-gray-300
+text-black
 text-xs
 font-bold
 shadow-lg
@@ -186,13 +187,13 @@ shadow-lg
         {/* Product Info */}
         <div className="p-6">
 
-          <h3 className="text-2xl font-bold text-white">
+          <h3 className="text-2xl font-bold text-black">
 
             {name}
 
           </h3>
 
-          <p className="text-zinc-400 mt-3 leading-relaxed line-clamp-2">
+          <p className="text-gray-600 mt-3 leading-relaxed line-clamp-2">
 
             {description}
 
@@ -201,7 +202,7 @@ shadow-lg
           {/* Price */}
           <div className="flex items-center justify-between mt-8">
 
-            <p className="text-3xl font-bold text-white">
+            <p className="text-3xl font-bold text-black">
 
               ₹{price}
 
@@ -237,11 +238,12 @@ shadow-lg
               rounded-xl
               text-base
               font-semibold
-              bg-red-500
-              hover:bg-red-600
+              bg-[#D4AF37]
+text-black
+hover:bg-[#B8941F]
               hover:scale-105
               hover:shadow-lg
-              hover:shadow-red-500/20
+              hover:shadow-[#D4AF37]/20
               active:scale-95
               transition-all
               duration-300
@@ -302,24 +304,24 @@ shadow-lg
               variant="outline"
 
               className="
-              flex-1
-              h-12
-              rounded-xl
-              text-base
-              font-semibold
-              border-red-500/40
-              bg-transparent
-              hover:bg-white
-              hover:text-black
-              hover:scale-105
-              hover:shadow-lg
-              active:scale-95
-              transition-all
-              duration-300
-              disabled:opacity-50
-              disabled:cursor-not-allowed
-              "
-
+flex-1
+h-12
+rounded-xl
+text-base
+font-semibold
+text-[#D4AF37]
+border-[#D4AF37]
+bg-transparent
+hover:bg-[#D4AF37]
+hover:text-black
+hover:scale-105
+hover:shadow-lg
+active:scale-95
+transition-all
+duration-300
+disabled:opacity-50
+disabled:cursor-not-allowed
+"
               onClick={(e) => {
 
                 e.preventDefault()

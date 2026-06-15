@@ -102,7 +102,7 @@ export default function Navbar() {
 
   return (
 
-    <nav className="border-b border-zinc-900 sticky top-0 backdrop-blur-xl bg-black/80 z-50">
+    <nav className="border-b border-gray-200 sticky top-0 backdrop-blur-xl bg-white/90 z-50">
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 flex items-center justify-between">
 
@@ -122,37 +122,26 @@ export default function Navbar() {
 
           <div className="leading-none">
 
-            <p className="text-white text-xl font-bold tracking-wide">
+            <p className="text-black text-xl font-bold tracking-wide">
+  DIECAST UNIVERSE
+</p>
 
-              DIECAST
-
-            </p>
-
-            <p className="text-red-500 text-sm tracking-[0.3em]">
-
-              PROTECTORS AND CARS
-
-            </p>
+           <p className="text-[#D4AF37] text-sm tracking-[0.3em]">
+  DIECAST COLLECTIBLES
+</p>
 
           </div>
 
         </Link>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-6 text-zinc-300">
+        <div className="hidden md:flex items-center gap-6 text-gray-700">
 
-          <Link
-            href="/protectors"
-            className="hover:text-red-500 transition"
-          >
-
-            Protectors
-
-          </Link>
+         
 
           <Link
             href="/cars"
-            className="hover:text-red-500 transition"
+            className="hover:text-[#D4AF37] transition"
           >
 
             Diecast Cars
@@ -161,7 +150,7 @@ export default function Navbar() {
 
           <Link
             href="/track-order"
-            className="hover:text-red-500 transition"
+            className="hover:text-[#D4AF37] transition"
           >
 
             Track Order
@@ -170,7 +159,7 @@ export default function Navbar() {
 
           <Link
             href="/orders"
-            className="hover:text-red-500 transition"
+            className="hover:text-[#D4AF37] transition"
           >
 
             My Orders
@@ -180,7 +169,7 @@ export default function Navbar() {
           {/* Cart */}
           <Link
             href="/cart"
-            className="relative hover:text-red-500 transition"
+            className="relative hover:text-[#D4AF37] transition"
           >
 
             <div
@@ -207,8 +196,8 @@ export default function Navbar() {
                   h-5
                   px-1
                   rounded-full
-                  bg-red-500
-                  text-white
+                  bg-[#D4AF37]
+text-black
                   text-xs
                   font-bold
                   flex
@@ -231,7 +220,7 @@ export default function Navbar() {
 
             <Link
               href="/admin"
-              className="text-red-500 font-semibold"
+              className="text-[#D4AF37] font-semibold"
             >
 
               Admin
@@ -248,7 +237,7 @@ export default function Navbar() {
 
             <SignInButton>
 
-              <button className="hover:text-red-500 transition">
+              <button className="hover:text-[#D4AF37] transition">
 
                 Login
 
@@ -295,8 +284,8 @@ export default function Navbar() {
                   h-5
                   px-1
                   rounded-full
-                  bg-red-500
-                  text-white
+                  bg-[#D4AF37]
+text-black
                   text-xs
                   font-bold
                   flex
@@ -340,7 +329,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
 
-        <div className="md:hidden border-t border-zinc-800 bg-black px-6 py-6 space-y-6">
+        <div className="md:hidden border-t border-gray-200 bg-white px-6 py-6 space-y-6">
 
           <Link
             href="/protectors"
@@ -382,7 +371,7 @@ export default function Navbar() {
 
             <Link
               href="/admin"
-              className="block text-lg text-red-500"
+              className="block text-lg text-[#D4AF37]"
             >
 
               Admin
