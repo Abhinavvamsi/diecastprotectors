@@ -341,15 +341,7 @@ text-black
 
         <div className="md:hidden border-t border-gray-200 bg-white px-6 py-6 space-y-6">
 
-          <Link
-            href="/protectors"
-            className="block text-lg"
-          >
-
-            Protectors
-
-          </Link>
-
+        
           <Link
             href="/cars"
             className="block text-lg"
