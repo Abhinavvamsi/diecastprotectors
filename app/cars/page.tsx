@@ -229,8 +229,8 @@ export default function CarsPage() {
       once: true,
     }}
     transition={{
-      duration: 0.5,
-      delay: index * 0.08,
+      duration: 0.3,
+      delay: 0,
     }}
   >
 

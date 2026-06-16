@@ -599,8 +599,8 @@ export default function Home() {
   amount: 0.01,
 }}
     transition={{
-  duration: 0.35,
-  delay: index * 0.05,
+  duration: 0.3,
+  delay: 0,
 }}
   >
 
