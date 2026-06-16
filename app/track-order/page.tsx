@@ -3,7 +3,7 @@
 import { useState } from "react"
 
 import Navbar from "@/components/navbar"
-
+import { motion } from "framer-motion"
 import { toast } from "sonner"
 
 type Order = {
@@ -83,6 +83,20 @@ export default function TrackOrderPage() {
       <Navbar />
 
       <div className="max-w-3xl mx-auto px-6 py-16">
+        <div
+  className="
+  absolute
+  top-20
+  right-0
+  w-[400px]
+  h-[400px]
+  bg-[#D4AF37]/10
+  blur-[120px]
+  rounded-full
+  pointer-events-none
+  animate-[floatGlow_8s_ease-in-out_infinite]
+  "
+/>
 
         {/* Heading */}
         <div className="mb-12">
@@ -159,7 +173,30 @@ transition
         {/* Order Details */}
         {order && (
 
-          <div className="mt-10 bg-white border border-gray-200 shadow-sm rounded-3xl p-8">
+  <motion.div
+    initial={{
+      opacity: 0,
+      y: 30,
+      scale: 0.95,
+    }}
+    animate={{
+      opacity: 1,
+      y: 0,
+      scale: 1,
+    }}
+    transition={{
+      duration: 0.4,
+    }}
+    className="
+    mt-10
+    bg-white
+    border
+    border-gray-200
+    shadow-sm
+    rounded-3xl
+    p-8
+    "
+  >
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
 
@@ -248,8 +285,8 @@ transition
                     ].includes(
                       order.status
                     )
-                      ? "bg-green-500"
-                      : "bg-gray-300"
+                      ? "bg-green-500 animate-pulse"
+                      : "bg-zinc-700"
                   }`}
                 />
 
@@ -273,7 +310,7 @@ transition
                     ].includes(
                       order.status
                     )
-                      ? "bg-green-500"
+                      ? "bg-green-500 animate-pulse"
                       : "bg-zinc-700"
                   }`}
                 />
@@ -297,7 +334,7 @@ transition
                     ].includes(
                       order.status
                     )
-                      ? "bg-green-500"
+                      ? "bg-green-500 animate-pulse"
                       : "bg-zinc-700"
                   }`}
                 />
@@ -317,7 +354,7 @@ transition
                   className={`w-5 h-5 rounded-full ${
                     order.status ===
                     "Delivered"
-                      ? "bg-green-500"
+                      ? "bg-green-500 animate-pulse"
                       : "bg-zinc-700"
                   }`}
                 />
@@ -332,7 +369,7 @@ transition
 
             </div>
 
-          </div>
+          </motion.div>
 
         )}
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-
+import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
 import ProductCard from "@/components/product-card"
 
@@ -92,20 +92,27 @@ export default function CarsPage() {
 
         {/* Gold Glow */}
         <div
-          className="
-          absolute
-          top-0
-          right-0
-          w-[500px]
-          h-[500px]
-          bg-[#D4AF37]/10
-          blur-[120px]
-          rounded-full
-          pointer-events-none
-          "
-        />
+  className="
+  absolute
+  top-0
+  right-0
+  w-[500px]
+  h-[500px]
+  bg-[#D4AF37]/10
+  blur-[120px]
+  rounded-full
+  pointer-events-none
+  animate-[floatGlow_8s_ease-in-out_infinite]
+  "
+/>
 
-        <div className="relative z-10">
+        <div
+  className="
+  relative
+  z-10
+  animate-[fadeUp_0.8s_ease-out]
+  "
+>
 
           {/* Hero */}
           <div className="mb-14">
@@ -122,29 +129,60 @@ export default function CarsPage() {
             </p>
 
             <h1
-              className="
-              text-5xl
-              md:text-7xl
-              font-bold
-              mt-4
-              "
-            >
+  className="
+  text-5xl
+  md:text-7xl
+  font-bold
+  mt-4
+  animate-[slideInLeft_0.8s_ease-out]
+  "
+>
               Premium{" "}
               <span className="text-[#D4AF37]">
                 Diecast
               </span>{" "}
               Cars
             </h1>
+<div className="flex flex-wrap gap-4 mt-8">
 
-            <div
-              className="
-              w-24
-              h-1
-              bg-[#D4AF37]
-              rounded-full
-              mt-6
-              "
-            />
+  <div className="px-5 py-3 rounded-xl bg-[#D4AF37]/10">
+    <p className="text-2xl font-bold">
+      {products.length}+
+    </p>
+    <p className="text-sm text-gray-500">
+      Models
+    </p>
+  </div>
+
+  <div className="px-5 py-3 rounded-xl bg-[#D4AF37]/10">
+    <p className="text-2xl font-bold">
+      Premium
+    </p>
+    <p className="text-sm text-gray-500">
+      Quality
+    </p>
+  </div>
+
+  <div className="px-5 py-3 rounded-xl bg-[#D4AF37]/10">
+    <p className="text-2xl font-bold">
+      100%
+    </p>
+    <p className="text-sm text-gray-500">
+      Collectible
+    </p>
+  </div>
+
+</div>
+           <div
+  className="
+  w-24
+  h-1
+  bg-[#D4AF37]
+  rounded-full
+  mt-6
+  animate-pulse
+  "
+/>
 
             <p
               className="
@@ -175,22 +213,40 @@ export default function CarsPage() {
             "
           >
 
-            {products.map(
-              (product) => (
+            {products.map((product, index) => (
 
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  image={product.images?.[0]}
-                  description={product.description}
-                  stock={product.stock}
-                  badge={product.badge}
-                />
+  <motion.div
+    key={product.id}
+    initial={{
+      opacity: 0,
+      y: 40,
+    }}
+    whileInView={{
+      opacity: 1,
+      y: 0,
+    }}
+    viewport={{
+      once: true,
+    }}
+    transition={{
+      duration: 0.5,
+      delay: index * 0.08,
+    }}
+  >
 
-              )
-            )}
+    <ProductCard
+      id={product.id}
+      name={product.name}
+      price={product.price}
+      image={product.images?.[0]}
+      description={product.description}
+      stock={product.stock}
+      badge={product.badge}
+    />
+
+  </motion.div>
+
+))}
 
           </div>
 

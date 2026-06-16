@@ -242,19 +242,47 @@ text-amber-700
 
               <div
                 key={item.id}
-                className="flex flex-col md:flex-row md:items-center md:justify-between bg-white border border-gray-200 shadow-sm"
+                className="
+flex
+flex-col
+md:flex-row
+md:items-center
+md:justify-between
+bg-white
+border
+border-gray-200
+rounded-3xl
+p-6
+shadow-sm
+hover:border-[#D4AF37]
+hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)]
+transition-all
+duration-300
+"
               >
 
                 {/* LEFT */}
                 <div className="flex items-center gap-6">
 
-                  <div className="relative w-28 h-28 rounded-2xl overflow-hidden">
+                  <div
+  className="
+  relative
+  w-32
+  h-32
+  rounded-2xl
+  overflow-hidden
+  bg-gray-50
+  border
+  border-gray-100
+  flex-shrink-0
+  "
+>
 
                     <Image
                       src={item.image}
                       alt={item.name}
                       fill
-                      className="object-contain"
+                      className="object-contain p-2"
                     />
 
                   </div>
@@ -302,7 +330,7 @@ text-amber-700
 
 )}
 
-                    <p classNametext-gray-600=" mt-2">
+                    <p className="text-gray-600 mt-2">
 
                       Total:
                       {" "}
@@ -320,61 +348,90 @@ text-amber-700
                 <div className="flex items-center gap-4">
 
                   {/* Quantity Controls */}
-                  <div className="flex items-center bg-white border border-gray-300 rounded-xl overflow-hidden">
+                  <div
+  className="
+  flex
+  items-center
+  border
+  border-gray-200
+  rounded-2xl
+  overflow-hidden
+  "
+>
 
-                    <button
-                      onClick={() =>
-                        decreaseQuantity(
-                          item.id
-                        )
-                      }
-                      className="w-12 h-12 flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
+  <button
+    onClick={() =>
+      decreaseQuantity(item.id)
+    }
+    className="
+    w-14
+    h-14
+    flex
+    items-center
+    justify-center
+    hover:bg-gray-100
+    transition
+    "
+  >
+    <Minus size={18} />
+  </button>
 
-                      <Minus size={18} />
+  <div
+    className="
+    w-16
+    text-center
+    font-bold
+    text-lg
+    "
+  >
+    {item.quantity}
+  </div>
 
-                    </button>
+  <button
+    disabled={
+      item.quantity >= item.stock
+    }
+    onClick={() =>
+      increaseQuantity(item.id)
+    }
+    className="
+    w-14
+    h-14
+    flex
+    items-center
+    justify-center
+    hover:bg-gray-100
+    transition
+    disabled:opacity-40
+    "
+  >
+    <Plus size={18} />
+  </button>
 
-                    <div className="w-12 text-center font-bold">
-
-                      {item.quantity}
-
-                    </div>
-
-                    <button
-                      disabled={
-                        item.quantity >=
-                        item.stock
-                      }
-                      onClick={() =>
-                        increaseQuantity(
-                          item.id
-                        )
-                      }
-                      className="w-12 h-12 flex items-center justify-center hover:bg-gray-100 transition disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-
-                      <Plus size={18} />
-
-                    </button>
-
-                  </div>
+</div>
 
                   {/* Remove */}
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="w-12 h-12 rounded-xl"
-                    onClick={() =>
-                      removeFromCart(
-                        item.id
-                      )
-                    }
-                  >
-
-                    <Trash2 size={18} />
-
-                  </Button>
+                  <button
+  onClick={() =>
+    removeFromCart(item.id)
+  }
+  className="
+  w-14
+  h-14
+  rounded-2xl
+  bg-red-50
+  text-red-500
+  flex
+  items-center
+  justify-center
+  hover:bg-red-500
+  hover:text-white
+  transition-all
+  duration-300
+  "
+>
+  <Trash2 size={18} />
+</button>
 
                 </div>
 

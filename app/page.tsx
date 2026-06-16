@@ -1,4 +1,5 @@
 "use client"
+import { motion } from "framer-motion"
 
 import { useEffect, useState } from "react"
 
@@ -17,6 +18,7 @@ import Footer from "@/components/footer"
 import BrandsSection from "@/components/brands-section"
 
 import BrandMarquee from "@/components/brand-marquee"
+import PremiumLoader from "@/components/premium-loader"
 
 
 const bebas = Bebas_Neue({
@@ -574,43 +576,9 @@ export default function Home() {
         {/* Skeleton */}
         {loading && (
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+  <PremiumLoader />
 
-            {[...Array(6)].map((_, i) => (
-
-              <div
-                key={i}
-                className="
-                animate-pulse
-                rounded-3xl
-                overflow-hidden
-                border
-                border-gray-200
-                bg-white
-                "
-              >
-
-                <div className="h-72 bg-gray-100" />
-
-                <div className="p-6 space-y-4">
-
-                  <div className="h-6 bg-gray-100 rounded w-2/3" />
-
-                  <div className="h-4 bg-gray-100 rounded w-full" />
-
-                  <div className="h-4 bg-gray-100 rounded w-5/6" />
-
-                  <div className="h-10 bg-gray-100 rounded-xl mt-6" />
-
-                </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        )}
+)}
 
         {/* Empty */}
         {!loading &&
@@ -639,26 +607,44 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
-            {sortedProducts.map((product) => (
+           {sortedProducts.map((product, index) => (
 
-             <ProductCard
-  key={product.id}
-  id={product.id}
-  name={product.name}
-  price={product.price}
-  image={product.images?.[0]}
-  description={product.description}
-  stock={product.stock}
+  <motion.div
+    key={product.id}
+    initial={{
+      opacity: 0,
+      y: 40,
+    }}
+    whileInView={{
+      opacity: 1,
+      y: 0,
+    }}
+ viewport={{
+  once: true,
+  amount: 0.01,
+}}
+    transition={{
+  duration: 0.35,
+  delay: index * 0.05,
+}}
+  >
 
-  quantityPricing={
-    product.quantityPricing
-  }
+    <ProductCard
+      id={product.id}
+      name={product.name}
+      price={product.price}
+      image={product.images?.[0]}
+      description={product.description}
+      stock={product.stock}
+      quantityPricing={
+        product.quantityPricing
+      }
+      badge={product.badge}
+    />
 
-  badge={product.badge}
-/>
+  </motion.div>
 
-            ))}
-
+))}
           </div>
 
         )}

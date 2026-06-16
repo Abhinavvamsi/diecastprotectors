@@ -84,6 +84,7 @@ export default function ProductCard({
             group-hover:scale-110
             transition-transform
             duration-700
+            
             "
           />
 
@@ -233,23 +234,30 @@ shadow-lg
               disabled={stock === 0}
 
               className="
-              flex-1
-              h-12
-              rounded-xl
-              text-base
-              font-semibold
-              bg-[#D4AF37]
+px-8
+py-6
+text-lg
+rounded-xl
+
+border
+border-[#D4AF37]
+bg-white
 text-black
-hover:bg-[#B8941F]
-              hover:scale-105
-              hover:shadow-lg
-              hover:shadow-[#D4AF37]/20
-              active:scale-95
-              transition-all
-              duration-300
-              disabled:opacity-50
-              disabled:cursor-not-allowed
-              "
+font-semibold
+
+transition-all
+duration-300
+
+hover:bg-[#D4AF37]
+hover:text-black
+hover:scale-105
+hover:-translate-y-1
+hover:shadow-[0_10px_30px_rgba(212,175,55,0.25)]
+
+active:scale-95
+
+disabled:opacity-50
+"
 
               onClick={(e) => {
 
@@ -321,6 +329,17 @@ transition-all
 duration-300
 disabled:opacity-50
 disabled:cursor-not-allowed
+group
+
+hover:-translate-y-2
+
+hover:border-[#D4AF37]
+
+hover:shadow-[0_15px_40px_rgba(212,175,55,0.15)]
+
+transition-all
+
+duration-500
 "
               onClick={(e) => {
 
