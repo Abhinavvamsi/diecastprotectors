@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
-
+import Link from "next/link"
 import { useEffect, useState } from "react"
 
 import { Bebas_Neue } from "next/font/google"
@@ -283,62 +283,37 @@ export default function Home() {
 
       </p>
 
-      <div className="flex flex-col sm:flex-row gap-5 mt-12">
+      <div className="mt-12">
 
-        <a href="/protectors">
+  <Link href="/cars" prefetch>
 
-          <Button
-            className="
-            rounded-2xl
-            px-10
-            py-7
-            text-lg
-            bg-[#D4AF37]
-            hover:bg-[#B8941F]
-            hover:scale-105
-            active:scale-95
-            transition-all
-            duration-300
-            shadow-lg
-            shadow-[#D4AF37]/20
-            hover:shadow-[#D4AF37]/40
-            "
-          >
+    <Button
+      variant="outline"
+      className="
+      rounded-2xl
+      px-10
+      py-7
+      text-lg
+      bg-transparent
+      border-[#D4AF37]
+      text-black
+      hover:bg-[#D4AF37]
+      hover:text-black
+      hover:border-[#D4AF37]
+      hover:scale-105
+      active:scale-95
+      transition-all
+      duration-300
+      "
+    >
 
-            Shop Collection
+      Explore Diecast Cars
 
-          </Button>
+    </Button>
 
-        </a>
+  </Link>
 
-        <a href="/cars">
-
-          <Button
-            variant="outline"
-            className="
-            rounded-2xl
-            px-10
-            py-7
-            text-lg
-            bg-transparent
-            border-[#D4AF37]
-            hover:bg-transparent
-            hover:border-[#B8941F]
-            hover:scale-105
-            active:scale-95
-            transition-all
-            duration-300
-            "
-          >
-
-            Explore Diecast Cars
-
-          </Button>
-
-        </a>
-
-      </div>
-
+</div>
     </div>
 
     {/* RIGHT SIDE IMAGE */}
