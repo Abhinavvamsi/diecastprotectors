@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import { toast } from "sonner"
 
 export default function AdminProductsList({
   products,
@@ -13,7 +14,8 @@ export default function AdminProductsList({
 
   const [selectedBrand, setSelectedBrand] =
     useState("All")
-
+const [deletingId, setDeletingId] =
+  useState("")
   const filteredProducts =
     selectedBrand === "All"
       ? products
@@ -163,20 +165,55 @@ export default function AdminProductsList({
   Edit
 </a>
 
-                <button
+               <button
+  disabled={
+    deletingId === product.id
+  }
   onClick={async () => {
 
-    const response =
-      await fetch(
-        `/api/delete-product?id=${product.id}`,
-        {
-          method: "POST",
-        }
+    try {
+
+      setDeletingId(
+        product.id
       )
 
-    if (response.ok) {
+      const response =
+        await fetch(
+          `/api/delete-product?id=${product.id}`,
+          {
+            method: "POST",
+          }
+        )
 
-      window.location.reload()
+      if (!response.ok) {
+
+        toast.error(
+          "Failed to delete product"
+        )
+
+        setDeletingId("")
+
+        return
+
+      }
+
+      toast.success(
+        "Product deleted successfully"
+      )
+
+      setTimeout(() => {
+
+        window.location.reload()
+
+      }, 800)
+
+    } catch {
+
+      toast.error(
+        "Something went wrong"
+      )
+
+      setDeletingId("")
 
     }
 
@@ -191,10 +228,16 @@ export default function AdminProductsList({
   font-semibold
   hover:bg-red-500
   hover:text-white
-  transition
+  transition-all
+  duration-300
+  disabled:opacity-60
   "
 >
-  Delete
+
+  {deletingId === product.id
+    ? "Deleting..."
+    : "Delete"}
+
 </button>
               </div>
 
