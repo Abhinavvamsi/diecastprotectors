@@ -51,7 +51,7 @@ const selectedPrice =
 
       <Navbar />
 
-      <main className="min-h-screen bg-white text-black pb-32 md:pb-0">
+      <main className="min-h-screen bg-white text-black pt-24 pb-32 md:pb-0">
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
 
