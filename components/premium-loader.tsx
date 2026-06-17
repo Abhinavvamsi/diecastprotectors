@@ -67,14 +67,14 @@ export default function PremiumLoader() {
         "
       >
 
-        <div
-          className="
-          h-full
-          w-1/2
-          bg-[#D4AF37]
-          animate-pulse
-          "
-        />
+       <div
+  className="
+  h-full
+  w-1/2
+  bg-[#D4AF37]
+  animate-[loader_1.5s_ease-in-out_infinite]
+  "
+/>
 
       </div>
 
