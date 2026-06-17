@@ -31,9 +31,11 @@ export default function CarsPage() {
 
   const [products, setProducts] =
     useState<Product[]>([])
-
-    const [brands, setBrands] =
+const [brands, setBrands] =
   useState<Brand[]>([])
+
+const [loading, setLoading] =
+  useState(true)
 
   const [selectedBrand,
   setSelectedBrand
@@ -41,74 +43,65 @@ export default function CarsPage() {
 
   useEffect(() => {
 
-  async function fetchData() {
+ async function fetchData() {
 
-    try {
+  try {
 
-      const [
-        productsResponse,
-        brandsResponse,
-      ] = await Promise.all([
+    const [
+      productsResponse,
+      brandsResponse,
+    ] = await Promise.all([
 
-        fetch(
-          "/api/get-products",
-          {
-            cache: "no-store",
+      fetch("/api/get-cars"),
+
+      fetch("/api/admin/brands"),
+
+    ])
+
+    const productsData =
+      await productsResponse.json()
+
+    const brandsData =
+      await brandsResponse.json()
+
+    const sorted =
+      [...productsData].sort(
+        (a, b) => {
+
+          if (
+            a.stock === 0 &&
+            b.stock > 0
+          ) {
+            return 1
           }
-        ),
 
-        fetch(
-          "/api/admin/brands"
-        ),
-
-      ])
-
-      const productsData =
-        await productsResponse.json()
-
-      const brandsData =
-        await brandsResponse.json()
-
-      const filtered =
-        productsData.filter(
-          (product: Product) =>
-            product.category === "Cars"
-        )
-
-      const sorted =
-        [...filtered].sort(
-          (a, b) => {
-
-            if (
-              a.stock === 0 &&
-              b.stock > 0
-            ) {
-              return 1
-            }
-
-            if (
-              a.stock > 0 &&
-              b.stock === 0
-            ) {
-              return -1
-            }
-
-            return 0
-
+          if (
+            a.stock > 0 &&
+            b.stock === 0
+          ) {
+            return -1
           }
-        )
 
-      setProducts(sorted)
+          return 0
 
-      setBrands(brandsData)
+        }
+      )
 
-    } catch (error) {
+    setProducts(sorted)
 
-      console.error(error)
+    setBrands(brandsData)
 
-    }
+  } catch (error) {
+
+    console.error(error)
+
+  } finally {
+
+    setLoading(false)
 
   }
+
+}
 
   fetchData()
 
@@ -132,6 +125,29 @@ const brandFilters: string[] = [
   ),
 
 ]
+if (loading) {
+
+  return (
+
+    <main className="min-h-screen bg-white">
+
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto px-4 py-20">
+
+        <p className="text-center text-lg text-gray-500">
+
+          Loading Diecast Cars...
+
+        </p>
+
+      </div>
+
+    </main>
+
+  )
+
+}
   return (
 
     <main className="min-h-screen bg-white text-black">
@@ -332,24 +348,7 @@ const brandFilters: string[] = [
   )
   .map((product, index) => (
 
-  <motion.div
-    key={product.id}
-    initial={{
-      opacity: 0,
-      y: 20,
-    }}
-    whileInView={{
-      opacity: 1,
-      y: 0,
-    }}
-    viewport={{
-      once: true,
-    }}
-    transition={{
-      duration: 0.3,
-      delay: 0,
-    }}
-  >
+  <div key={product.id}>
 
     <ProductCard
       id={product.id}
@@ -361,7 +360,7 @@ const brandFilters: string[] = [
       badge={product.badge}
     />
 
-  </motion.div>
+  </div>
 
 ))}
 
