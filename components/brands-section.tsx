@@ -66,10 +66,11 @@ export default function BrandsSection() {
 
         {brands.map((brand) => (
 
-          <Link
-            key={brand.id}
-            href={`/brands/${brand.id}`}
-          >
+         <Link
+  key={brand.id}
+  href={`/brands/${brand.id}`}
+  prefetch
+>
 
             <div
   className="

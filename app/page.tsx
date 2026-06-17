@@ -102,11 +102,13 @@ export default function Home() {
 const data =
   await productsResponse.json()
 
+setProducts(
+  data.slice(0, 9)
+)
+
+
 const brandData =
   await brandsResponse.json()
-
-setProducts(data)
-setBrands(brandData)
 
 setBrands(brandData)
         data.forEach(
@@ -402,155 +404,12 @@ setBrands(brandData)
         </div>
 
         {/* Search */}
-        <div className="mb-10">
-
-          <input
-            type="text"
-            placeholder="Search diecast cars..."
-            value={search}
-            onChange={(e) =>
-              setSearch(
-                e.target.value
-              )
-            }
-            className="
-            w-full
-            h-16
-            rounded-2xl
-            bg-white
-            border
-            border-gray-200
-            px-6
-            text-black
-            placeholder:text-zinc-500
-            outline-none
-            focus:border-[#D4AF37]
-            transition-all
-            duration-300
-            "
-          />
-
-        </div>
+        
 
         {/* Categories */}
-        <div className="flex flex-wrap gap-4 mb-12">
+        
 
-          {categories.map((category) => (
 
-            <button
-              key={category}
-              onClick={() =>
-                setSelectedCategory(category)
-              }
-              className={`
-                px-5
-                py-2.5
-                rounded-full
-                border
-                transition-all
-                duration-300
-                text-sm
-                md:text-base
-
-                ${
-                  selectedCategory === category
-
-                    ? "bg-[#D4AF37] text-black border-[#D4AF37]"
-
-                    : "border-gray-300 text-gray-600 hover:border-[#D4AF37] hover:text-black hover:bg-[#D4AF37]/5"
-                }
-              `}
-            >
-
-              {category}
-
-            </button>
-
-          ))}
-
-        </div>
-<div className="flex flex-wrap gap-4 mb-12">
-
-  {[
-    "All",
-    "In Stock",
-    "Sold Out",
-  ].map((filter) => (
-
-    <button
-      key={filter}
-      onClick={() =>
-        setStockFilter(filter)
-      }
-      className={`
-        px-5
-        py-2.5
-        rounded-full
-        border
-        transition-all
-        duration-300
-
-        ${
-          stockFilter === filter
-            ? "bg-[#D4AF37] text-black border-[#D4AF37]"
-            : "border-gray-300 text-gray-600 hover:border-[#D4AF37] hover:text-[#D4AF37]"
-        }
-      `}
-    >
-
-      {filter}
-
-    </button>
-
-  ))}
-
-</div>
-<div className="mb-12">
-
-  <p className="text-[#D4AF37] uppercase tracking-wider text-sm mb-4">
-
-    Browse By Brand
-
-  </p>
-
-  <div className="flex flex-wrap gap-4">
-
-    {brandFilters.map((brand) => (
-
-      <button
-        key={brand}
-        onClick={() =>
-          setSelectedBrand(
-            brand
-          )
-        }
-        className={`
-          px-5
-          py-2.5
-          rounded-full
-          border
-          transition-all
-          duration-300
-
-          ${
-            selectedBrand === brand
-
-              ? "bg-[#D4AF37] text-black border-[#D4AF37]"
-
-              : "border-gray-300 text-gray-600 hover:border-[#D4AF37] hover:text-[#D4AF37]"
-          }
-        `}
-      >
-
-        {brand}
-
-      </button>
-
-    ))}
-
-  </div>
-
-</div>
         {/* Skeleton */}
         {loading && (
 
@@ -626,7 +485,28 @@ setBrands(brandData)
           </div>
 
         )}
+<div className="flex justify-center mt-12">
 
+  <Link href="/cars">
+
+    <Button
+      className="
+      bg-[#D4AF37]
+      text-black
+      hover:bg-[#B8941F]
+      px-8
+      py-6
+      rounded-xl
+      "
+    >
+
+      View Full Collection
+
+    </Button>
+
+  </Link>
+
+</div>
       </section>
 
       <Footer />

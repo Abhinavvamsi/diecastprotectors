@@ -52,7 +52,10 @@ export default function ProductCard({
 
   return (
 
-    <Link href={`/products/${id}`}>
+    <Link
+  href={`/products/${id}`}
+  prefetch
+>
 
       <div
   className="

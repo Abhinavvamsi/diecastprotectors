@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { Search } from "lucide-react"
 import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
 import ProductCard from "@/components/product-card"
@@ -41,6 +42,15 @@ const [loading, setLoading] =
   setSelectedBrand
 ] = useState("All")
 
+const [search, setSearch] =
+  useState("")
+
+const [stockFilter,
+  setStockFilter
+] = useState("All")
+const [sortBy,
+  setSortBy
+] = useState("Newest")
   useEffect(() => {
 
  async function fetchData() {
@@ -283,47 +293,243 @@ if (loading) {
   />
 
 </div>
-<div className="mb-12">
+{/* Search */}
 
-  <p className="text-[#D4AF37] uppercase tracking-wider text-sm mb-4">
+<div className="mb-10">
 
-    Browse By Brand
+  <div
+    className="
+    relative
+    group
+    "
+  >
+
+    <Search
+      className="
+      absolute
+      left-5
+      top-1/2
+      -translate-y-1/2
+      w-5
+      h-5
+      text-gray-400
+      group-focus-within:text-[#D4AF37]
+      transition-colors
+      duration-300
+      "
+    />
+
+    <input
+      type="text"
+      placeholder="Search diecast cars..."
+      value={search}
+      onChange={(e) =>
+        setSearch(e.target.value)
+      }
+      className="
+      w-full
+      h-16
+      pl-14
+      pr-5
+
+      rounded-2xl
+
+      border
+      border-gray-200
+
+      bg-white
+
+      text-black
+      placeholder:text-gray-400
+
+      transition-all
+      duration-300
+
+      focus:outline-none
+      focus:border-[#D4AF37]
+
+      focus:shadow-[0_0_30px_rgba(212,175,55,0.15)]
+
+      hover:border-[#D4AF37]/50
+
+      hover:-translate-y-0.5
+      "
+    />
+
+  </div>
+
+</div>
+
+
+
+
+{/* Brand Filters */}
+
+<div className="mb-8">
+
+  <p className="text-[#D4AF37] text-sm font-medium mb-3">
+
+    Brand
 
   </p>
 
-  <div className="flex flex-wrap gap-4">
+  <div className="flex flex-wrap gap-3">
 
-  {brandFilters.map((brand) => (
+    {brandFilters.map((brand) => (
 
-    <button
-      key={brand}
-      onClick={() =>
-        setSelectedBrand(brand)
-      }
-      className={`
-        px-5
-        py-2.5
-        rounded-full
-        border
-
-        ${
-          selectedBrand === brand
-            ? "bg-[#D4AF37] text-black border-[#D4AF37]"
-            : "border-gray-300 text-gray-600 hover:border-[#D4AF37]"
+      <button
+        key={brand}
+        onClick={() =>
+          setSelectedBrand(brand)
         }
-      `}
-    >
+        className={`
+          px-5
+          py-2.5
+          rounded-full
+          border
+          transition-all
+          duration-300
 
-      {brand}
+          ${
+            selectedBrand === brand
+              ? "bg-[#D4AF37] text-black border-[#D4AF37]"
+              : "border-gray-300 text-gray-600 hover:border-[#D4AF37]"
+          }
+        `}
+      >
 
-    </button>
+        {brand}
 
-  ))}
+      </button>
+
+    ))}
+
+  </div>
 
 </div>
 
+{/* Stock Filters */}
+
+<div className="mb-8">
+
+  <p className="text-[#D4AF37] text-sm font-medium mb-3">
+
+    Availability
+
+  </p>
+
+  <div className="flex flex-wrap gap-3">
+
+    {[
+      "All",
+      "In Stock",
+      "Sold Out",
+    ].map((filter) => (
+
+      <button
+        key={filter}
+        onClick={() =>
+          setStockFilter(filter)
+        }
+        className={`
+          px-5
+          py-2.5
+          rounded-full
+          border
+          transition-all
+          duration-300
+
+          ${
+            stockFilter === filter
+              ? "bg-[#D4AF37] text-black border-[#D4AF37]"
+              : "border-gray-300 text-gray-600 hover:border-[#D4AF37]"
+          }
+        `}
+      >
+
+        {filter}
+
+      </button>
+
+    ))}
+
+  </div>
+
 </div>
 
+
+<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+
+  <p className="text-gray-500">
+
+    Showing {
+
+      products.filter((product) => {
+
+        const matchesBrand =
+          selectedBrand === "All"
+            ? true
+            : product.brand?.name === selectedBrand
+
+        const matchesSearch =
+          product.name
+            .toLowerCase()
+            .includes(search.toLowerCase())
+
+        const matchesStock =
+          stockFilter === "All"
+            ? true
+            : stockFilter === "In Stock"
+            ? product.stock > 0
+            : product.stock === 0
+
+        return (
+          matchesBrand &&
+          matchesSearch &&
+          matchesStock
+        )
+
+      }).length
+
+    } Products
+
+  </p>
+
+  <select
+    value={sortBy}
+    onChange={(e) =>
+      setSortBy(e.target.value)
+    }
+    className="
+    h-12
+    px-4
+    rounded-xl
+    border
+    border-gray-200
+    bg-white
+    text-black
+    "
+  >
+
+    <option value="Newest">
+      Newest
+    </option>
+
+    <option value="Price Low">
+      Price: Low to High
+    </option>
+
+    <option value="Price High">
+      Price: High to Low
+    </option>
+
+    <option value="Name A-Z">
+      Name: A-Z
+    </option>
+
+  </select>
+
+</div>
           {/* Products */}
           <div
             className="
@@ -336,34 +542,72 @@ if (loading) {
           >
 
             {products
-  .filter((product) =>
+  .filter((product) => {
 
-    selectedBrand === "All"
+    const matchesBrand =
+      selectedBrand === "All"
+        ? true
+        : product.brand?.name === selectedBrand
 
-      ? true
+    const matchesSearch =
+      product.name
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
 
-      : product.brand?.name ===
-        selectedBrand
+    const matchesStock =
+      stockFilter === "All"
+        ? true
+        : stockFilter === "In Stock"
+        ? product.stock > 0
+        : product.stock === 0
 
-  )
-  .map((product, index) => (
+    return (
+      matchesBrand &&
+      matchesSearch &&
+      matchesStock
+    )
 
-  <div key={product.id}>
+  })
 
-    <ProductCard
-      id={product.id}
-      name={product.name}
-      price={product.price}
-      image={product.images?.[0]}
-      description={product.description}
-      stock={product.stock}
-      badge={product.badge}
-    />
+  .sort((a, b) => {
 
-  </div>
+    if (sortBy === "Price Low") {
+      return a.price - b.price
+    }
+
+    if (sortBy === "Price High") {
+      return b.price - a.price
+    }
+
+    if (sortBy === "Name A-Z") {
+      return a.name.localeCompare(
+        b.name
+      )
+    }
+
+    return 0
+
+  })
+
+  .map((product) => (
+
+    <div key={product.id}>
+
+      <ProductCard
+        id={product.id}
+        name={product.name}
+        price={product.price}
+        image={product.images?.[0]}
+        description={product.description}
+        stock={product.stock}
+        badge={product.badge}
+      />
+
+    </div>
 
 ))}
-
           </div>
 
         </div>
