@@ -1,42 +1,69 @@
 "use client"
 
+import { Bebas_Neue } from "next/font/google"
+
+const bebas = Bebas_Neue({
+  subsets: ["latin"],
+  weight: "400",
+})
+
 export default function PremiumLoader() {
 
   return (
 
     <div
       className="
-      min-h-[500px]
+      min-h-screen
       flex
       flex-col
       items-center
       justify-center
+      bg-white
       "
     >
 
       <h1
+        className={`
+          ${bebas.className}
+          text-6xl
+          md:text-8xl
+          tracking-wide
+          text-black
+        `}
+      >
+
+        DIECAST
+
+        <span className="text-[#D4AF37]">
+
+          {" "}UNIVERSE
+
+        </span>
+
+      </h1>
+
+      <p
         className="
-        text-5xl
-        md:text-7xl
-        font-bold
-        tracking-widest
-        text-[#D4AF37]
-        animate-pulse
+        mt-4
+        text-gray-500
+        tracking-[0.3em]
+        uppercase
+        text-sm
         "
       >
 
-        DIECAST UNIVERSE
+        Loading Collection...
 
-      </h1>
+      </p>
 
       <div
         className="
         mt-8
-        w-64
         h-1
-        bg-gray-200
-        rounded-full
+        w-56
         overflow-hidden
+        rounded-full
+        bg-gray-200
         "
       >
 
@@ -45,25 +72,11 @@ export default function PremiumLoader() {
           h-full
           w-1/2
           bg-[#D4AF37]
-          animate-[loading_1.5s_linear_infinite]
+          animate-pulse
           "
         />
 
       </div>
-
-      <p
-        className="
-        mt-6
-        text-gray-500
-        uppercase
-        tracking-[0.3em]
-        text-sm
-        "
-      >
-
-        Loading Collectibles...
-
-      </p>
 
     </div>
 

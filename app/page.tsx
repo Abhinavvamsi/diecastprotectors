@@ -203,6 +203,7 @@ setBrands(brandData)
     : product.brand?.name ===
       selectedBrand
 
+    
     return (
   matchesCategory &&
   matchesBrand &&
@@ -233,6 +234,11 @@ setBrands(brandData)
 
     }
   )
+  if (loading) {
+
+  return <PremiumLoader />
+
+}
   return (
 
     <main className="min-h-screen bg-white text-black overflow-x-hidden">
@@ -410,12 +416,7 @@ setBrands(brandData)
         
 
 
-        {/* Skeleton */}
-        {loading && (
 
-  <PremiumLoader />
-
-)}
 
         {/* Empty */}
         {!loading &&
