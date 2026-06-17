@@ -79,7 +79,8 @@ export default function Home() {
   const [search,
     setSearch
   ] = useState("")
-
+  const [brands, setBrands] =
+  useState([])
   const [selectedBrand,
   setSelectedBrand
 ] = useState("All")
@@ -90,24 +91,24 @@ export default function Home() {
 
       try {
 
-        const response =
-          await fetch(
-            "/api/get-products",
-            {
-              cache: "no-store",
-            }
-          )
+      const [
+  productsResponse,
+  brandsResponse,
+] = await Promise.all([
+  fetch("/api/get-products"),
+  fetch("/api/admin/brands"),
+])
 
-        const data =
-          await response.json()
+const data =
+  await productsResponse.json()
 
-        await new Promise(
-          (resolve) =>
-            setTimeout(resolve, 1000)
-        )
+const brandData =
+  await brandsResponse.json()
 
-        setProducts(data)
+setProducts(data)
+setBrands(brandData)
 
+setBrands(brandData)
         data.forEach(
           (product: Product) => {
 
@@ -147,7 +148,7 @@ export default function Home() {
     ),
 
   ]
-  const brands = [
+  const brandFilters = [
 
   "All",
 
@@ -362,7 +363,9 @@ export default function Home() {
   </div>
 
 </section>
-<BrandMarquee />
+<BrandMarquee
+  brands={brands}
+/>
       {/* Brands Section */}
       <BrandsSection />
 
@@ -512,7 +515,7 @@ export default function Home() {
 
   <div className="flex flex-wrap gap-4">
 
-    {brands.map((brand) => (
+    {brandFilters.map((brand) => (
 
       <button
         key={brand}

@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Image from "next/image"
 
 type Brand = {
@@ -9,96 +8,76 @@ type Brand = {
   logo?: string
 }
 
-export default function BrandMarquee() {
+export default function BrandMarquee({
+  brands,
+}: {
+  brands: Brand[]
+}) {
 
-  const [brands, setBrands] = useState<Brand[]>([])
-
-  useEffect(() => {
-
-    async function fetchBrands() {
-
-      try {
-
-        const response =
-  await fetch("/api/admin/brands")
-
-        const data =
-          await response.json()
-
-        setBrands(data)
-
-      } catch (error) {
-
-        console.error(error)
-
-      }
-
-    }
-
-    fetchBrands()
-
-  }, [])
+  if (!brands.length) {
+    return null
+  }
 
   return (
 
-    <section className="overflow-hidden border-y border-gray-200 py-6 bg-white">
+    <section className="overflow-hidden w-full border-y border-gray-200 py-6 bg-white">
 
-      <div className="marquee items-center gap-8 md:gap-12">
+      <div className="marquee items-center">
 
         {[
-  ...brands,
-  ...brands,
-  ...brands,
-  ...brands,
-].map(
-          (brand, index) => (
+          ...brands,
+          ...brands,
+          ...brands,
+          ...brands,
+        ].map((brand, index) => (
 
-            <div
-              key={`${brand.id}-${index}`}
-              className="
-              mx-12
-              flex
-              items-center
-              justify-center
-              shrink-0
-              "
-            >
+          <div
+            key={`${brand.id}-${index}`}
+            className="
+            mx-10
+            flex
+            items-center
+            justify-center
+            shrink-0
+            "
+          >
 
-              {brand.logo ? (
+            {brand.logo ? (
 
-                <Image
-                  src={brand.logo}
-                  alt={brand.name}
-                  width={140}
-                  height={70}
-                  className="
-                  h-14
-                  w-auto
-                  object-contain
-                  opacity-80
-                  hover:opacity-100
-                  transition
-                  "
-                />
+              <Image
+                src={brand.logo}
+                alt={brand.name}
+                width={140}
+                height={70}
+                className="
+                h-14
+                w-auto
+                object-contain
+                opacity-80
+                hover:opacity-100
+                transition
+                duration-300
+                "
+              />
 
-              ) : (
+            ) : (
 
-                <span
-                  className="
-                  text-[#D4AF37]
-                  font-bold
-                  text-xl
-                  "
-                >
-                  {brand.name}
-                </span>
+              <span
+                className="
+                text-[#D4AF37]
+                font-bold
+                text-xl
+                whitespace-nowrap
+                "
+              >
+                {brand.name}
+              </span>
 
-              )}
+            )}
 
-            </div>
+          </div>
 
-          )
-        )}
+        ))}
 
       </div>
 

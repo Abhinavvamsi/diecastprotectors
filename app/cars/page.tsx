@@ -16,29 +16,52 @@ type Product = {
   stock: number
   badge?: string
 }
+type Brand = {
+  id: string
+  name: string
+  logo?: string
+}
 
 export default function CarsPage() {
 
   const [products, setProducts] =
     useState<Product[]>([])
 
+    const [brands, setBrands] =
+  useState<Brand[]>([])
+
   useEffect(() => {
 
-    async function fetchProducts() {
+  async function fetchData() {
 
-      const response =
-        await fetch(
+    try {
+
+      const [
+        productsResponse,
+        brandsResponse,
+      ] = await Promise.all([
+
+        fetch(
           "/api/get-products",
           {
             cache: "no-store",
           }
-        )
+        ),
 
-      const data =
-        await response.json()
+        fetch(
+          "/api/admin/brands"
+        ),
+
+      ])
+
+      const productsData =
+        await productsResponse.json()
+
+      const brandsData =
+        await brandsResponse.json()
 
       const filtered =
-        data.filter(
+        productsData.filter(
           (product: Product) =>
             product.category === "Cars"
         )
@@ -68,11 +91,19 @@ export default function CarsPage() {
 
       setProducts(sorted)
 
+      setBrands(brandsData)
+
+    } catch (error) {
+
+      console.error(error)
+
     }
 
-    fetchProducts()
+  }
 
-  }, [])
+  fetchData()
+
+}, [])
 
   return (
 
@@ -203,7 +234,11 @@ export default function CarsPage() {
 
           </div>
 <div className="my-16">
-  <BrandMarquee />
+
+  <BrandMarquee
+    brands={brands}
+  />
+
 </div>
           {/* Products */}
           <div
@@ -222,7 +257,7 @@ export default function CarsPage() {
     key={product.id}
     initial={{
       opacity: 0,
-      y: 40,
+      y: 20,
     }}
     whileInView={{
       opacity: 1,
