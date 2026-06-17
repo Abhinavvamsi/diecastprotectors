@@ -5,7 +5,6 @@ import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
 import ProductCard from "@/components/product-card"
 import BrandMarquee from "@/components/brand-marquee"
-
 type Product = {
   id: string
   name: string
@@ -15,6 +14,12 @@ type Product = {
   category: string
   stock: number
   badge?: string
+
+  brand?: {
+    id: string
+    name: string
+    logo?: string
+  }
 }
 type Brand = {
   id: string
@@ -29,6 +34,10 @@ export default function CarsPage() {
 
     const [brands, setBrands] =
   useState<Brand[]>([])
+
+  const [selectedBrand,
+  setSelectedBrand
+] = useState("All")
 
   useEffect(() => {
 
@@ -104,7 +113,25 @@ export default function CarsPage() {
   fetchData()
 
 }, [])
+const brandFilters: string[] = [
 
+  "All",
+
+  ...new Set(
+
+    products
+      .map(
+        (product) =>
+          product.brand?.name
+      )
+      .filter(
+        (brand): brand is string =>
+          Boolean(brand)
+      )
+
+  ),
+
+]
   return (
 
     <main className="min-h-screen bg-white text-black">
@@ -240,6 +267,47 @@ export default function CarsPage() {
   />
 
 </div>
+<div className="mb-12">
+
+  <p className="text-[#D4AF37] uppercase tracking-wider text-sm mb-4">
+
+    Browse By Brand
+
+  </p>
+
+  <div className="flex flex-wrap gap-4">
+
+  {brandFilters.map((brand) => (
+
+    <button
+      key={brand}
+      onClick={() =>
+        setSelectedBrand(brand)
+      }
+      className={`
+        px-5
+        py-2.5
+        rounded-full
+        border
+
+        ${
+          selectedBrand === brand
+            ? "bg-[#D4AF37] text-black border-[#D4AF37]"
+            : "border-gray-300 text-gray-600 hover:border-[#D4AF37]"
+        }
+      `}
+    >
+
+      {brand}
+
+    </button>
+
+  ))}
+
+</div>
+
+</div>
+
           {/* Products */}
           <div
             className="
@@ -251,7 +319,18 @@ export default function CarsPage() {
             "
           >
 
-            {products.map((product, index) => (
+            {products
+  .filter((product) =>
+
+    selectedBrand === "All"
+
+      ? true
+
+      : product.brand?.name ===
+        selectedBrand
+
+  )
+  .map((product, index) => (
 
   <motion.div
     key={product.id}
