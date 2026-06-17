@@ -39,14 +39,14 @@ export default function Footer() {
             <div className="flex flex-col gap-3 text-gray-600">
 
               <Link
-  href="/orders"
+  href="/"
   className="hover:text-[#D4AF37] transition-colors"
 >
   Home
 </Link>
 
               <Link
-  href="/orders"
+  href="/cars"
   className="hover:text-[#D4AF37] transition-colors"
 >
   Diecast Cars

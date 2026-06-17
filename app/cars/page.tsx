@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
 import ProductCard from "@/components/product-card"
+import BrandMarquee from "@/components/brand-marquee"
 
 type Product = {
   id: string
@@ -201,7 +202,9 @@ export default function CarsPage() {
             </p>
 
           </div>
-
+<div className="my-16">
+  <BrandMarquee />
+</div>
           {/* Products */}
           <div
             className="

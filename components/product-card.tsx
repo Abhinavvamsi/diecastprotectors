@@ -55,22 +55,25 @@ export default function ProductCard({
     <Link href={`/products/${id}`}>
 
       <div
-        className="
-        group
-        bg-white
-        rounded-3xl
-        overflow-hidden
-        border
-        border-gray-200
-        shadow-sm
-        hover:border-[#D4AF37]
-        hover:-translate-y-1
-        hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)]
-        transition-all
-        duration-500
-        cursor-pointer
-        "
-      >
+  className="
+  group
+  h-full
+  flex
+  flex-col
+  bg-white
+  rounded-3xl
+  overflow-hidden
+  border
+  border-gray-200
+  shadow-sm
+  hover:border-[#D4AF37]
+  hover:-translate-y-1
+  hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)]
+  transition-all
+  duration-500
+  cursor-pointer
+  "
+>
 
         {/* Product Image */}
         <div className="relative h-72 overflow-hidden">
@@ -186,22 +189,36 @@ shadow-lg
         </div>
 
         {/* Product Info */}
-        <div className="p-6">
+        <div className="p-6 flex flex-col flex-1">
 
-          <h3 className="text-2xl font-bold text-black">
+          <h3
+  className="
+  text-2xl
+  font-bold
+  text-black
+  min-h-[72px]
+  line-clamp-2
+  "
+>
+  {name}
+</h3>
 
-            {name}
-
-          </h3>
-
-          <p className="text-gray-600 mt-3 leading-relaxed line-clamp-2">
+          <p
+  className="
+  text-gray-600
+  mt-3
+  leading-relaxed
+  line-clamp-2
+  min-h-[52px]
+  "
+>
 
             {description}
 
           </p>
 
           {/* Price */}
-          <div className="flex items-center justify-between mt-8">
+          <div className="mt-auto">
 
             <p className="text-3xl font-bold text-black">
 

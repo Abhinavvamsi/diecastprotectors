@@ -114,7 +114,7 @@ export default function Navbar() {
   "
 >
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6 flex items-center justify-between">
 
         {/* Logo */}
         <Link
@@ -123,25 +123,24 @@ export default function Navbar() {
         >
 
           <Image
-            src="/logo.png"
-            alt="Diecast Protectors And Cars"
-            width={58}
-            height={58}
-            className="object-contain"
-          />
+  src="/logo.png"
+  alt="Diecast Universe"
+  width={48}
+  height={48}
+  className="object-contain shrink-0"
+/>
 
-          <div className="leading-none">
+<div className="leading-none min-w-0">
 
-            <p className="text-black text-xl font-bold tracking-wide">
-  DIECAST UNIVERSE
-</p>
+  <p className="text-black text-lg md:text-xl font-bold tracking-wide truncate">
+    DIECAST UNIVERSE
+  </p>
 
-           <p className="text-[#D4AF37] text-sm tracking-[0.3em]">
-  DIECAST COLLECTIBLES
-</p>
+  <p className="text-[#D4AF37] text-[10px] md:text-sm tracking-[0.2em] truncate">
+    DIECAST COLLECTIBLES
+  </p>
 
-          </div>
-
+</div>
         </Link>
 
         {/* Desktop */}
@@ -281,7 +280,10 @@ text-black
               `}
             >
 
-              <ShoppingCart size={24} />
+              <ShoppingCart
+  size={24}
+  className="text-black"
+/>
 
               {cart.length > 0 && (
 
@@ -325,9 +327,15 @@ text-black
           >
 
             {mobileMenuOpen ? (
-              <X size={28} />
+              <X
+  size={28}
+  className="text-black"
+/>
             ) : (
-              <Menu size={28} />
+              <Menu
+  size={28}
+  className="text-black"
+/>
             )}
 
           </button>
@@ -339,12 +347,12 @@ text-black
       {/* Mobile Menu */}
       {mobileMenuOpen && (
 
-        <div className="md:hidden border-t border-gray-200 bg-white px-6 py-6 space-y-6">
+        <div className="md:hidden border-t border-gray-200 bg-white text-black px-6 py-6 space-y-6">
 
         
           <Link
             href="/cars"
-            className="block text-lg"
+            className="block text-lg font-medium text-black"
           >
 
             Diecast Cars
@@ -353,7 +361,7 @@ text-black
 
           <Link
             href="/track-order"
-            className="block text-lg"
+            className="block text-lg font-medium text-black"
           >
 
             Track Order
@@ -362,7 +370,7 @@ text-black
 
           <Link
             href="/orders"
-            className="block text-lg"
+            className="block text-lg font-medium text-black"
           >
 
             My Orders
