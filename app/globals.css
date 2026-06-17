@@ -23,21 +23,14 @@
 
   will-change: transform;
 
-  animation: marquee 20s linear infinite;
+  animation: marquee 18s linear infinite;
+
+  -webkit-transform: translateZ(0);
+
+  transform: translateZ(0);
 
 }
 
-.marquee {
-
-  width: max-content;
-
-  animation:
-    marquee
-    25s
-    linear
-    infinite;
-
-}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
