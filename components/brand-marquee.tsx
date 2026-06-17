@@ -43,9 +43,14 @@ export default function BrandMarquee() {
 
     <section className="overflow-hidden border-y border-gray-200 py-6 bg-white">
 
-      <div className="flex marquee items-center">
+      <div className="marquee items-center gap-8 md:gap-12">
 
-        {[...brands, ...brands].map(
+        {[
+  ...brands,
+  ...brands,
+  ...brands,
+  ...brands,
+].map(
           (brand, index) => (
 
             <div

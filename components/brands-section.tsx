@@ -72,44 +72,55 @@ export default function BrandsSection() {
           >
 
             <div
-              className="
-              bg-white
-              border
-              border-gray-200
-              rounded-3xl
-              overflow-hidden
-              shadow-sm
-              hover:shadow-md
-              hover:border-[#D4AF37]
-              transition-all
-              "
-            >
+  className="
+  h-full
+  flex
+  flex-col
+  bg-white
+  border
+  border-gray-200
+  rounded-3xl
+  overflow-hidden
+  shadow-sm
+  hover:shadow-lg
+  hover:border-[#D4AF37]
+  hover:-translate-y-1
+  transition-all
+  duration-300
+  "
+>
 
               <div
-                className="
-                h-40
-                flex
-                items-center
-                justify-center
-                bg-gray-50
-                "
-              >
+  className="
+  h-56
+  flex
+  items-center
+  justify-center
+  bg-gray-50
+  p-8
+  "
+>
 
-                {brand.logo && (
+  {brand.logo && (
 
-                  <Image
-                    src={brand.logo}
-                    alt={brand.name}
-                    width={120}
-                    height={120}
-                    className="object-contain"
-                  />
+    <Image
+      src={brand.logo}
+      alt={brand.name}
+      width={180}
+      height={100}
+      className="
+      max-h-24
+      w-auto
+      h-auto
+      object-contain
+      "
+    />
 
-                )}
+  )}
 
-              </div>
+</div>
 
-              <div className="p-5">
+              <div className="p-5 flex-1">
 
                 <h3 className="font-bold text-lg">
 
