@@ -24,13 +24,21 @@ const bebas = Bebas_Neue({
 
 })
 
-export const metadata: Metadata = {
+export const metadata = {
 
-  title:
-    "Diecast Universe",
+  title: "Diecast Universe",
 
-  description:
-    "Shop premium Hot Wheels protectors, acrylic cases and collectible diecast cars for passionate collectors.",
+  description: "Premium Diecast Collectibles",
+
+  icons: {
+
+    icon: "/logo.png",
+
+    shortcut: "/logo.png",
+
+    apple: "/logo.png",
+
+  },
 
   keywords: [
     "Hot Wheels",
@@ -42,28 +50,34 @@ export const metadata: Metadata = {
     "Diecast Collection",
   ],
 
-  openGraph: {
+ openGraph: {
+  title: "Diecast Universe",
+  description:
+    "Premium Diecast Collectibles",
+  url:
+    "https://diecastprotectors.in",
+  siteName:
+    "Diecast Universe",
 
-    title:
-      "Diecast Universe",
+  images: [
+    {
+      url: "/logo.png",
+      width: 512,
+      height: 512,
+      alt: "Diecast Universe",
+    },
+  ],
 
-    description:
-      "Premium diecast cars and Hot Wheels protectors.",
-
-    url:
-      "https://diecastprotectors.in",
-
-    siteName:
-      "Diecast Universe",
-
-    locale:
-      "en_IN",
-
-    type:
-      "website",
-
-  },
-
+  locale: "en_IN",
+  type: "website",
+},
+twitter: {
+  card: "summary_large_image",
+  title: "Diecast Universe",
+  description:
+    "Premium Diecast Collectibles",
+  images: ["/logo.png"],
+},
 }
 
 export default function RootLayout({
