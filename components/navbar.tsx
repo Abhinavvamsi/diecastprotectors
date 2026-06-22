@@ -57,29 +57,33 @@ export default function Navbar() {
   /* Clear cart when account changes */
   useEffect(() => {
 
-    const storedUser =
-      localStorage.getItem(
-        "hw-shield-user"
-      )
+  if (user === undefined) {
+    return
+  }
 
-    const currentUser =
-      user?.id || "guest"
-
-    if (
-      storedUser &&
-      storedUser !== currentUser
-    ) {
-
-      clearCart()
-
-    }
-
-    localStorage.setItem(
-      "hw-shield-user",
-      currentUser
+  const storedUser =
+    localStorage.getItem(
+      "hw-shield-user"
     )
 
-  }, [user, clearCart])
+  const currentUser =
+    user?.id || "guest"
+
+  if (
+    storedUser &&
+    storedUser !== currentUser
+  ) {
+
+    clearCart()
+
+  }
+
+  localStorage.setItem(
+    "hw-shield-user",
+    currentUser
+  )
+
+}, [user, clearCart])
 
   /* Cart animation */
   useEffect(() => {
@@ -170,6 +174,7 @@ export default function Navbar() {
 
           <Link
             href="/orders"
+            prefetch
             className="hover:text-[#D4AF37] transition"
           >
 

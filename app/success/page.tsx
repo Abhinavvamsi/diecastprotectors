@@ -126,7 +126,7 @@ export default function SuccessPage() {
               "
             >
 
-              🎉 Join The Diecast Protectors Community
+              🎉 Join The Diecast Universe Community
 
             </h3>
 

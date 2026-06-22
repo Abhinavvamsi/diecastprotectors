@@ -81,6 +81,10 @@ export default function Home() {
   ] = useState("")
   const [brands, setBrands] =
   useState([])
+
+  const [showLoader, setShowLoader] =
+  useState(true)
+
   const [selectedBrand,
   setSelectedBrand
 ] = useState("All")
@@ -137,7 +141,27 @@ setBrands(brandData)
     fetchProducts()
 
   }, [syncStock])
+useEffect(() => {
 
+  const visited =
+    sessionStorage.getItem(
+      "home-loaded"
+    )
+
+  if (visited) {
+
+    setShowLoader(false)
+
+  } else {
+
+    sessionStorage.setItem(
+      "home-loaded",
+      "true"
+    )
+
+  }
+
+}, [])
   const categories = [
 
     "All",
