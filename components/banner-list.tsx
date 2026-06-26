@@ -88,33 +88,20 @@ export default function BannerList({
 
         <div
           key={banner.id}
-          className="
-          bg-white
-          rounded-3xl
-          border
-          border-gray-200
-          p-6
-          shadow-sm
-          hover:shadow-xl
-          hover:border-[#D4AF37]
-          transition-all
-          flex
-          items-center
-          justify-between
-          "
+          className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm hover:shadow-xl hover:border-[#D4AF37] transition-all flex flex-col md:flex-row gap-6 md:items-center md:justify-between"
         >
 
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col md:flex-row gap-6 w-full">
 
             <Image
               src={banner.images.desktop}
               alt={banner.title}
               width={220}
               height={120}
-              className="rounded-2xl object-cover border"
+              className="w-full md:w-[220px] h-52 md:h-[120px] rounded-2xl object-cover border"
             />
 
-            <div>
+            <div className="flex-1">
 
               <h2 className="text-2xl font-bold text-black">
                 {banner.title}
@@ -158,7 +145,7 @@ export default function BannerList({
 
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex w-full md:w-auto gap-3 mt-4 md:mt-0">
 
   <Link
     href={`/admin/banners/${banner.id}`}
@@ -180,16 +167,7 @@ export default function BannerList({
     onClick={() =>
       deleteBanner(banner.id)
     }
-    className="
-    px-5
-    py-3
-    rounded-xl
-    bg-red-500
-    text-white
-    font-semibold
-    hover:bg-red-600
-    transition
-    "
+    className="flex-1 md:flex-none px-5 py-3 rounded-xl bg-[#D4AF37] text-black font-semibold hover:bg-[#c89f25] transition"
   >
     Delete
   </button>
