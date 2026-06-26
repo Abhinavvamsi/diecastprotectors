@@ -388,6 +388,73 @@ export default async function AdminPage() {
   </div>
 
 </Link>
+
+
+
+
+{/* Banner Management */}
+
+<Link
+  href="/admin/banners"
+  className="
+  group
+  bg-white
+  border
+  border-gray-200
+  shadow-sm
+  rounded-3xl
+  p-8
+  hover:border-[#D4AF37]
+  hover:shadow-md
+  hover:-translate-y-1
+  transition-all
+  duration-300
+  "
+>
+  <div className="space-y-6">
+
+    <div
+      className="
+      w-16
+      h-16
+      rounded-2xl
+      bg-[#D4AF37]
+      text-black
+      flex
+      items-center
+      justify-center
+      text-3xl
+      font-bold
+      "
+    >
+      🖼️
+    </div>
+
+    <div>
+
+      <h2 className="text-3xl font-bold">
+        Banner Management
+      </h2>
+
+      <p className="text-gray-500 mt-4 leading-relaxed">
+        Create, edit and manage homepage banners.
+      </p>
+
+    </div>
+
+  </div>
+
+</Link>
+
+
+
+
+
+
+
+
+
+
         {/* Coupons */}
 
         <Link

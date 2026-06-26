@@ -32,6 +32,11 @@ export default function AdminNav() {
   href: "/admin/brands",
   label: "Brands",
 },
+
+{
+  href: "/admin/banners",
+  label: "Banners",
+},
     {
       href: "/admin/coupons",
       label: "Coupons",

@@ -1,4 +1,5 @@
 "use client"
+import BannerSlider from "@/components/banner-slider"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -53,6 +54,20 @@ brand?: {
 }
 }
 
+type Banner = {
+  id: string
+  title: string
+  subtitle?: string
+  images: {
+    desktop: string
+    mobile: string
+  }
+  buttonText?: string
+  buttonLink?: string
+  order: number
+  active: boolean
+}
+
 export default function Home() {
 
   const syncStock =
@@ -79,9 +94,8 @@ export default function Home() {
   const [search,
     setSearch
   ] = useState("")
-  const [brands, setBrands] =
-  useState([])
-
+const [brands, setBrands] = useState<any[]>([])
+const [banners, setBanners] = useState<Banner[]>([])
   const [showLoader, setShowLoader] =
   useState(true)
 
@@ -95,25 +109,28 @@ export default function Home() {
 
       try {
 
-      const [
+    const [
   productsResponse,
   brandsResponse,
+  bannersResponse,
 ] = await Promise.all([
   fetch("/api/get-products"),
   fetch("/api/admin/brands"),
+  fetch("/api/banners"),
 ])
 
-const data =
-  await productsResponse.json()
+const data = await productsResponse.json()
+setProducts(data.slice(0, 9))
 
-setProducts(
-  data.slice(0, 9)
-)
+const brandData = await brandsResponse.json()
+setBrands(brandData)
 
+const bannerData = await bannersResponse.json()
+setBanners(bannerData)
 
-const brandData =
-  await brandsResponse.json()
-
+data.forEach((product: Product) => {
+  syncStock(product.id, product.stock)
+})
 setBrands(brandData)
         data.forEach(
           (product: Product) => {
@@ -270,131 +287,8 @@ useEffect(() => {
       {/* Navbar */}
       <Navbar />
 
-      {/* Hero Section */}
-<section className="max-w-7xl mx-auto px-4 md:px-6 py-24 md:py-32">
-
-  <div className="grid lg:grid-cols-[1fr_1.3fr] gap-10 items-center">
-
-    {/* LEFT SIDE */}
-    <div>
-
-      <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm md:text-base">
-        Premium Diecast Collectibles
-      </p>
-
-      <h1
-        className={`
-          ${bebas.className}
-          text-6xl
-          sm:text-7xl
-          md:text-8xl
-          lg:text-[9rem]
-          leading-[0.9]
-          tracking-wide
-          mt-6
-          max-w-5xl
-        `}
-      >
-
-        PREMIUM
-
-        <span className="text-[#D4AF37]">
-
-          {" "}DIECAST{" "}
-
-        </span>
-
-        <br />
-
-        COLLECTIONS
-
-      </h1>
-
-      <p className="text-gray-600 text-lg md:text-xl mt-8 max-w-2xl leading-relaxed">
-
-        Discover premium Hot Wheels, Inno 64, Mini GT and rare collectible diecast models curated for passionate collectors.
-
-      </p>
-
-      <div className="mt-12">
-
-  <Link href="/cars" prefetch>
-
-    <Button
-      variant="outline"
-      className="
-      rounded-2xl
-      px-10
-      py-7
-      text-lg
-      bg-transparent
-      border-[#D4AF37]
-      text-black
-      hover:bg-[#D4AF37]
-      hover:text-black
-      hover:border-[#D4AF37]
-      hover:scale-105
-      active:scale-95
-      transition-all
-      duration-300
-      "
-    >
-
-      Explore Diecast Cars
-
-    </Button>
-
-  </Link>
-
-</div>
-    </div>
-
-    {/* RIGHT SIDE IMAGE */}
-    <div className="relative flex justify-center items-center">
-
-      {/* Gold Glow */}
-      <div
-        className="
-        absolute
-        -inset-10
-        bg-[#D4AF37]/10
-        blur-[120px]
-        rounded-full
-        animate-pulse
-        "
-      />
-
-      {/* Floating Image */}
-      <div
-        className="
-        relative
-        animate-[float_6s_ease-in-out_infinite]
-        "
-      >
-
-        <img
-          src="/hero-car.png"
-          alt="Premium Diecast"
-          className="
-          relative
-          z-10
-          w-full
-          max-w-[950px]
-          object-contain
-          drop-shadow-[0_20px_60px_rgba(212,175,55,0.30)]
-          transition-all
-          duration-700
-          hover:scale-105
-          "
-        />
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
+{/* Hero Banner */}
+<BannerSlider banners={banners} />
 <BrandMarquee
   brands={brands}
 />
@@ -541,4 +435,3 @@ useEffect(() => {
   )
 
 }
-
