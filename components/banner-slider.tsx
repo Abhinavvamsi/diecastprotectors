@@ -102,7 +102,12 @@ export default function BannerSlider({
               grabCursor: false,
             },
           }}
-          className="h-[650px] rounded-[32px]"
+         className="
+h-[380px]
+sm:h-[450px]
+md:h-[650px]
+rounded-[32px]
+"
         >
 
           {banners.map((banner) => (
