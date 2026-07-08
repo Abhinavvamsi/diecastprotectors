@@ -1,5 +1,5 @@
 "use client"
-
+import { motion } from "framer-motion"
 import { useState } from "react"
 import * as XLSX from "xlsx"
 export default function BulkImportForm() {
@@ -295,15 +295,85 @@ setShowSummary(true)
           Upload Excel File
         </h2>
 
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          onChange={(e) =>
-            setExcelFile(
-              e.target.files?.[0] || null
-            )
-          }
-        />
+        <label
+  className="
+  group
+  flex
+  cursor-pointer
+  flex-col
+  items-center
+  justify-center
+  rounded-2xl
+  border-2
+  border-dashed
+  border-zinc-700
+  bg-zinc-950
+  p-10
+  transition-all
+  duration-300
+  hover:border-pink-500
+  hover:bg-zinc-900
+  hover:shadow-[0_0_35px_rgba(236,72,153,.25)]
+  hover:-translate-y-1
+  "
+>
+
+  <input
+    type="file"
+    accept=".xlsx,.xls"
+    className="hidden"
+    onChange={(e) =>
+      setExcelFile(
+        e.target.files?.[0] || null
+      )
+    }
+  />
+
+  <div
+    className="
+    mb-4
+    text-5xl
+    transition-transform
+    duration-300
+    group-hover:scale-110
+    group-hover:-translate-y-1
+    "
+  >
+    📄
+  </div>
+
+  <p className="text-lg font-semibold">
+
+    Choose Excel File
+
+  </p>
+
+  <p className="mt-2 text-sm text-zinc-400">
+
+    Click to browse or drag & drop
+
+  </p>
+
+  {excelFile && (
+
+    <div
+      className="
+      mt-5
+      rounded-full
+      bg-green-500/15
+      px-5
+      py-2
+      text-green-400
+      "
+    >
+
+      ✓ {excelFile.name}
+
+    </div>
+
+  )}
+
+</label>
 
         {excelFile && (
 
@@ -325,15 +395,85 @@ setShowSummary(true)
           Upload Images ZIP
         </h2>
 
-        <input
-          type="file"
-          accept=".zip"
-          onChange={(e) =>
-            setZipFile(
-              e.target.files?.[0] || null
-            )
-          }
-        />
+        <label
+  className="
+  group
+  flex
+  cursor-pointer
+  flex-col
+  items-center
+  justify-center
+  rounded-2xl
+  border-2
+  border-dashed
+  border-zinc-700
+  bg-zinc-950
+  p-10
+  transition-all
+  duration-300
+  hover:border-pink-500
+  hover:bg-zinc-900
+  hover:shadow-[0_0_35px_rgba(236,72,153,.25)]
+  hover:-translate-y-1
+  "
+>
+
+ <input
+  type="file"
+  accept=".zip"
+  className="hidden"
+  onChange={(e) =>
+    setZipFile(
+      e.target.files?.[0] || null
+    )
+  }
+/>
+
+  <div
+    className="
+    mb-4
+    text-5xl
+    transition-transform
+    duration-300
+    group-hover:scale-110
+    group-hover:-translate-y-1
+    "
+  >
+    🖼️
+  </div>
+
+  <p className="text-lg font-semibold">
+
+    Choose Excel File
+
+  </p>
+
+  <p className="mt-2 text-sm text-zinc-400">
+
+    Click to browse or drag & drop
+
+  </p>
+
+  {zipFile && (
+
+  <div
+    className="
+      mt-5
+      rounded-full
+      bg-green-500/15
+      px-5
+      py-2
+      text-green-400
+    "
+  >
+
+    ✓ {zipFile.name}
+
+  </div>
+
+)}
+
+</label>
 
         {zipFile && (
 
@@ -381,57 +521,125 @@ setShowSummary(true)
 
 {summary && (
 
-  <div className="grid md:grid-cols-3 gap-6 mb-8">
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className="grid gap-6 md:grid-cols-3 mb-8"
+  >
 
-    <div className="bg-zinc-900 rounded-2xl p-6">
+    {/* Total */}
 
-      <h2 className="text-3xl font-bold">
+    <motion.div
+      whileHover={{
+        scale: 1.04,
+        y: -5,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+      }}
+      className="
+      rounded-3xl
+      border
+      border-zinc-800
+      bg-zinc-900
+      p-7
+      shadow-xl
+      hover:border-pink-500/50
+      hover:shadow-[0_0_35px_rgba(236,72,153,.2)]
+      "
+    >
 
-        {summary.total}
-
-      </h2>
-
-      <p className="text-zinc-400">
+      <p className="text-zinc-400 text-sm uppercase tracking-wider">
 
         Total Products
 
       </p>
 
-    </div>
+      <h2 className="mt-3 text-5xl font-black">
 
-    <div className="bg-green-950 rounded-2xl p-6">
-
-      <h2 className="text-3xl font-bold text-green-400">
-
-        {summary.valid}
+        {summary.total}
 
       </h2>
 
-      <p>
+    </motion.div>
+
+    {/* Valid */}
+
+    <motion.div
+      whileHover={{
+        scale: 1.04,
+        y: -5,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+      }}
+      className="
+      rounded-3xl
+      border
+      border-green-500/20
+      bg-green-950
+      p-7
+      shadow-xl
+      hover:border-green-400
+      hover:shadow-[0_0_35px_rgba(34,197,94,.25)]
+      "
+    >
+
+      <p className="text-green-300 text-sm uppercase tracking-wider">
 
         Ready to Import
 
       </p>
 
-    </div>
+      <h2 className="mt-3 text-5xl font-black text-green-400">
 
-    <div className="bg-red-950 rounded-2xl p-6">
-
-      <h2 className="text-3xl font-bold text-red-400">
-
-        {summary.invalid}
+        {summary.valid}
 
       </h2>
 
-      <p>
+    </motion.div>
+
+    {/* Invalid */}
+
+    <motion.div
+      whileHover={{
+        scale: 1.04,
+        y: -5,
+      }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+      }}
+      className="
+      rounded-3xl
+      border
+      border-red-500/20
+      bg-red-950
+      p-7
+      shadow-xl
+      hover:border-red-400
+      hover:shadow-[0_0_35px_rgba(239,68,68,.25)]
+      "
+    >
+
+      <p className="text-red-300 text-sm uppercase tracking-wider">
 
         Validation Errors
 
       </p>
 
-    </div>
+      <h2 className="mt-3 text-5xl font-black text-red-400">
 
-  </div>
+        {summary.invalid}
+
+      </h2>
+
+    </motion.div>
+
+  </motion.div>
 
 )}
 
