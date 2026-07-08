@@ -60,18 +60,20 @@ export default function ProductCard({
       <div
   className="
   group
+relative
+overflow-hidden
   h-full
   flex
   flex-col
-  bg-white
+  bg-[#15151D]
   rounded-3xl
   overflow-hidden
   border
-  border-gray-200
+  border-[#2B2B3A]
   shadow-sm
-  hover:border-[#D4AF37]
-  hover:-translate-y-1
-  hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)]
+  hover:border-pink-500
+hover:-translate-y-2
+hover:shadow-[0_0_35px_rgba(236,72,153,0.35)]
   transition-all
   duration-500
   cursor-pointer
@@ -86,12 +88,12 @@ export default function ProductCard({
             alt={name}
             fill
             className="
-            object-contain
-            group-hover:scale-110
-            transition-transform
-            duration-700
-            
-            "
+object-contain
+p-3
+group-hover:scale-110
+transition-transform
+duration-700
+"
           />
 
           {/* Gradient Overlay */}
@@ -101,7 +103,9 @@ export default function ProductCard({
   inset-0
   z-10
   bg-gradient-to-t
-  from-[#111111]/50
+  from-[#09090B]/80
+via-purple-900/20
+to-transparent
   to-transparent
   opacity-0
   group-hover:opacity-100
@@ -122,8 +126,10 @@ z-20
 px-3
 py-1
 rounded-full
-bg-[#D4AF37]
-text-black
+bg-gradient-to-r
+from-pink-500
+to-purple-600
+text-white
 text-xs
 font-bold
 tracking-wider
@@ -149,7 +155,9 @@ z-20
 px-3
 py-1
 rounded-full
-bg-orange-500
+bg-gradient-to-r
+from-orange-500
+to-red-500
 text-white
 text-xs
 font-bold
@@ -175,8 +183,8 @@ z-20
 px-3
 py-1
 rounded-full
-bg-gray-300
-text-black
+bg-red-500
+text-white
 text-xs
 font-bold
 shadow-lg
@@ -198,7 +206,7 @@ shadow-lg
   className="
   text-2xl
   font-bold
-  text-black
+  text-white
   min-h-[72px]
   line-clamp-2
   "
@@ -208,7 +216,7 @@ shadow-lg
 
           <p
   className="
-  text-gray-600
+  text-gray-400
   mt-3
   leading-relaxed
   line-clamp-2
@@ -223,7 +231,7 @@ shadow-lg
           {/* Price */}
           <div className="mt-auto">
 
-            <p className="text-3xl font-bold text-black">
+            <p className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
               ₹{price}
 
@@ -254,29 +262,20 @@ shadow-lg
               disabled={stock === 0}
 
               className="
-px-8
-py-6
-text-lg
+flex-1
+h-12
 rounded-xl
-
-border
-border-[#D4AF37]
-bg-white
-text-black
 font-semibold
-
+text-white
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,0.45)]
 transition-all
 duration-300
-
-hover:bg-[#D4AF37]
-hover:text-black
-hover:scale-105
-hover:-translate-y-1
-hover:shadow-[0_10px_30px_rgba(212,175,55,0.25)]
-
-active:scale-95
-
-disabled:opacity-50
+disabled:opacity-40
 "
 
               onClick={(e) => {
@@ -331,35 +330,25 @@ disabled:opacity-50
 
               variant="outline"
 
-              className="
+             className="
 flex-1
 h-12
 rounded-xl
-text-base
 font-semibold
-text-[#D4AF37]
-border-[#D4AF37]
+border
+border-pink-500
+text-pink-400
 bg-transparent
-hover:bg-[#D4AF37]
-hover:text-black
+hover:bg-gradient-to-r
+hover:from-pink-500
+hover:to-purple-600
+hover:text-white
+hover:border-transparent
 hover:scale-105
-hover:shadow-lg
-active:scale-95
+hover:shadow-[0_0_30px_rgba(236,72,153,0.35)]
 transition-all
 duration-300
-disabled:opacity-50
-disabled:cursor-not-allowed
-group
-
-hover:-translate-y-2
-
-hover:border-[#D4AF37]
-
-hover:shadow-[0_15px_40px_rgba(212,175,55,0.15)]
-
-transition-all
-
-duration-500
+disabled:opacity-40
 "
               onClick={(e) => {
 

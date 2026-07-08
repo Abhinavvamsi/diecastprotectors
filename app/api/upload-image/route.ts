@@ -1,10 +1,6 @@
 import cloudinary from "@/lib/cloudinary"
-
-import { NextResponse }
-from "next/server"
-
-import { currentUser }
-from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/admin"
 
 export async function POST(
   req: Request
@@ -13,30 +9,7 @@ export async function POST(
   try {
 
     /* Protect API */
-    const user =
-      await currentUser()
-
-    const isAdmin =
-      user?.primaryEmailAddress
-        ?.emailAddress ===
-      "abhinavvamsi2004@gmail.com"
-
-    if (!isAdmin) {
-
-      return NextResponse.json(
-
-        {
-          error:
-            "Unauthorized",
-        },
-
-        {
-          status: 401,
-        }
-
-      )
-
-    }
+    await requireAdmin()
 
     /* Get File */
     const formData =
@@ -50,8 +23,7 @@ export async function POST(
       return NextResponse.json(
 
         {
-          error:
-            "No file uploaded",
+          error: "No file uploaded",
         },
 
         {
@@ -79,8 +51,7 @@ export async function POST(
         base64,
 
         {
-          folder:
-            "hw-shield",
+          folder: "hw-shield",
         }
 
       )
@@ -99,8 +70,7 @@ export async function POST(
     return NextResponse.json(
 
       {
-        error:
-          "Image upload failed",
+        error: "Image upload failed",
       },
 
       {

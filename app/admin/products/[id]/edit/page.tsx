@@ -4,11 +4,7 @@ import EditProductForm from "@/components/edit-product-form"
 
 import AdminNav from "@/components/admin-nav"
 
-import {
-  currentUser,
-} from "@clerk/nextjs/server"
-
-import { redirect } from "next/navigation"
+import { requireAdmin } from "@/lib/admin"
 
 type Props = {
   params: Promise<{
@@ -20,19 +16,7 @@ export default async function EditPage({
   params,
 }: Props) {
 
-  const user =
-    await currentUser()
-
-  const isAdmin =
-    user?.primaryEmailAddress
-      ?.emailAddress ===
-    "abhinavvamsi2004@gmail.com"
-
-  if (!isAdmin) {
-
-    redirect("/")
-
-  }
+  await requireAdmin()
 
   const { id } =
     await params
@@ -56,7 +40,7 @@ export default async function EditPage({
 
   return (
 
-  <main className="min-h-screen bg-white text-black p-8">
+  <main className="min-h-screen bg-[#09090B] text-white p-8">
 
     <div className="max-w-4xl mx-auto">
 
@@ -64,9 +48,9 @@ export default async function EditPage({
 
       <div className="mb-12">
 
-        <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
+        <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
-          Diecast Universe Admin
+          Shinsei Diecast Admin
 
         </p>
 
@@ -76,7 +60,7 @@ export default async function EditPage({
 
         </h1>
 
-        <p className="text-gray-500 mt-2">
+        <p className="text-zinc-400 mt-2">
 
           Update product information, pricing, stock and images.
 
@@ -85,16 +69,16 @@ export default async function EditPage({
       </div>
 
       <div
-        className="
-        bg-white
-        border
-        border-gray-200
-        shadow-sm
-        rounded-[2rem]
-        p-6
-        md:p-10
-        "
-      >
+  className="
+  bg-zinc-900
+  border
+  border-zinc-800
+  shadow-2xl
+  rounded-[2rem]
+  p-6
+  md:p-10
+  "
+>
 
         <EditProductForm
           product={{

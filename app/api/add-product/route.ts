@@ -1,37 +1,15 @@
 import { prisma } from "@/lib/prisma"
-
 import { NextResponse } from "next/server"
-
-import { currentUser } from "@clerk/nextjs/server"
+import { requireAdmin } from "@/lib/admin"
 
 export async function POST(
   req: Request
 ) {
 
   try {
-    const user =
-  await currentUser()
 
-const isAdmin =
-  user?.primaryEmailAddress
-    ?.emailAddress ===
-  "abhinavvamsi2004@gmail.com"
+    await requireAdmin()
 
-if (!isAdmin) {
-
-  return NextResponse.json(
-
-    {
-      error: "Unauthorized",
-    },
-
-    {
-      status: 401,
-    }
-
-  )
-
-}
     const body =
       await req.json()
 
@@ -42,30 +20,28 @@ if (!isAdmin) {
 
           name: body.name,
 
-  description: body.description,
+          description: body.description,
 
-  price: body.price,
+          price: body.price,
 
-  images: body.images,
+          images: body.images,
 
-  category: body.category,
+          category: body.category,
 
-  badge: body.badge,
+          badge: body.badge,
 
-  stock: body.stock,
+          stock: body.stock,
 
-  brandId: body.brandId,
+          brandId: body.brandId,
 
-  quantityPricing:
+          quantityPricing:
+            body.quantityPricing || null,
 
-    body.quantityPricing || null,
         },
 
       })
 
-    return NextResponse.json(
-      product
-    )
+    return NextResponse.json(product)
 
   } catch (error) {
 
@@ -74,8 +50,7 @@ if (!isAdmin) {
     return NextResponse.json(
 
       {
-        error:
-          "Failed to add product",
+        error: "Failed to add product",
       },
 
       {

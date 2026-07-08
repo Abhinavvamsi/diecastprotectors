@@ -40,7 +40,7 @@ export default async function OrdersPage() {
 
   return (
 
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       <Navbar />
 
@@ -51,8 +51,8 @@ export default async function OrdersPage() {
 
           <div>
 
-            <p className="text-[#D4AF37] uppercase tracking-widest text-sm mb-3">
-              Diecast Universe
+            <p className="uppercase tracking-widest text-sm mb-3 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+              Shinsei Diecast
             </p>
 
             <h1 className="text-5xl font-bold">
@@ -61,7 +61,7 @@ export default async function OrdersPage() {
 
             </h1>
 
-            <p className="text-gray-600 mt-4">
+            <p className="text-zinc-400 mt-4">
 
               View your order history and track your diecast collectibles.
 
@@ -75,10 +75,10 @@ export default async function OrdersPage() {
               variant="outline"
               className="
               rounded-xl
-              border-[#D4AF37]
-              text-[#D4AF37]
-              hover:bg-[#D4AF37]
-              hover:text-black
+             border-pink-500
+text-pink-400
+hover:bg-pink-500
+hover:text-white
               "
             >
 
@@ -93,7 +93,7 @@ export default async function OrdersPage() {
         {/* Empty State */}
         {orders.length === 0 && (
 
-          <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-12 text-center">
+          <div className="bg-zinc-900 border border-zinc-800 shadow-xl rounded-3xl p-12 text-center">
 
             <h2 className="text-3xl font-bold">
 
@@ -101,7 +101,7 @@ export default async function OrdersPage() {
 
             </h2>
 
-            <p className="text-gray-600 mt-4">
+            <p className="text-zinc-400 mt-4">
 
               Your purchase history will appear here.
 
@@ -118,7 +118,7 @@ export default async function OrdersPage() {
 
             <div
               key={order.id}
-              className="bg-white border border-gray-200 shadow-sm rounded-3xl p-8"
+              className="bg-zinc-900 border border-zinc-800 shadow-xl rounded-3xl p-8"
             >
 
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
@@ -126,7 +126,12 @@ export default async function OrdersPage() {
                 {/* LEFT */}
                 <div>
 
-                  <p className="text-[#D4AF37] text-sm uppercase tracking-widest">
+                  <p className="bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-500
+bg-clip-text
+text-transparent text-sm uppercase tracking-widest">
 
                     Order ID
 
@@ -138,19 +143,19 @@ export default async function OrdersPage() {
 
                   </h2>
 
-                  <p className="text-[#D4AF37] mt-6">
+                  <p className="text-pink-400 mt-6">
 
                     Payment ID
 
                   </p>
 
-                  <p className="break-all text-gray-700">
+                  <p className="break-all text-zinc-400">
 
                     {order.paymentId}
 
                   </p>
 
-                  <p className="text-[#D4AF37] mt-6">
+                  <p className="text-pink-400 mt-6">
 
                     Ordered On
 
@@ -173,36 +178,64 @@ export default async function OrdersPage() {
                     .map((product, index) => (
 
                     <div
-                      key={index}
-                      className="flex items-center gap-4"
-                    >
+  key={index}
+  className="
+  flex
+  items-start
+  gap-4
+  min-h-[80px]
+  "
+>
 
-                      <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
+                   <div
+  className="
+  relative
+  w-16
+  h-16
+  shrink-0
+  rounded-xl
+  overflow-hidden
+  bg-zinc-950
+  border
+  border-zinc-800
+  flex
+  items-center
+  justify-center
+  "
+>
 
-                        <img
-                          src={
-                            product.images?.[0] ||
-                            product.image
-                          }
-                          alt={product.name}
-                          className="w-full h-full object-contain"
-                        />
+  <img
+    src={
+      product.images?.[0] ||
+      product.image
+    }
+    alt={product.name}
+    className="
+    w-full
+    h-full
+    object-contain
+    p-1
+    "
+  />
 
-                      </div>
+</div>
 
                       <div>
 
-                        <h3 className="font-semibold">
+                       <h3
+  className="
+  font-semibold
+  text-white
+  line-clamp-2
+  min-h-[48px]
+  "
+>
+  {product.name}
+</h3>
 
-                          {product.name}
-
-                        </h3>
-
-                        <p className="text-[#D4AF37] text-sm">
-
-                          Quantity: {product.quantity}
-
-                        </p>
+                        <p className="text-pink-400 text-sm mt-1">
+  Quantity: {product.quantity}
+</p>
 
                       </div>
 
@@ -215,13 +248,23 @@ export default async function OrdersPage() {
                 {/* RIGHT */}
                 <div className="md:text-right">
 
-                  <p className="text-[#D4AF37]">
+                  <p className="text-pink-400">
 
                     Total Amount
 
                   </p>
 
-                  <h3 className="text-5xl font-bold mt-2">
+                  <h3 className="
+text-5xl
+font-bold
+mt-2
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-500
+bg-clip-text
+text-transparent
+">
 
                     ₹{order.totalAmount}
 
@@ -261,9 +304,15 @@ export default async function OrdersPage() {
                       className="
                       mt-8
                       rounded-xl
-                      bg-[#D4AF37]
-                      text-black
-                      hover:bg-[#B8941F]
+                     bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+hover:scale-105
+hover:shadow-[0_0_30px_rgba(236,72,153,.4)]
+transition-all
+duration-300
                       "
                     >
 

@@ -8,11 +8,7 @@ import { prisma } from "@/lib/prisma"
 
 import OrderStatusSelect from "@/components/order-status-select"
 
-import {
-  currentUser,
-} from "@clerk/nextjs/server"
-
-import { redirect } from "next/navigation"
+import { requireAdmin } from "@/lib/admin"
 
 export default async function OrdersPage({
   searchParams,
@@ -23,20 +19,8 @@ export default async function OrdersPage({
 }>
 }) {
 
-  const user =
-    await currentUser()
-    
-
-  const isAdmin =
-    user?.primaryEmailAddress
-      ?.emailAddress ===
-    "abhinavvamsi2004@gmail.com"
-
-  if (!isAdmin) {
-
-    redirect("/")
-
-  }
+  await requireAdmin()
+  
   const {
   search = "",
   status = "All",
@@ -159,7 +143,7 @@ const [
 ])
   return (
 
-    <main className="min-h-screen bg-white text-black p-8">
+    <main className="min-h-screen bg-[#09090B] text-white p-8">
 
       <div className="max-w-7xl mx-auto">
 
@@ -174,7 +158,7 @@ const [
   "
 >
 
-  <h1 className="text-5xl font-bold">
+  <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
     Orders Dashboard
 
@@ -186,14 +170,20 @@ const [
 
     <button
       className="
-      px-6
-      py-3
-      rounded-xl
-      bg-[#D4AF37]
-text-black
-      hover:bg-[#B8941F]
-      font-bold
-      "
+px-6
+py-3
+rounded-xl
+font-bold
+text-white
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
+transition-all
+duration-300
+"
     >
 
       📥 Export Excel
@@ -215,16 +205,16 @@ text-black
 
   <div
     className="
-    bg-white
+    bg-zinc-900
+border-zinc-800
+shadow-2xl
     border
-    border-gray-200
-    shadow-sm
     rounded-3xl
     p-6
     "
   >
 
-    <p className="text-gray-600">
+    <p className="text-zinc-400">
 
       Total Orders
 
@@ -240,23 +230,22 @@ text-black
 
   <div
     className="
-    bg-white
+    bg-zinc-900
+border-zinc-800
+shadow-2xl
     border
-    border-gray-200
-
-shadow-sm
     rounded-3xl
     p-6
     "
   >
 
-    <p className="text-gray-600">
+    <p className="text-zinc-400">
 
       Revenue
 
     </p>
 
-    <h2 className="text-4xl font-bold mt-2 text-[#D4AF37]">
+    <h2 className="text-4xl font-bold mt-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
       ₹
       {
@@ -270,23 +259,22 @@ shadow-sm
 
   <div
     className="
-    bg-white
+   bg-zinc-900
+border-zinc-800
+shadow-2xl
     border
-    border-gray-200
-
-shadow-sm
     rounded-3xl
     p-6
     "
   >
 
-    <p className="text-gray-600">
+    <p className="text-zinc-400">
 
       Pending
 
     </p>
 
-    <h2 className="text-4xl font-bold mt-2 text-yellow-500">
+    <h2 className="text-4xl font-bold mt-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
       {pendingOrders}
 
@@ -296,23 +284,22 @@ shadow-sm
 
   <div
     className="
-    bg-white
+    bg-zinc-900
+border-zinc-800
+shadow-2xl
     border
-    border-gray-200
-
-shadow-sm
     rounded-3xl
     p-6
     "
   >
 
-    <p className="text-gray-600">
+    <p className="text-zinc-400">
 
       Delivered
 
     </p>
 
-    <h2 className="text-4xl font-bold mt-2 text-[#D4AF37]">
+    <h2 className="text-4xl font-bold mt-2 text-green">
 
       {deliveredOrders}
 
@@ -370,8 +357,8 @@ shadow-sm
     gap-2
     ${
       status === item.name
-        ? "bg-[#D4AF37] border-[#D4AF37] text-black text-white"
-        : "border-gray-300 text-gray-600 hover:border-[#D4AF37] hover:text-[#D4AF37]"
+        ? "bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600 border-transparent text-white text-white"
+        : "border-zinc-700 text-zinc-400 hover:border-pink-500 hover:text-pink-400"
     }
   `}
 >
@@ -434,17 +421,16 @@ shadow-sm
   w-full
   h-14
   rounded-2xl
-  bg-white
+  bg-zinc-900
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
   border
-  border-gray-300
-  shadow-sm
   px-5
-  text-black
-  placeholder:text-gray-400
   outline-none
-  focus:border-[#D4AF37]
   focus:ring-2
-  focus:ring-[#D4AF37]/20
   transition-all
   "
 />
@@ -455,9 +441,9 @@ shadow-sm
 
   <div
     className="
-    bg-white
+    bg-zinc-900
+border-zinc-800
     border
-    border-gray-200
     shadow-sm
     rounded-3xl
     p-10
@@ -465,7 +451,7 @@ shadow-sm
     "
   >
 
-    <p className="text-gray-500">
+    <p className="text-zinc-400">
       No orders found
     </p>
 
@@ -480,10 +466,10 @@ shadow-sm
     <div
       key={order.id}
       className="
-      bg-white
+      bg-zinc-900
+border-zinc-800
+shadow-2xl
       border
-      border-gray-200
-      shadow-sm
       rounded-3xl
       p-8
       hover:shadow-md
@@ -503,25 +489,25 @@ shadow-sm
 
                   </h2>
 
-                  <p className="text-gray-600 mt-2">
+                  <p className="text-white mt-2">
 
                     {order.email}
 
                   </p>
 
-                  <p className="text-gray-600">
+                  <p className="text-white">
 
                     {order.phone}
 
                   </p>
 
-                  <p className="text-gray-600">
+                  <p className="text-white">
 
                     {order.address}
 
                   </p>
 
-                  <p className="text-gray-600">
+                  <p className="text-white">
 
                     {order.city}
                     {" - "}
@@ -534,7 +520,7 @@ shadow-sm
                 {/* Order Details */}
                 <div>
 
-                  <p className="text-2xl font-bold text-[#D4AF37]">
+                  <p className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
                     Total:
                     {" "}
@@ -542,31 +528,31 @@ shadow-sm
 
                   </p>
 
-                  <p className="text-[#D4AF37] mt-4">
+                  <p className="text-pink-400 mt-4">
 
                     Order ID
 
                     <br />
 
-                    <span className="text-black break-all font-medium">
+                    <span className="text-white break-all font-medium">
   {order.orderId}
 </span>
 
                   </p>
 
-                  <p className="text-[#D4AF37] mt-2 break-all">
+                  <p className="text-pink-400 mt-2 break-all">
 
                     Payment ID
 
                     <br />
 
-                    <span className="text-black break-all font-medium">
+                    <span className="text-white break-all font-medium">
   {order.paymentId}
 </span>
 
                   </p>
 
-                  <p className="text-[#D4AF37] mt-4">
+                  <p className="text-pink-400 mt-4">
 
                     Ordered On
 
@@ -613,10 +599,10 @@ shadow-sm
   px-4
   py-2
   rounded-full
-  bg-[#FFF8E1]
+  bg-pink-500/10
+border-pink-500/30
+text-pink-400
   border
-  border-[#D4AF37]/40
-  text-[#B8941F]
   font-medium
   "
 >
@@ -634,10 +620,10 @@ shadow-sm
   px-4
   py-2
   rounded-full
-  bg-blue-50
+  bg-purple-500/10
+border-purple-500/30
+text-purple-400
   border
-  border-blue-200
-  text-blue-700
   font-medium
   "
 >
@@ -661,19 +647,19 @@ shadow-sm
 
       ${
         order.status === "Pending"
-          ? "bg-yellow-50 border-yellow-200 text-yellow-700"
+          ? "bg-yellow-500/15 border-yellow-500/30 text-yellow-400"
 
           : order.status === "Packed"
-          ? "bg-blue-50 border-blue-200 text-blue-700"
+          ? "bg-blue-500/15 border-blue-500/30 text-blue-400"
 
           : order.status === "Shipped"
-          ? "bg-purple-50 border-purple-200 text-purple-700"
+          ? "bg-purple-500/15 border-purple-500/30 text-purple-400"
 
           : order.status === "Delivered"
-          ? "bg-green-50 border-green-200 text-green-700"
+          ? "bg-green-500/15 border-green-500/30 text-green-400"
 
           : order.status === "Cancelled"
-          ? "bg-red-50 border-red-200 text-red-700"
+          ? "bg-red-500/15 border-red-500/30 text-red-400"
 
           : "bg-gray-50 border-gray-200 text-gray-700"
       }
@@ -697,7 +683,7 @@ shadow-sm
 
               {/* Ordered Products */}
 
-              <div className="mt-8 border-t border-gray-200
+              <div className="mt-8 border-t border-zinc-800
 
 shadow-sm pt-8">
 
@@ -722,11 +708,10 @@ shadow-sm pt-8">
                           flex
                           items-center
                           gap-4
-                          bg-gray-50
+                          bg-zinc-950
+                          border-zinc-800
                           border
-                          border-gray-200
 
-shadow-sm
                           rounded-2xl
                           p-4
                           "
@@ -766,7 +751,7 @@ shadow-sm
 
                             </h4>
 
-                            <p className="text-gray-600">
+                            <p className="text-zinc-400">
 
                               Quantity:
                               {" "}
@@ -774,7 +759,7 @@ shadow-sm
 
                             </p>
 
-                            <p className="text-[#D4AF37]">
+                            <p className="text-pink-400">
 
                               Unit Price:
                               {" "}

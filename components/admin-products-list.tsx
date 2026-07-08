@@ -37,13 +37,19 @@ const [deletingId, setDeletingId] =
             )
           }
           className="
-          h-12
-          px-4
-          rounded-xl
-          border
-          border-gray-300
-          bg-white
-          "
+h-12
+px-4
+rounded-xl
+border
+border-zinc-700
+bg-zinc-900
+text-white
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
+"
         >
 
           <option value="All">
@@ -72,16 +78,21 @@ const [deletingId, setDeletingId] =
           <div
             key={product.id}
             className="
-            bg-white
-            border
-            border-gray-200
-            shadow-sm
-            rounded-3xl
-            overflow-hidden
-            "
+bg-zinc-900
+border
+border-zinc-800
+shadow-2xl
+rounded-3xl
+overflow-hidden
+transition-all
+duration-300
+hover:border-pink-500/40
+hover:-translate-y-1
+hover:shadow-[0_0_30px_rgba(236,72,153,.18)]
+"
           >
 
-            <div className="relative h-72">
+            <div className="relative h-72 bg-zinc-950">
 
               <Image
                 src={
@@ -102,13 +113,15 @@ const [deletingId, setDeletingId] =
 
                 <span
                   className="
-                  px-3
-                  py-1
-                  rounded-full
-                  bg-[#D4AF37]/10
-                  text-[#D4AF37]
-                  text-xs
-                  "
+px-3
+py-1
+rounded-full
+bg-pink-500/15
+text-pink-400
+text-xs
+border
+border-pink-500/30
+"
                 >
                   {product.category}
                 </span>
@@ -116,14 +129,16 @@ const [deletingId, setDeletingId] =
                 {product.brand && (
 
                   <span
-                    className="
-                    px-3
-                    py-1
-                    rounded-full
-                    bg-blue-100
-                    text-blue-600
-                    text-xs
-                    "
+                   className="
+px-3
+py-1
+rounded-full
+bg-purple-500/15
+text-purple-400
+text-xs
+border
+border-purple-500/30
+"
                   >
                     {product.brand.name}
                   </span>
@@ -138,7 +153,7 @@ const [deletingId, setDeletingId] =
 
               </h2>
 
-              <p className="text-gray-500 mt-3">
+              <p className="text-zinc-400 mt-3">
 
                 Stock: {product.stock}
 
@@ -149,18 +164,23 @@ const [deletingId, setDeletingId] =
                 <a
   href={`/admin/products/${product.id}/edit`}
   className="
-  flex-1
-  h-11
-  rounded-xl
-  bg-[#D4AF37]
-  text-black
-  font-semibold
-  flex
-  items-center
-  justify-center
-  hover:bg-[#B8941F]
-  transition
-  "
+flex-1
+h-11
+rounded-xl
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+font-semibold
+flex
+items-center
+justify-center
+transition-all
+duration-300
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
+"
 >
   Edit
 </a>
@@ -218,20 +238,20 @@ const [deletingId, setDeletingId] =
     }
 
   }}
-  className="
-  flex-1
-  h-11
-  rounded-xl
-  border
-  border-red-500
-  text-red-500
-  font-semibold
-  hover:bg-red-500
-  hover:text-white
-  transition-all
-  duration-300
-  disabled:opacity-60
-  "
+ className="
+flex-1
+h-11
+rounded-xl
+border
+border-pink-500
+text-pink-400
+font-semibold
+hover:bg-pink-500
+hover:text-white
+transition-all
+duration-300
+disabled:opacity-60
+"
 >
 
   {deletingId === product.id

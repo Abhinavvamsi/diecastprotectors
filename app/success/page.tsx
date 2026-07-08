@@ -1,5 +1,5 @@
 "use client"
-
+import { CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 
@@ -18,7 +18,7 @@ export default function SuccessPage() {
 
   return (
 
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       <Navbar />
 
@@ -28,10 +28,10 @@ export default function SuccessPage() {
           className="
           w-full
           max-w-3xl
-          bg-white
           border
-          border-gray-200
-          shadow-sm
+          bg-zinc-900
+border-zinc-800
+          shadow-xl
           rounded-3xl
           p-12
           text-center
@@ -40,25 +40,27 @@ export default function SuccessPage() {
 
           {/* Success Icon */}
 
-          <div className="text-7xl mb-6">
 
-            🎉
-
-          </div>
+<div className="flex justify-center mb-8">
+  <div className="w-24 h-24 rounded-full bg-green-500/10 flex items-center justify-center">
+    <CheckCircle2
+      size={64}
+      className="text-green-500"
+    />
+  </div>
+</div>
 
           {/* Heading */}
 
-          <h1 className="text-5xl font-bold">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+    Payment Successful
+</h1>
 
-            Payment Successful
+          <p className="text-zinc-400 text-lg mt-6 leading-relaxed">
 
-          </h1>
+            Thank you for shopping with Shinsei Diecast.
 
-          <p className="text-gray-500 text-lg mt-6 leading-relaxed">
-
-            Thank you for shopping with Diecast Universe.
-
-            Your order has been placed successfully.
+Your order has been confirmed and we're preparing it for dispatch.
 
           </p>
 
@@ -67,27 +69,30 @@ export default function SuccessPage() {
           <div
             className="
             mt-10
-            bg-[#FAFAFA]
+            bg-zinc-950
             border
-            border-gray-200
+            border-zinc-800
             rounded-2xl
             p-8
             "
           >
 
-            <p
-              className="
-              text-[#D4AF37]
-              text-sm
-              uppercase
-              tracking-widest
-              font-semibold
-              "
-            >
-
-              Order ID
-
-            </p>
+           <p
+  className="
+  text-sm
+  uppercase
+  tracking-widest
+  font-semibold
+  bg-gradient-to-r
+  from-pink-500
+  via-fuchsia-500
+  to-purple-500
+  bg-clip-text
+  text-transparent
+  "
+>
+  Order ID
+</p>
 
             <p
               className="
@@ -112,8 +117,11 @@ export default function SuccessPage() {
             p-8
             rounded-3xl
             border
-            border-[#D4AF37]/30
-            bg-[#FFF8E6]
+            bg-gradient-to-br
+from-pink-500/10
+to-purple-600/10
+
+border-purple-500/30
             text-center
             "
           >
@@ -122,24 +130,28 @@ export default function SuccessPage() {
               className="
               text-2xl
               font-bold
-              text-[#D4AF37]
+              bg-gradient-to-r
+from-pink-500
+to-purple-500
+bg-clip-text
+text-transparent
               "
             >
 
-              🎉 Join The Diecast Universe Community
+              🎉 Join The Shinsei Diecast Community
 
             </h3>
 
             <div
               className="
-              text-gray-700
+              text-zinc-300
               mt-5
               space-y-2
               "
             >
 
               <p>
-                ✅ Protector Restocks
+                ✅ Latest Diecast Arrivals
               </p>
 
               <p>
@@ -166,10 +178,17 @@ export default function SuccessPage() {
               px-8
               py-4
               rounded-xl
-              bg-[#D4AF37]
+              bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+
+hover:shadow-[0_0_30px_rgba(236,72,153,.4)]
               text-black
               font-bold
-              hover:bg-[#B8941F]
+              hover:scale-105
+transition-all
+duration-300
               transition
               "
             >
@@ -200,9 +219,13 @@ export default function SuccessPage() {
                 w-full
                 h-14
                 rounded-xl
-                bg-[#D4AF37]
-                hover:bg-[#B8941F]
-                text-black
+                bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+
+hover:shadow-[0_0_30px_rgba(236,72,153,.4)]
                 font-semibold
                 "
               >
@@ -221,8 +244,11 @@ export default function SuccessPage() {
                 w-full
                 h-14
                 rounded-xl
-                border-[#D4AF37]
-                text-black
+                border-pink-500
+text-pink-400
+
+hover:bg-pink-500
+hover:text-white
                 hover:bg-[#D4AF37]/10
                 "
               >

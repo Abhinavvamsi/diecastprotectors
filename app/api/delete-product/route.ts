@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/prisma"
-
 import { NextResponse } from "next/server"
-
-import { currentUser } from "@clerk/nextjs/server"
+import { requireAdmin } from "@/lib/admin"
 
 export async function POST(
   req: Request
@@ -11,29 +9,7 @@ export async function POST(
   try {
 
     /* Protect API */
-    const user =
-      await currentUser()
-
-    const isAdmin =
-      user?.primaryEmailAddress
-        ?.emailAddress ===
-      "abhinavvamsi2004@gmail.com"
-
-    if (!isAdmin) {
-
-      return NextResponse.json(
-
-        {
-          error: "Unauthorized",
-        },
-
-        {
-          status: 401,
-        }
-
-      )
-
-    }
+    await requireAdmin()
 
     /* Get Product ID */
     const { searchParams } =
@@ -67,15 +43,12 @@ export async function POST(
 
     })
 
-    /* Redirect */
-    return NextResponse.redirect(
+    /* Success */
+    return NextResponse.json({
 
-      new URL(
-        "/admin/products",
-        req.url
-      )
+      success: true,
 
-    )
+    })
 
   } catch (error) {
 
@@ -84,8 +57,7 @@ export async function POST(
     return NextResponse.json(
 
       {
-        error:
-          "Failed to delete product",
+        error: "Failed to delete product",
       },
 
       {

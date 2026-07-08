@@ -106,7 +106,7 @@ export async function POST(
 
           <p>
             Thank you for shopping with
-            Diecast Universe.
+            Shinsei Diecast.
           </p>
 
         </div>

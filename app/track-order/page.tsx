@@ -77,7 +77,7 @@ export default function TrackOrderPage() {
 
   return (
 
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       {/* Global Navbar */}
       <Navbar />
@@ -90,7 +90,7 @@ export default function TrackOrderPage() {
   right-0
   w-[400px]
   h-[400px]
-  bg-[#D4AF37]/10
+  bg-pink-500/10
   blur-[120px]
   rounded-full
   pointer-events-none
@@ -101,8 +101,8 @@ export default function TrackOrderPage() {
         {/* Heading */}
         <div className="mb-12">
 
-        <p className="text-[#D4AF37] uppercase tracking-widest text-sm">
-  Diecast Universe
+        <p className="uppercase tracking-widest text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+  Shinsei Diecast
 </p>
 
           <h1 className="text-5xl font-bold">
@@ -111,7 +111,7 @@ export default function TrackOrderPage() {
 
           </h1>
 
-          <p className="text-[#D4AF37] mt-4 text-lg">
+          <p className="text-zinc-400 mt-4 text-lg">
 
             Enter your Order ID to check your latest order status.
 
@@ -120,9 +120,9 @@ export default function TrackOrderPage() {
         </div>
 
         {/* Search Box */}
-        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-8">
+        <div className="bg-zinc-900 border border-zinc-800 shadow-sm rounded-3xl p-8">
 
-          <label className="block text-gray-600 mb-4">
+          <label className="block text-zinc-400 mb-4">
 
             Order ID
 
@@ -141,12 +141,16 @@ export default function TrackOrderPage() {
 w-full
 h-14
 rounded-xl
-bg-white
+bg-zinc-950
+text-white
+placeholder:text-zinc-500
 border
-border-gray-300
+border-zinc-700
 px-4
 outline-none
-focus:border-[#D4AF37]
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
 transition
 "
           />
@@ -159,7 +163,23 @@ transition
               loading ||
               !orderId
             }
-            className="w-full mt-6 h-14 rounded-xl bg-[#D4AF37] text-black hover:bg-[#B8941F] font-bold hover:scale-[1.02] active:scale-95 transition disabled:opacity-50"
+            className="
+w-full
+mt-6
+h-14
+rounded-xl
+font-bold
+text-white
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+hover:scale-[1.02]
+hover:shadow-[0_0_35px_rgba(236,72,153,.4)]
+transition-all
+duration-300
+disabled:opacity-50
+"
           >
 
             {loading
@@ -189,9 +209,9 @@ transition
     }}
     className="
     mt-10
-    bg-white
+    bg-zinc-900
     border
-    border-gray-200
+    border-zinc-800
     shadow-sm
     rounded-3xl
     p-8
@@ -208,7 +228,7 @@ transition
 
                 </h2>
 
-                <p className="text-gray-600 mt-4">
+                <p className="text-zinc-400 mt-4">
 
                   Order ID:
                   <br />
@@ -217,7 +237,7 @@ transition
 
                 </p>
 
-                <p className="text-gray-600 mt-4 break-all">
+                <p className="text-zinc-400 mt-4 break-all">
 
                   Payment ID:
                   <br />
@@ -226,7 +246,7 @@ transition
 
                 </p>
 
-                <p className="text-gray-600 mt-4">
+                <p className="text-zinc-400 mt-4">
 
                   Ordered On:
                   <br />
@@ -253,13 +273,13 @@ transition
 
               <div>
 
-                <p className="text-[#D4AF37]">
+                <p className="bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent font-semibold">
 
                   Total Amount
 
                 </p>
 
-                <p className="text-4xl font-bold mt-2">
+                <p className="text-4xl font-bold mt-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
                   ₹{order.totalAmount}
 
@@ -290,7 +310,7 @@ transition
                   }`}
                 />
 
-                <p className="text-lg">
+                <p className="text-lg text-zinc-300">
 
                   Pending
 

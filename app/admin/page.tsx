@@ -1,33 +1,15 @@
 import Link from "next/link"
 import Navbar from "@/components/navbar"
-
-import {
-  currentUser,
-} from "@clerk/nextjs/server"
-
-import {
-  redirect,
-} from "next/navigation"
+import { requireAdmin } from "@/lib/admin"
 
 export default async function AdminPage() {
 
-  const user =
-    await currentUser()
-
-  const isAdmin =
-    user?.primaryEmailAddress
-      ?.emailAddress ===
-    "abhinavvamsi2004@gmail.com"
-
-  if (!isAdmin) {
-
-    redirect("/")
-
-  }
+  const { admin } =
+  await requireAdmin()
 
   return (
 
-  <main className="min-h-screen bg-white text-black">
+  <main className="min-h-screen bg-[#09090B] text-white">
 
     <Navbar />
 
@@ -39,9 +21,9 @@ export default async function AdminPage() {
 
         <div>
 
-          <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
+          <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
-            Diecast Universe Admin
+            Shinsei Diecast Admin
 
           </p>
 
@@ -51,7 +33,7 @@ export default async function AdminPage() {
 
           </h1>
 
-          <p className="text-gray-500 mt-4 text-lg">
+          <p className="text-zinc-400 mt-4 text-lg">
 
             Manage products, orders, inventory and store operations.
 
@@ -62,16 +44,21 @@ export default async function AdminPage() {
         <Link href="/">
 
           <button
-            className="
-            h-14
-            px-8
-            rounded-2xl
-            border
-            border-gray-300
-            hover:border-[#D4AF37]
-            hover:text-[#D4AF37]
-            transition
-            "
+           className="
+h-14
+px-8
+rounded-2xl
+border
+border-pink-500
+text-pink-400
+hover:bg-gradient-to-r
+hover:from-pink-500
+hover:to-purple-600
+hover:text-white
+hover:border-transparent
+transition-all
+duration-300
+"
           >
 
             Back to Store
@@ -86,9 +73,9 @@ export default async function AdminPage() {
 
       <div className="grid md:grid-cols-3 gap-6 mb-12">
 
-        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
 
-          <p className="text-gray-500">
+          <p className="text-zinc-400">
 
             Products
 
@@ -102,9 +89,9 @@ export default async function AdminPage() {
 
         </div>
 
-        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 shadow-sm rounded-3xl p-6">
 
-          <p className="text-gray-500">
+          <p className="text-zinc-400">
 
             Orders
 
@@ -118,9 +105,9 @@ export default async function AdminPage() {
 
         </div>
 
-        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 shadow-sm rounded-3xl p-6">
 
-          <p className="text-gray-500">
+          <p className="text-zinc-400">
 
             Store
 
@@ -146,15 +133,16 @@ export default async function AdminPage() {
           href="/admin/add-product"
           className="
           group
-          bg-white
-          border
-          border-gray-200
-          shadow-sm
+         bg-zinc-900
+border
+border-zinc-800
+shadow-sm
           rounded-3xl
           p-8
-          hover:border-[#D4AF37]
-          hover:shadow-md
-          hover:-translate-y-1
+          hover:border-pink-500/60
+hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+          hover:-translate-y-2
+          hover:shadow-[0_0_35px_rgba(236,72,153,.25)]
           transition-all
           duration-300
           "
@@ -167,8 +155,11 @@ export default async function AdminPage() {
               w-16
               h-16
               rounded-2xl
-              bg-[#D4AF37]
-              text-black
+              bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
               flex
               items-center
               justify-center
@@ -189,7 +180,7 @@ export default async function AdminPage() {
 
               </h2>
 
-              <p className="text-gray-500 mt-4 leading-relaxed">
+              <p className="text-zinc-400 mt-4 leading-relaxed">
 
                 Create new products with image uploads and stock management.
 
@@ -207,15 +198,15 @@ export default async function AdminPage() {
           href="/admin/orders"
           className="
           group
-          bg-white
-          border
-          border-gray-200
-          shadow-sm
+     bg-zinc-900
+border
+border-zinc-800
+shadow-sm
           rounded-3xl
           p-8
-          hover:border-[#D4AF37]
-          hover:shadow-md
-          hover:-translate-y-1
+          hover:border-pink-500/60
+hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+          hover:-translate-y-2
           transition-all
           duration-300
           "
@@ -228,8 +219,11 @@ export default async function AdminPage() {
               w-16
               h-16
               rounded-2xl
-              bg-[#D4AF37]
-              text-black
+              bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
               flex
               items-center
               justify-center
@@ -250,7 +244,7 @@ export default async function AdminPage() {
 
               </h2>
 
-              <p className="text-gray-500 mt-4 leading-relaxed">
+              <p className="text-zinc-400 mt-4 leading-relaxed">
 
                 Track customer purchases and manage deliveries.
 
@@ -268,15 +262,16 @@ export default async function AdminPage() {
           href="/admin/products"
           className="
           group
-          bg-white
-          border
-          border-gray-200
-          shadow-sm
+          bg-zinc-900
+border
+border-zinc-800
+shadow-sm
           rounded-3xl
           p-8
-          hover:border-[#D4AF37]
-          hover:shadow-md
-          hover:-translate-y-1
+          hover:border-pink-500/60
+hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+          hover:-translate-y-2
+          hover:shadow-[0_0_35px_rgba(236,72,153,.25)]
           transition-all
           duration-300
           "
@@ -289,8 +284,11 @@ export default async function AdminPage() {
               w-16
               h-16
               rounded-2xl
-              bg-[#D4AF37]
-              text-black
+              bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
               flex
               items-center
               justify-center
@@ -311,7 +309,7 @@ export default async function AdminPage() {
 
               </h2>
 
-              <p className="text-gray-500 mt-4 leading-relaxed">
+              <p className="text-zinc-400 mt-4 leading-relaxed">
 
                 Edit pricing, inventory and catalog details.
 
@@ -327,14 +325,16 @@ export default async function AdminPage() {
   href="/admin/brands"
   className="
   group
-  bg-white
-  border
-  border-gray-200
+  bg-zinc-900
+border
+border-zinc-800
+shadow-sm
   rounded-3xl
   p-8
-  hover:border-[#D4AF37]
+  hover:border-pink-500/60
+hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
   hover:-translate-y-2
-  hover:shadow-md
+  hover:shadow-[0_0_35px_rgba(236,72,153,.25)]
   transition-all
   duration-300
   "
@@ -347,8 +347,11 @@ export default async function AdminPage() {
       w-16
       h-16
       rounded-2xl
-      bg-[#D4AF37]
-      text-black
+      bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
       flex
       items-center
       justify-center
@@ -371,7 +374,7 @@ export default async function AdminPage() {
 
       <p
         className="
-        text-gray-500
+        text-zinc-400
         mt-4
         leading-relaxed
         "
@@ -398,15 +401,16 @@ export default async function AdminPage() {
   href="/admin/banners"
   className="
   group
-  bg-white
-  border
-  border-gray-200
-  shadow-sm
+  bg-zinc-900
+border
+border-zinc-800
+shadow-sm
   rounded-3xl
   p-8
-  hover:border-[#D4AF37]
-  hover:shadow-md
-  hover:-translate-y-1
+  hover:border-pink-500/60
+hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+  hover:-translate-y-2
+  hover:shadow-[0_0_35px_rgba(236,72,153,.25)]
   transition-all
   duration-300
   "
@@ -418,8 +422,11 @@ export default async function AdminPage() {
       w-16
       h-16
       rounded-2xl
-      bg-[#D4AF37]
-      text-black
+     bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
       flex
       items-center
       justify-center
@@ -436,7 +443,7 @@ export default async function AdminPage() {
         Banner Management
       </h2>
 
-      <p className="text-gray-500 mt-4 leading-relaxed">
+      <p className="text-zinc-400 mt-4 leading-relaxed">
         Create, edit and manage homepage banners.
       </p>
 
@@ -461,15 +468,16 @@ export default async function AdminPage() {
           href="/admin/coupons"
           className="
           group
-          bg-white
-          border
-          border-gray-200
-          shadow-sm
+         bg-zinc-900
+border
+border-zinc-800
+shadow-sm
           rounded-3xl
           p-8
-          hover:border-[#D4AF37]
-          hover:shadow-md
-          hover:-translate-y-1
+          hover:border-pink-500/60
+hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+          hover:-translate-y-2
+          hover:shadow-[0_0_35px_rgba(236,72,153,.25)]
           transition-all
           duration-300
           "
@@ -482,8 +490,11 @@ export default async function AdminPage() {
               w-16
               h-16
               rounded-2xl
-              bg-[#D4AF37]
-              text-black
+              bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
               flex
               items-center
               justify-center
@@ -504,7 +515,7 @@ export default async function AdminPage() {
 
                 </h2>
 
-              <p className="text-gray-500 mt-4 leading-relaxed">
+              <p className="text-zinc-400 mt-4 leading-relaxed">
 
                 Create and manage discount campaigns.
 
@@ -522,15 +533,16 @@ export default async function AdminPage() {
           href="/admin/settings"
           className="
           group
-          bg-white
-          border
-          border-gray-200
-          shadow-sm
+          bg-zinc-900
+border
+border-zinc-800
+shadow-sm
           rounded-3xl
           p-8
-          hover:border-[#D4AF37]
-          hover:shadow-md
-          hover:-translate-y-1
+          hover:border-pink-500/60
+hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+          hover:-translate-y-2
+          hover:shadow-[0_0_35px_rgba(236,72,153,.25)]
           transition-all
           duration-300
           "
@@ -543,8 +555,11 @@ export default async function AdminPage() {
               w-16
               h-16
               rounded-2xl
-              bg-[#D4AF37]
-              text-black
+             bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
               flex
               items-center
               justify-center
@@ -565,7 +580,7 @@ export default async function AdminPage() {
 
               </h2>
 
-              <p className="text-gray-500 mt-4 leading-relaxed">
+              <p className="text-zinc-400 mt-4 leading-relaxed">
 
                 Configure shipping, pickup and store settings.
 
@@ -576,6 +591,63 @@ export default async function AdminPage() {
           </div>
 
         </Link>
+        {admin.role === "OWNER" && (
+
+  <Link
+    href="/admin/admins"
+    className="
+    group
+    bg-zinc-900
+    border
+    border-zinc-800
+    rounded-3xl
+    p-8
+    hover:border-pink-500/60
+    hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+    hover:-translate-y-2
+    transition-all
+    duration-300
+    "
+  >
+
+    <div className="space-y-6">
+
+      <div
+        className="
+        w-16
+        h-16
+        rounded-2xl
+        bg-gradient-to-r
+        from-pink-500
+        via-fuchsia-500
+        to-purple-600
+        text-white
+        flex
+        items-center
+        justify-center
+        text-3xl
+        "
+      >
+        👤
+      </div>
+
+      <div>
+
+        <h2 className="text-3xl font-bold">
+          Admin Management
+        </h2>
+
+        <p className="text-zinc-400 mt-4">
+          Manage administrator access and permissions.
+        </p>
+
+      </div>
+
+    </div>
+
+  </Link>
+
+)}
 
       </div>
 

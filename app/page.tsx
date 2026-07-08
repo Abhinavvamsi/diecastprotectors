@@ -282,7 +282,7 @@ useEffect(() => {
 }
   return (
 
-    <main className="min-h-screen bg-white text-black overflow-x-hidden">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       {/* Navbar */}
       <Navbar />
@@ -305,21 +305,27 @@ useEffect(() => {
         {/* Header */}
         <div className="mb-12">
 
-          <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
+          <p className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent uppercase tracking-[0.3em] text-sm font-semibold">
 
             Featured Products
 
           </p>
 
-          <h2
-            className={`
-              ${bebas.className}
-              text-5xl
-              md:text-6xl
-              mt-4
-              tracking-wide
-            `}
-          >
+        <h2
+  className={`
+    ${bebas.className}
+    text-5xl
+    md:text-6xl
+    mt-4
+    tracking-wide
+    bg-gradient-to-r
+    from-pink-500
+    via-fuchsia-400
+    to-purple-500
+    bg-clip-text
+    text-transparent
+  `}
+>
 
             Collector Favorites
 
@@ -348,7 +354,7 @@ useEffect(() => {
 
             </h2>
 
-            <p className="text-zinc-500 mt-4">
+            <p className="text-zinc-400 mt-4">
 
               Try searching something else
 
@@ -408,16 +414,22 @@ useEffect(() => {
 
   <Link href="/cars">
 
-    <Button
-      className="
-      bg-[#D4AF37]
-      text-black
-      hover:bg-[#B8941F]
-      px-8
-      py-6
-      rounded-xl
-      "
-    >
+ <Button
+  className="
+  bg-gradient-to-r
+  from-pink-500
+  via-fuchsia-500
+  to-purple-600
+  text-white
+  hover:scale-105
+  hover:shadow-[0_0_30px_rgba(236,72,153,0.45)]
+  transition-all
+  duration-300
+  px-8
+  py-6
+  rounded-xl
+  "
+>
 
       View Full Collection
 

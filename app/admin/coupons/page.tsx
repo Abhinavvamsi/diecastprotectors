@@ -165,7 +165,7 @@ async function toggleCoupon(
 
   return (
 
-  <main className="min-h-screen bg-white text-black p-8">
+  <main className="min-h-screen bg-[#09090B] text-white p-8">
 
     <div className="max-w-7xl mx-auto">
 
@@ -173,15 +173,15 @@ async function toggleCoupon(
 
       <div className="mb-12">
 
-        <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
-          Diecast Universe Admin
+        <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+          Shinsei Diecast Admin
         </p>
 
         <h1 className="text-5xl md:text-6xl font-bold mt-4">
           Coupon Management
         </h1>
 
-        <p className="text-gray-500 mt-3">
+        <p className="text-zinc-400 mt-3">
           Create and manage discount coupons.
         </p>
 
@@ -191,9 +191,9 @@ async function toggleCoupon(
 
       <div className="grid md:grid-cols-3 gap-6 mb-10">
 
-        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 shadow-2xl rounded-3xl p-6">
 
-          <p className="text-gray-500">
+          <p className="text-zinc-400">
             Total Coupons
           </p>
 
@@ -203,9 +203,9 @@ async function toggleCoupon(
 
         </div>
 
-        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 shadow-2xl rounded-3xl p-6">
 
-          <p className="text-gray-500">
+          <p className="text-zinc-400">
             Active Coupons
           </p>
 
@@ -219,9 +219,9 @@ async function toggleCoupon(
 
         </div>
 
-        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+        <div className="bg-zinc-900 border border-zinc-800 shadow-2xl rounded-3xl p-6">
 
-          <p className="text-gray-500">
+          <p className="text-zinc-400">
             Total Uses
           </p>
 
@@ -242,7 +242,7 @@ async function toggleCoupon(
 
       {/* Create Coupon */}
 
-      <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-8 mb-10">
+      <div className="bg-zinc-900 border border-zinc-800 shadow-2xl rounded-3xl p-8 mb-10">
 
         <h2 className="text-2xl font-bold mb-6">
           Create Coupon
@@ -259,18 +259,19 @@ async function toggleCoupon(
               )
             }
             className="
-            h-14
-            rounded-xl
-            border
-            border-gray-300
-            bg-white
-            px-4
-            text-black
-            outline-none
-            focus:border-[#D4AF37]
-            focus:ring-2
-            focus:ring-[#D4AF37]/20
-            "
+h-14
+rounded-xl
+border
+border-zinc-700
+bg-[#09090B]
+px-4
+text-white
+placeholder:text-zinc-500
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+"
           />
 
           <select
@@ -278,19 +279,20 @@ async function toggleCoupon(
             onChange={(e) =>
               setType(e.target.value)
             }
-            className="
-            h-14
-            rounded-xl
-            border
-            border-gray-300
-            bg-white
-            px-4
-            text-black
-            outline-none
-            focus:border-[#D4AF37]
-            focus:ring-2
-            focus:ring-[#D4AF37]/20
-            "
+           className="
+h-14
+rounded-xl
+border
+border-zinc-700
+bg-[#09090B]
+px-4
+text-white
+placeholder:text-zinc-500
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+"
           >
 
             <option>
@@ -313,18 +315,19 @@ async function toggleCoupon(
               )
             }
             className="
-            h-14
-            rounded-xl
-            border
-            border-gray-300
-            bg-white
-            px-4
-            text-black
-            outline-none
-            focus:border-[#D4AF37]
-            focus:ring-2
-            focus:ring-[#D4AF37]/20
-            "
+h-14
+rounded-xl
+border
+border-zinc-700
+bg-[#09090B]
+px-4
+text-white
+placeholder:text-zinc-500
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+"
           />
 
           <input
@@ -337,31 +340,37 @@ async function toggleCoupon(
               )
             }
             className="
-            h-14
-            rounded-xl
-            border
-            border-gray-300
-            bg-white
-            px-4
-            text-black
-            outline-none
-            focus:border-[#D4AF37]
-            focus:ring-2
-            focus:ring-[#D4AF37]/20
-            "
+h-14
+rounded-xl
+border
+border-zinc-700
+bg-[#09090B]
+px-4
+text-white
+placeholder:text-zinc-500
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+"
           />
 
           <button
             onClick={createCoupon}
             className="
-            h-14
-            rounded-xl
-            bg-[#D4AF37]
-            text-black
-            font-semibold
-            hover:bg-[#B8941F]
-            transition
-            "
+h-14
+rounded-xl
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+font-semibold
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
+transition-all
+duration-300
+"
           >
 
             Create
@@ -380,16 +389,18 @@ async function toggleCoupon(
 
           <div
             key={coupon.id}
-            className="
-            bg-white
-            border
-            border-gray-200
-            shadow-sm
-            rounded-3xl
-            p-6
-            hover:shadow-md
-            transition-all
-            "
+           className="
+bg-zinc-900
+border
+border-zinc-800
+shadow-2xl
+rounded-3xl
+p-6
+hover:border-pink-500/40
+hover:shadow-[0_0_25px_rgba(236,72,153,.18)]
+transition-all
+duration-300
+"
           >
 
             <div className="flex justify-between items-start">
@@ -400,7 +411,7 @@ async function toggleCoupon(
                   {coupon.code}
                 </h2>
 
-                <p className="text-gray-600 mt-2">
+                <p className="text-zinc-300 mt-2">
 
                   {coupon.type === "PERCENTAGE"
                     ? `${coupon.value}% OFF`
@@ -408,7 +419,7 @@ async function toggleCoupon(
 
                 </p>
 
-                <p className="text-gray-500 mt-1">
+                <p className="text-zinc-400 mt-1">
 
                   Minimum Order:
                   {" "}
@@ -427,8 +438,8 @@ async function toggleCoupon(
                 font-semibold
                 ${
                   coupon.active
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
+? "bg-green-500/20 text-green-400 border border-green-500/30"
+: "bg-red-500/20 text-red-400 border border-red-500/30"
                 }
                 `}
               >
@@ -443,7 +454,7 @@ async function toggleCoupon(
 
             <div className="mt-6">
 
-              <p className="text-gray-500">
+              <p className="text-zinc-400">
 
                 Used By:
                 {" "}
@@ -463,15 +474,20 @@ async function toggleCoupon(
                     )
                   }
                   className="
-                  px-4
-                  py-2
-                  rounded-xl
-                  bg-[#D4AF37]
-                  text-black
-                  font-semibold
-                  hover:bg-[#B8941F]
-                  transition
-                  "
+px-4
+py-2
+rounded-xl
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+font-semibold
+hover:scale-105
+hover:shadow-[0_0_20px_rgba(236,72,153,.35)]
+transition-all
+duration-300
+"
                 >
 
                   {coupon.active
@@ -487,14 +503,18 @@ async function toggleCoupon(
                     )
                   }
                   className="
-                  px-4
-                  py-2
-                  rounded-xl
-                  bg-red-500
-                  text-white
-                  hover:bg-red-600
-                  transition
-                  "
+px-4
+py-2
+rounded-xl
+border
+border-red-500
+text-red-400
+font-semibold
+hover:bg-red-500
+hover:text-white
+transition-all
+duration-300
+"
                 >
 
                   Delete

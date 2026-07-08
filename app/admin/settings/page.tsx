@@ -102,7 +102,7 @@ pickupLocation,
 
  return (
 
-  <main className="min-h-screen bg-white text-black p-8">
+  <main className="min-h-screen bg-[#09090B] text-white p-8">
 
     <div className="max-w-7xl mx-auto">
 
@@ -110,15 +110,15 @@ pickupLocation,
 
       <div className="mb-12">
 
-        <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
-          Diecast Universe Admin
+        <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+          Shinsei Diecast Admin
         </p>
 
         <h1 className="text-5xl md:text-6xl font-bold mt-4">
           Store Settings
         </h1>
 
-        <p className="text-gray-500 mt-3">
+        <p className="text-zinc-400 mt-3">
           Configure shipping, pickup and checkout preferences.
         </p>
 
@@ -126,13 +126,13 @@ pickupLocation,
 
       <div
         className="
-        bg-white
-        border
-        border-gray-200
-        shadow-sm
-        rounded-3xl
-        p-8
-        "
+bg-zinc-900
+border
+border-zinc-800
+shadow-2xl
+rounded-3xl
+p-8
+"
       >
 
         <div className="space-y-8">
@@ -145,7 +145,7 @@ pickupLocation,
               className="
               block
               text-sm
-              text-gray-500
+              text-zinc-400
               uppercase
               tracking-wider
               mb-3
@@ -164,19 +164,20 @@ pickupLocation,
                 )
               }
               className="
-              w-full
-              h-14
-              rounded-xl
-              border
-              border-gray-300
-              bg-white
-              px-4
-              text-black
-              outline-none
-              focus:border-[#D4AF37]
-              focus:ring-2
-              focus:ring-[#D4AF37]/20
-              "
+w-full
+h-14
+rounded-xl
+border
+border-zinc-700
+bg-[#09090B]
+px-4
+text-white
+placeholder:text-zinc-500
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+"
             />
 
           </div>
@@ -189,7 +190,7 @@ pickupLocation,
               className="
               block
               text-sm
-              text-gray-500
+              text-zinc-400
               uppercase
               tracking-wider
               mb-3
@@ -207,20 +208,21 @@ pickupLocation,
                 )
               }
               className="
-              w-full
-              min-h-[140px]
-              rounded-xl
-              border
-              border-gray-300
-              bg-white
-              px-4
-              py-4
-              text-black
-              outline-none
-              focus:border-[#D4AF37]
-              focus:ring-2
-              focus:ring-[#D4AF37]/20
-              "
+w-full
+min-h-[140px]
+rounded-xl
+border
+border-zinc-700
+bg-[#09090B]
+px-4
+py-4
+text-white
+placeholder:text-zinc-500
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+"
             />
 
           </div>
@@ -229,12 +231,12 @@ pickupLocation,
 
           <div
             className="
-            bg-gray-50
-            border
-            border-gray-200
-            rounded-2xl
-            p-6
-            "
+bg-[#09090B]
+border
+border-zinc-700
+rounded-2xl
+p-6
+"
           >
 
             <label
@@ -257,7 +259,7 @@ pickupLocation,
                 className="
                 w-5
                 h-5
-                accent-[#D4AF37]
+                accent-pink-500
                 "
               />
 
@@ -273,7 +275,7 @@ pickupLocation,
                   className="
                   block
                   text-sm
-                  text-gray-500
+                  text-zinc-400
                   uppercase
                   tracking-wider
                   mb-3
@@ -292,19 +294,20 @@ pickupLocation,
                     )
                   }
                   className="
-                  w-full
-                  h-14
-                  rounded-xl
-                  border
-                  border-gray-300
-                  bg-white
-                  px-4
-                  text-black
-                  outline-none
-                  focus:border-[#D4AF37]
-                  focus:ring-2
-                  focus:ring-[#D4AF37]/20
-                  "
+w-full
+h-14
+rounded-xl
+border
+border-zinc-700
+bg-[#09090B]
+px-4
+text-white
+placeholder:text-zinc-500
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+"
                 />
 
               </div>
@@ -318,15 +321,20 @@ pickupLocation,
           <button
             onClick={saveSettings}
             className="
-            w-full
-            h-14
-            rounded-xl
-            bg-[#D4AF37]
-            text-black
-            font-bold
-            hover:bg-[#B8941F]
-            transition-all
-            "
+w-full
+h-14
+rounded-xl
+font-bold
+text-white
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+hover:scale-[1.02]
+hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
+transition-all
+duration-300
+"
           >
 
             Save Settings

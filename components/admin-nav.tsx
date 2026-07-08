@@ -2,10 +2,27 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export default function AdminNav() {
 
   const pathname = usePathname()
+
+  const [role, setRole] =
+    useState("")
+
+  useEffect(() => {
+
+    const cachedRole =
+      localStorage.getItem("admin-role")
+
+    if (cachedRole) {
+
+      setRole(cachedRole)
+
+    }
+
+  }, [])
 
   const links = [
 
@@ -28,15 +45,26 @@ export default function AdminNav() {
       href: "/admin/products",
       label: "Products",
     },
-    {
-  href: "/admin/brands",
-  label: "Brands",
-},
 
-{
-  href: "/admin/banners",
-  label: "Banners",
-},
+    ...(role === "OWNER"
+      ? [
+          {
+            href: "/admin/admins",
+            label: "Admins",
+          },
+        ]
+      : []),
+
+    {
+      href: "/admin/brands",
+      label: "Brands",
+    },
+
+    {
+      href: "/admin/banners",
+      label: "Banners",
+    },
+
     {
       href: "/admin/coupons",
       label: "Coupons",
@@ -67,35 +95,36 @@ export default function AdminNav() {
 
             <button
               className={`
-              px-6
-              py-3
-              rounded-2xl
-              font-semibold
-              border
-              transition-all
-              duration-300
-              shadow-sm
+                px-6
+                py-3
+                rounded-2xl
+                font-semibold
+                border
+                transition-all
+                duration-300
 
-              ${
-                isActive
-                  ? `
-                    bg-[#D4AF37]
-                    text-black
-                    border-[#D4AF37]
-                    shadow-lg
-                    shadow-[#D4AF37]/20
-                  `
-                  : `
-                    bg-white
-                    text-black
-                    border-gray-200
-                    hover:border-[#D4AF37]
-                    hover:bg-[#FFFBEF]
-                    hover:text-[#D4AF37]
-                    hover:-translate-y-1
-                    hover:shadow-md
-                  `
-              }
+                ${
+                  isActive
+                    ? `
+                      text-white
+                      border-pink-500
+                      bg-gradient-to-r
+                      from-pink-500
+                      via-fuchsia-500
+                      to-purple-600
+                      shadow-[0_0_25px_rgba(236,72,153,.35)]
+                    `
+                    : `
+                      bg-zinc-900
+                      text-zinc-300
+                      border-zinc-700
+                      hover:border-pink-500
+                      hover:text-white
+                      hover:-translate-y-1
+                      hover:bg-zinc-800
+                      hover:shadow-[0_0_20px_rgba(236,72,153,.15)]
+                    `
+                }
               `}
             >
 

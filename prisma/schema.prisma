@@ -85,3 +85,13 @@ model Banner {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+
+
+model Admin {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  role      String   @default("ADMIN")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

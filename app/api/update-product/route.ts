@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/prisma"
-
 import { NextResponse } from "next/server"
-
-import { currentUser } from "@clerk/nextjs/server"
+import { requireAdmin } from "@/lib/admin"
 
 export async function POST(
   req: Request
@@ -10,26 +8,8 @@ export async function POST(
 
   try {
 
-    const user =
-      await currentUser()
-
-    const isAdmin =
-      user?.primaryEmailAddress
-        ?.emailAddress ===
-      "abhinavvamsi2004@gmail.com"
-
-    if (!isAdmin) {
-
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-
-    }
+    /* Protect API */
+    await requireAdmin()
 
     const { searchParams } =
       new URL(req.url)
@@ -40,12 +20,15 @@ export async function POST(
     if (!id) {
 
       return NextResponse.json(
+
         {
           error: "Missing product id",
         },
+
         {
           status: 400,
         }
+
       )
 
     }
@@ -83,6 +66,9 @@ export async function POST(
           stock:
             body.stock,
 
+          brandId:
+            body.brandId,
+
           quantityPricing:
             body.quantityPricing,
 
@@ -99,13 +85,16 @@ export async function POST(
     console.log(error)
 
     return NextResponse.json(
+
       {
         error:
           "Failed to update product",
       },
+
       {
         status: 500,
       }
+
     )
 
   }

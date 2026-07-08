@@ -248,7 +248,7 @@ if (body.couponCode) {
 
         <p>
           Thank you for shopping
-          with Diecast Universe.
+          with Shinsei Diecast.
         </p>
 
       </div>

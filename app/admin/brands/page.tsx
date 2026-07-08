@@ -153,19 +153,19 @@ async function handleLogoUpload(
 
   return (
 
-    <main className="min-h-screen bg-white text-black p-8">
+    <main className="min-h-screen bg-[#09090B] text-white p-8">
 
       <div className="max-w-7xl mx-auto">
 
         <AdminNav />
 
-        <h1 className="text-5xl font-bold mb-10">
+        <h1 className="text-5xl font-bold mb-10 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
           Brand Management
 
         </h1>
 
-        <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6 mb-10">
+        <div className="bg-zinc-900 border border-zinc-800 shadow-2xl rounded-3xl p-6 mb-10">
 
           <h2 className="text-xl font-bold mb-4">
 
@@ -185,28 +185,39 @@ async function handleLogoUpload(
                 )
               }
               className="
-              flex-1
-              h-14
-              rounded-xl
-              border
-              border-gray-300
-              px-4
-              "
+flex-1
+h-14
+rounded-xl
+bg-zinc-950
+border
+border-zinc-700
+px-4
+text-white
+placeholder:text-zinc-500
+outline-none
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
+"
             />
 <label
   className="
-  flex
-  items-center
-  justify-center
-  h-14
-  rounded-xl
-  border-2
-  border-dashed
-  border-gray-300
-  cursor-pointer
-  hover:border-[#D4AF37]
-  transition
-  "
+flex
+items-center
+justify-center
+h-14
+rounded-xl
+border-2
+border-dashed
+border-zinc-700
+bg-zinc-950
+cursor-pointer
+hover:border-pink-500
+hover:bg-pink-500/5
+transition-all
+duration-300
+"
 >
 
   {uploading
@@ -224,12 +235,19 @@ async function handleLogoUpload(
             <button
               onClick={createBrand}
               className="
-              px-6
-              rounded-xl
-              bg-[#D4AF37]
-              text-black
-              font-semibold
-              "
+px-6
+rounded-xl
+font-semibold
+text-white
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
+transition-all
+duration-300
+"
             >
 
               Create
@@ -241,7 +259,7 @@ async function handleLogoUpload(
 
   <div className="mt-6">
 
-    <p className="text-sm text-gray-500 mb-2">
+    <p className="text-sm text-zinc-400 mb-2">
 
       Logo Preview
 
@@ -251,14 +269,15 @@ async function handleLogoUpload(
       src={logo}
       alt="Brand Logo"
       className="
-      w-24
-      h-24
-      object-contain
-      border
-      border-gray-200
-      rounded-xl
-      p-2
-      "
+w-24
+h-24
+object-contain
+bg-zinc-950
+border
+border-zinc-700
+rounded-xl
+p-2
+"
     />
 
   </div>
@@ -273,13 +292,18 @@ async function handleLogoUpload(
             <div
               key={brand.id}
               className="
-              bg-white
-              border
-              border-gray-200
-              shadow-sm
-              rounded-3xl
-              p-6
-              "
+bg-zinc-900
+border
+border-zinc-800
+shadow-2xl
+rounded-3xl
+p-6
+transition-all
+duration-300
+hover:border-pink-500/40
+hover:-translate-y-1
+hover:shadow-[0_0_25px_rgba(236,72,153,.18)]
+"
             >
 
               <h2 className="text-2xl font-bold">
@@ -293,11 +317,16 @@ async function handleLogoUpload(
     src={brand.logo}
     alt={brand.name}
     className="
-    w-16
-    h-16
-    object-contain
-    mt-4
-    "
+w-16
+h-16
+object-contain
+mt-4
+bg-zinc-950
+border
+border-zinc-700
+rounded-xl
+p-2
+"
   />
 
 )}
@@ -308,17 +337,18 @@ async function handleLogoUpload(
     )
   }
   className="
-  mt-4
-  w-full
-  h-12
-  rounded-xl
-  border
-  border-red-500
-  text-red-500
-  hover:bg-red-500
-  hover:text-white
-  transition
-  "
+mt-4
+w-full
+h-12
+rounded-xl
+border
+border-pink-500
+text-pink-400
+hover:bg-pink-500
+hover:text-white
+transition-all
+duration-300
+"
 >
 
   Delete Brand

@@ -20,7 +20,7 @@ export default function BrandMarquee({
 
   return (
 
-    <section className="overflow-hidden w-full border-y border-gray-200 py-6 bg-white">
+    <section className="overflow-hidden w-full border-y border-zinc-800 py-6 bg-[#09090B]">
 
       <div className="marquee items-center">
 
@@ -34,7 +34,7 @@ export default function BrandMarquee({
           <div
             key={`${brand.id}-${index}`}
             className="
-            mx-10
+            mx-8
             flex
             items-center
             justify-center
@@ -44,33 +44,60 @@ export default function BrandMarquee({
 
             {brand.logo ? (
 
-              <Image
-                src={brand.logo}
-                alt={brand.name}
-                width={140}
-                height={70}
+              <div
                 className="
-                h-14
-                w-auto
-                object-contain
-                opacity-80
-                hover:opacity-100
-                transition
+                h-20
+                w-40
+                rounded-2xl
+                bg-zinc-900
+                border
+                border-zinc-800
+                flex
+                items-center
+                justify-center
+                transition-all
                 duration-300
+                hover:border-pink-500/50
+                hover:shadow-[0_0_25px_rgba(236,72,153,.25)]
                 "
-              />
+              >
+
+                <Image
+                  src={brand.logo}
+                  alt={brand.name}
+                  width={120}
+                  height={60}
+                  className="
+                  h-12
+                  w-auto
+                  object-contain
+                  opacity-90
+                  hover:opacity-100
+                  transition
+                  duration-300
+                  "
+                />
+
+              </div>
 
             ) : (
 
               <span
                 className="
-                text-[#D4AF37]
-                font-bold
                 text-xl
+                font-bold
                 whitespace-nowrap
+                bg-gradient-to-r
+                from-pink-500
+                via-fuchsia-500
+                to-purple-500
+                bg-clip-text
+                text-transparent
                 "
               >
+
                 {brand.name}
+
               </span>
 
             )}

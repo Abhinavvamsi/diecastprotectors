@@ -139,13 +139,13 @@ if (loading) {
 
   return (
 
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 py-20">
 
-        <p className="text-center text-lg text-gray-500">
+        <p className="text-center text-lg text-gray-400">
 
           Loading Diecast Cars...
 
@@ -160,11 +160,12 @@ if (loading) {
 }
   return (
 
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       <Navbar />
 
       <section
+      
         className="
         relative
         max-w-7xl
@@ -173,6 +174,7 @@ if (loading) {
         md:px-6
         py-20
         "
+        
       >
 
         {/* Gold Glow */}
@@ -183,7 +185,7 @@ if (loading) {
   right-0
   w-[500px]
   h-[500px]
-  bg-[#D4AF37]/10
+  bg-purple-500/20
   blur-[120px]
   rounded-full
   pointer-events-none
@@ -204,13 +206,17 @@ if (loading) {
 
             <p
               className="
-              text-[#D4AF37]
+              bg-gradient-to-r
+from-pink-500
+to-purple-500
+bg-clip-text
+text-transparent
               uppercase
               tracking-widest
               text-sm
               "
             >
-              Diecast Universe
+              Shinsei Diecast
             </p>
 
             <h1
@@ -223,18 +229,20 @@ if (loading) {
   "
 >
               Premium{" "}
-              <span className="text-[#D4AF37]">
+              <span className="bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
                 Diecast
               </span>{" "}
               Cars
             </h1>
 <div className="flex flex-wrap gap-4 mt-8">
 
-  <div className="px-5 py-3 rounded-xl bg-[#D4AF37]/10">
+  <div className="px-5 py-3 rounded-xl bg-[#15151D]
+border
+border-[#2B2B3A]">
     <p className="text-2xl font-bold">
       {products.length}+
     </p>
-    <p className="text-sm text-gray-500">
+    <p className="text-sm text-gray-400">
       Models
     </p>
   </div>
@@ -262,7 +270,9 @@ if (loading) {
   className="
   w-24
   h-1
-  bg-[#D4AF37]
+  bg-gradient-to-r
+from-pink-500
+to-purple-600
   rounded-full
   mt-6
   animate-pulse
@@ -271,7 +281,7 @@ if (loading) {
 
             <p
               className="
-              text-gray-600
+              text-gray-400
               mt-6
               text-lg
               max-w-2xl
@@ -313,7 +323,7 @@ if (loading) {
       w-5
       h-5
       text-gray-400
-      group-focus-within:text-[#D4AF37]
+      group-focus-within:text-pink-500
       transition-colors
       duration-300
       "
@@ -335,22 +345,22 @@ if (loading) {
       rounded-2xl
 
       border
-      border-gray-200
+      border-[#2B2B3A]
 
-      bg-white
+      bg-[#15151D]
 
-      text-black
+      text-white
       placeholder:text-gray-400
 
       transition-all
       duration-300
 
       focus:outline-none
-      focus:border-[#D4AF37]
+      focus:border-pink-500
 
-      focus:shadow-[0_0_30px_rgba(212,175,55,0.15)]
+      focus:shadow-[0_0_30px_rgba(236,72,153,.25)]
 
-      hover:border-[#D4AF37]/50
+      hover:border-pink-500/60
 
       hover:-translate-y-0.5
       "
@@ -367,7 +377,7 @@ if (loading) {
 
 <div className="mb-8">
 
-  <p className="text-[#D4AF37] text-sm font-medium mb-3">
+  <p className="text-pink-400 text-sm font-medium mb-3">
 
     Brand
 
@@ -392,8 +402,8 @@ if (loading) {
 
           ${
             selectedBrand === brand
-              ? "bg-[#D4AF37] text-black border-[#D4AF37]"
-              : "border-gray-300 text-gray-600 hover:border-[#D4AF37]"
+? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent"
+: "border-[#2B2B3A] text-gray-300 hover:border-pink-500"
           }
         `}
       >
@@ -412,7 +422,7 @@ if (loading) {
 
 <div className="mb-8">
 
-  <p className="text-[#D4AF37] text-sm font-medium mb-3">
+  <p className="text-pink-400 text-sm font-medium mb-3">
 
     Availability
 
@@ -440,9 +450,9 @@ if (loading) {
           duration-300
 
           ${
-            stockFilter === filter
-              ? "bg-[#D4AF37] text-black border-[#D4AF37]"
-              : "border-gray-300 text-gray-600 hover:border-[#D4AF37]"
+           stockFilter === filter
+? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent"
+: "border-[#2B2B3A] text-gray-300 hover:border-pink-500"
           }
         `}
       >
@@ -460,7 +470,7 @@ if (loading) {
 
 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 
-  <p className="text-gray-500">
+  <p className="text-gray-400">
 
     Showing {
 
@@ -505,9 +515,11 @@ if (loading) {
     px-4
     rounded-xl
     border
-    border-gray-200
-    bg-white
-    text-black
+    border-[#2B2B3A]
+bg-[#15151D]
+text-white
+focus:border-pink-500
+focus:outline-none
     "
   >
 

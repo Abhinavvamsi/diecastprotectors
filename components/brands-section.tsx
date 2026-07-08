@@ -14,9 +14,10 @@ export default function BrandsSection() {
     async function loadBrands() {
 
       const response =
-  await fetch(
-    "/api/admin/brands"
-  )
+        await fetch(
+          "/api/admin/brands"
+        )
+
       const data =
         await response.json()
 
@@ -40,13 +41,13 @@ export default function BrandsSection() {
 
       <div className="mb-10">
 
-        <p className="text-[#D4AF37] uppercase tracking-widest text-sm">
+        <p className="uppercase tracking-widest text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
           Explore By Brand
 
         </p>
 
-        <h2 className="text-4xl font-bold mt-2">
+        <h2 className="text-4xl font-bold mt-2 text-white">
 
           Shop Your Favorite Brands
 
@@ -66,70 +67,70 @@ export default function BrandsSection() {
 
         {brands.map((brand) => (
 
-         <Link
-  key={brand.id}
-  href={`/brands/${brand.id}`}
-  prefetch
->
+          <Link
+            key={brand.id}
+            href={`/brands/${brand.id}`}
+            prefetch
+          >
 
             <div
-  className="
-  h-full
-  flex
-  flex-col
-  bg-white
-  border
-  border-gray-200
-  rounded-3xl
-  overflow-hidden
-  shadow-sm
-  hover:shadow-lg
-  hover:border-[#D4AF37]
-  hover:-translate-y-1
-  transition-all
-  duration-300
-  "
->
+              className="
+              h-full
+              flex
+              flex-col
+              bg-zinc-900
+              border
+              border-zinc-800
+              rounded-3xl
+              overflow-hidden
+              shadow-sm
+              hover:shadow-[0_0_30px_rgba(236,72,153,.2)]
+              hover:border-pink-500/50
+              hover:-translate-y-1
+              transition-all
+              duration-300
+              "
+            >
 
               <div
-  className="
-  h-56
-  flex
-  items-center
-  justify-center
-  bg-gray-50
-  p-8
-  "
->
+                className="
+                h-56
+                flex
+                items-center
+                justify-center
+                bg-zinc-950
+                p-8
+                "
+              >
 
-  {brand.logo && (
+                {brand.logo && (
 
-    <Image
-      src={brand.logo}
-      alt={brand.name}
-      width={180}
-      height={100}
-      className="
-      max-h-24
-      w-auto
-      h-auto
-      object-contain
-      "
-    />
+                  <Image
+                    src={brand.logo}
+                    alt={brand.name}
+                    width={180}
+                    height={100}
+                    className="
+                    max-h-24
+                    w-auto
+                    h-auto
+                    object-contain
+                    "
+                  />
 
-  )}
+                )}
 
-</div>
+              </div>
 
               <div className="p-5 flex-1">
 
-                <h3 className="font-bold text-lg">
+                <h3 className="font-bold text-lg text-white">
 
                   {brand.name}
 
                 </h3>
 
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-zinc-400 text-sm mt-1">
 
                   {brand._count.products}
                   {" "}

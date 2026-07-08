@@ -18,7 +18,7 @@ export default function PremiumLoader() {
       flex-col
       items-center
       justify-center
-      bg-white
+      bg-[#09090B]
       "
     >
 
@@ -28,15 +28,24 @@ export default function PremiumLoader() {
           text-6xl
           md:text-8xl
           tracking-wide
-          text-black
+          text-white
         `}
       >
 
-        DIECAST
+        SHINSEI
 
-        <span className="text-[#D4AF37]">
+        <span
+          className="
+          bg-gradient-to-r
+          from-pink-500
+          via-fuchsia-500
+          to-purple-500
+          bg-clip-text
+          text-transparent
+          "
+        >
 
-          {" "}UNIVERSE
+          {" "}DIECAST
 
         </span>
 
@@ -45,7 +54,7 @@ export default function PremiumLoader() {
       <p
         className="
         mt-4
-        text-gray-500
+        text-zinc-400
         tracking-[0.3em]
         uppercase
         text-sm
@@ -63,18 +72,21 @@ export default function PremiumLoader() {
         w-56
         overflow-hidden
         rounded-full
-        bg-gray-200
+        bg-zinc-800
         "
       >
 
-       <div
-  className="
-  h-full
-  w-1/2
-  bg-[#D4AF37]
-  animate-[loader_1.5s_ease-in-out_infinite]
-  "
-/>
+        <div
+          className="
+          h-full
+          w-1/2
+          bg-gradient-to-r
+          from-pink-500
+          via-fuchsia-500
+          to-purple-600
+          animate-[loader_1.5s_ease-in-out_infinite]
+          "
+        />
 
       </div>
 

@@ -51,7 +51,7 @@ const selectedPrice =
 
       <Navbar />
 
-      <main className="min-h-screen bg-white text-black pt-24 pb-32 md:pb-0">
+      <main className="min-h-screen bg-[#09090B] text-white pt-24 pb-32 md:pb-0">
 
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20">
 
@@ -68,9 +68,9 @@ md:h-[700px]
 rounded-3xl
 overflow-hidden
 border
-border-gray-200
-bg-white
-shadow-sm
+border-[#2B2B3A]
+bg-[#15151D]
+shadow-[0_0_30px_rgba(168,85,247,0.15)]
 group
 ">
 
@@ -98,9 +98,9 @@ group
                         setSelectedImage(index)
                       }
                       className={`relative w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all duration-300 shrink-0 ${
-                        selectedImage === index
-                         ? "border-[#D4AF37] scale-105"
-                          : "border-gray-200 hover:border-[#D4AF37]"
+                       selectedImage === index
+? "border-pink-500 scale-105 shadow-[0_0_15px_rgba(236,72,153,.4)]"
+: "border-[#2B2B3A] hover:border-purple-500"
                       }`}
                     >
 
@@ -137,25 +137,29 @@ group
 
 )}
 
-<p className="text-[#D4AF37] uppercase tracking-widest text-sm font-semibold">
+<p className="bg-gradient-to-r
+from-pink-500
+to-purple-500
+bg-clip-text
+text-transparent uppercase tracking-widest text-sm font-semibold">
 
   {product.category}
 
 </p>
 
-              <h1 className="text-4xl md:text-6xl font-bold mt-4 leading-tight">
+              <h1 className="text-4xl md:text-6xl font-bold mt-4 leading-tight bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
                 {product.name}
 
               </h1>
 
-              <p className="text-5xl font-bold mt-6 text-[#D4AF37]">
+              <p className="text-5xl font-bold mt-6 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
   ₹{selectedPrice}
 
 </p>
 
-              <p className="text-gray-600 mt-8 leading-relaxed text-lg">
+              <p className="text-gray-400 mt-8 leading-relaxed text-lg">
 
                 {product.description}
 
@@ -179,7 +183,7 @@ group
 
   <div className="mt-8">
 
-    <p className="text-sm text-zinc-400 mb-4">
+    <p className="text-sm text-gray-400 mb-4">
 
       Buy More Save More
 
@@ -232,9 +236,9 @@ group
               transition-all
 
               ${
-                selectedTier === index
-                  ? "bg-white text-black border-white"
-                  : "border-zinc-700 hover:border-white"
+               selectedTier === index
+? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent"
+: "border-[#2B2B3A] text-gray-300 hover:border-pink-500"
               }
             `}
           >
@@ -257,7 +261,7 @@ group
               {/* Quantity */}
               <div className="mt-10">
 
-                <p className="text-sm text-[#D4AF37] uppercase tracking-wide mb-4">
+                <p className="text-sm text-pink-400 uppercase tracking-wide mb-4">
 
                   Quantity
 
@@ -273,14 +277,16 @@ group
                           : 1
                       )
                     }
-                    className="w-12 h-12 rounded-xl border border-red-500/40 text-xl hover:border-white transition"
+                    className="w-12 h-12 rounded-xl border border-purple-500/40 text-xl hover:border-pink-500 border-purple-500/40
+hover:border-pink-500
+hover:bg-[#15151D] transition"
                   >
 
                     -
 
                   </button>
 
-                  <div className="w-14 text-center text-xl font-semibold">
+                  <div className="w-14 text-center text-xl font-bold text-white">
 
                     {quantity}
 
@@ -308,9 +314,11 @@ group
     h-12
     rounded-xl
     border
-    border-red-500/40
+    border-purple-500/40
     text-xl
-    hover:border-white
+    hover:border-pink-500
+
+hover:bg-[#15151D]
     transition
     disabled:opacity-40
     disabled:cursor-not-allowed
@@ -331,19 +339,21 @@ group
                 <Button
   disabled={product.stock === 0}
   className="
-  px-8
-  py-6
-  text-lg
-  rounded-xl
-  bg-[#D4AF37]
-  text-black
-  hover:bg-[#B8941F]
-  transition-all
-  duration-200
-  hover:scale-105
-  active:scale-95
-  disabled:opacity-50
-  "
+px-8
+py-6
+text-lg
+rounded-xl
+text-white
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.45)]
+transition-all
+duration-300
+disabled:opacity-40
+"
                   onClick={() => {
 if (
   quantity > product.stock
@@ -398,11 +408,26 @@ if (
                 <Button
                   disabled={product.stock === 0}
                   variant="outline"
-                  className="px-8 py-6 text-lg rounded-xl bg-white border-[#D4AF37] text-[#D4AF37]
-
-hover:bg-[#D4AF37]
-
-hover:text-black transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
+                  className="
+px-8
+py-6
+text-lg
+rounded-xl
+border
+border-pink-500
+text-pink-400
+bg-transparent
+hover:bg-gradient-to-r
+hover:from-pink-500
+hover:to-purple-600
+hover:text-white
+hover:border-transparent
+hover:scale-105
+hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
+transition-all
+duration-300
+disabled:opacity-40
+"
                   onClick={() => {
 if (
   quantity > product.stock
@@ -461,41 +486,37 @@ if (
         </div>
 
         {/* Sticky Mobile Buy Bar */}
-        <div
-          className="
-          fixed
-          bottom-0
-          left-0
-          right-0
-          md:hidden
-          z-50
-          border-t
-          border-gray-200
-          bg-white/95
-          backdrop-blur-xl
-          px-4
-          py-4
-          flex
-          items-center
-          justify-between
-          gap-4
-          "
-        >
-
+        {/* Sticky Mobile Buy Bar */}
+<div
+  className="
+  fixed
+  bottom-0
+  left-0
+  right-0
+  md:hidden
+  z-50
+  border-t
+  border-[#2B2B3A]
+  bg-[#09090B]/95
+  backdrop-blur-xl
+  px-4
+  py-4
+  flex
+  items-center
+  justify-between
+  gap-4
+  "
+>
           {/* Price */}
           <div>
 
-            <p className="text-xs text-zinc-400">
+           <p className="text-xs text-gray-400">
+  Price
+</p>
 
-              Price
-
-            </p>
-
-            <h3 className="text-2xl font-bold text-black">
-
-              ₹{product.price}
-
-            </h3>
+<h3 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+  ₹{product.price}
+</h3>
 
           </div>
 
@@ -547,19 +568,24 @@ if (
 
             }}
 
-            className="
-            flex-1
-            h-14
-            rounded-2xl
-            bg-[#D4AF37]
-            hover:bg-[#B8941F]
-            text-black
-            font-bold
-            text-lg
-            transition-all
-            duration-300
-            disabled:opacity-50
-            "
+         className="
+flex-1
+h-14
+rounded-2xl
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+font-bold
+text-lg
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.45)]
+transition-all
+duration-300
+disabled:opacity-40
+disabled:cursor-not-allowed
+"
           >
 
             {product.stock === 0

@@ -1,31 +1,48 @@
 import Link from "next/link"
-
+import Image from "next/image"
 export default function Footer() {
 
   return (
 
-    <footer className="border-t border-gray-200 bg-white text-black mt-20">
+    <footer className="border-t border-[#2B2B3A] bg-[#09090B] text-white mt-20">
 
-      <div className="max-w-7xl mx-auto px-6 py-14">
+      <div className="max-w-7xl mx-auto px-6 py-14 relative">
 
         <div className="grid md:grid-cols-3 gap-12">
 
           {/* Brand */}
-          <div>
+          {/* Brand */}
+<div>
 
-            <h2 className="text-3xl font-bold">
+  <div className="flex items-center gap-4">
 
-              Diecast Universe
+    <Image
+      src="/logo.png"
+      alt="Shinsei Diecast"
+      width={56}
+      height={56}
+      className="object-contain shrink-0 drop-shadow-[0_0_12px_rgba(236,72,153,0.6)]"
+    />
 
-            </h2>
+    <div>
 
-            <p className="text-[#D4AF37] mt-4 leading-relaxed">
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+        Shinsei Diecast
+      </h2>
 
-              Premium Hot Wheels, Mini GT, Inno64 and collectible diecast models curated for passionate collectors.
+      <p className="text-xs tracking-[0.25em] uppercase text-zinc-400 mt-1">
+        Premium Diecast Collection
+      </p>
 
-            </p>
+    </div>
 
-          </div>
+  </div>
+
+  <p className="mt-6 leading-relaxed text-gray-400">
+    From Japan to your collection — premium diecast cars delivered with care.
+  </p>
+
+</div>
 
           {/* Quick Links */}
           <div>
@@ -40,21 +57,21 @@ export default function Footer() {
 
               <Link
   href="/"
-  className="hover:text-[#D4AF37] transition-colors"
+  className="text-gray-400 hover:text-pink-400 transition-colors duration-300"
 >
   Home
 </Link>
 
               <Link
   href="/cars"
-  className="hover:text-[#D4AF37] transition-colors"
+  className="text-gray-400 hover:text-pink-400 transition-colors duration-300"
 >
   Diecast Cars
 </Link>
 
               <Link
   href="/orders"
-  className="hover:text-[#D4AF37] transition-colors"
+  className="text-gray-400 hover:text-pink-400 transition-colors duration-300"
 >
   My Orders
 </Link>
@@ -72,27 +89,33 @@ export default function Footer() {
 
             </h3>
 
-            <div className="flex flex-col gap-3 text-zinc-400">
+            <div className="flex flex-col gap-3 text-gray-400">
 
-              <Link href="/shipping-policy">
+              <Link
+  href="/shipping-policy"
+  className="hover:text-pink-400 transition-colors duration-300"
+>
 
                 Shipping Policy
 
               </Link>
 
-              <Link href="/refund-policy">
+              <Link href="/refund-policy"
+              className="hover:text-pink-400 transition-colors duration-300">
 
                 Refund Policy
 
               </Link>
 
-              <Link href="/privacy-policy">
+              <Link href="/privacy-policy"
+              className="hover:text-pink-400 transition-colors duration-300">
 
                 Privacy Policy
 
               </Link>
 
-              <Link href="/terms-and-conditions">
+              <Link href="/terms-and-conditions"
+              className="hover:text-pink-400 transition-colors duration-300">
 
                 Terms & Conditions
 
@@ -105,24 +128,24 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-gray-200 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-gray-500 text-sm">
+        <div className="border-t border-[#2B2B3A] mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-gray-500 text-sm">
 
           <p>
 
-           © 2026 Diecast Universe. All rights reserved.
+           © 2026 Shinsei Diecast. All rights reserved.
 
           </p>
 
           <p>
 
-            Built for collectors ❤️
+            Inspired by JDM Culture • Built for Collectors 🚗
 
           </p>
 
         </div>
 
       </div>
-
+<div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-pink-500/40 to-transparent" />
     </footer>
 
   )

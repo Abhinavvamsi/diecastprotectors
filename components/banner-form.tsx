@@ -167,15 +167,15 @@ async function handleMobileUpload(
   }
 }
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       <div className="max-w-6xl mx-auto px-6 py-12">
 
-        <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
-          Diecast Universe Admin
+        <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+          Shinsei Diecast Admin
         </p>
 
-        <h1 className="text-6xl font-bold text-black mt-3">
+        <h1 className="text-6xl font-bold text-white mt-3">
   {mode === "edit"
     ? "Edit Banner"
     : "Add New Banner"}
@@ -184,22 +184,22 @@ async function handleMobileUpload(
         <form
           onSubmit={handleSubmit}
           className="
-          mt-12
-          rounded-3xl
-          border
-          border-gray-300
-          bg-white
-          p-10
-          shadow-sm
-          space-y-8
-          "
+mt-12
+rounded-3xl
+border
+border-zinc-800
+bg-zinc-900
+p-10
+shadow-2xl
+space-y-8
+"
         >
 
           {/* Banner Title */}
 
 <div>
 
-  <label className="block text-gray-500 uppercase text-sm mb-3">
+  <label className="block text-zinc-400 uppercase text-sm mb-3">
     Banner Title
   </label>
 
@@ -209,18 +209,21 @@ async function handleMobileUpload(
     placeholder="Hot Wheels Premium Collection"
     required
     className="
-    w-full
-    rounded-2xl
-    border
-    border-gray-300
-    px-5
-    py-4
-    text-black
-    placeholder:text-gray-400
-    focus:border-[#D4AF37]
-    focus:outline-none
-    transition
-    "
+w-full
+rounded-2xl
+bg-[#09090B]
+border
+border-zinc-700
+px-5
+py-4
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+focus:outline-none
+transition
+"
   />
 
 </div>
@@ -229,7 +232,7 @@ async function handleMobileUpload(
 
 <div>
 
-  <label className="block text-gray-500 uppercase text-sm mb-3">
+  <label className="block text-zinc-400 uppercase text-sm mb-3">
     Subtitle
   </label>
 
@@ -239,19 +242,22 @@ async function handleMobileUpload(
     placeholder="Discover rare diecast collectibles..."
     rows={4}
     className="
-    w-full
-    rounded-2xl
-    border
-    border-gray-300
-    px-5
-    py-4
-    text-black
-    placeholder:text-gray-400
-    focus:border-[#D4AF37]
-    focus:outline-none
-    resize-none
-    transition
-    "
+w-full
+rounded-2xl
+bg-[#09090B]
+border
+border-zinc-700
+px-5
+py-4
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+focus:outline-none
+resize-none
+transition
+"
   />
 
 </div>
@@ -262,7 +268,7 @@ async function handleMobileUpload(
 
   <div>
 
-    <label className="block text-gray-500 uppercase text-sm mb-3">
+    <label className="block text-zinc-400 uppercase text-sm mb-3">
       Desktop Banner
     </label>
 
@@ -273,9 +279,9 @@ async function handleMobileUpload(
       rounded-3xl
       border-2
       border-dashed
-      border-gray-300
-      hover:border-[#D4AF37]
-      hover:bg-[#FFFBEF]
+      border-zinc-700
+     hover:border-pink-500
+hover:bg-pink-500/5
       transition
       cursor-pointer
       overflow-hidden
@@ -298,11 +304,11 @@ async function handleMobileUpload(
 
         <div className="text-center">
 
-          <h3 className="text-xl font-bold text-black">
+          <h3 className="text-xl font-bold text-white">
             Upload Desktop Banner
           </h3>
 
-          <p className="mt-2 text-gray-500">
+          <p className="mt-2 text-zinc-400">
             Recommended: 1920 × 700
           </p>
 
@@ -321,7 +327,7 @@ async function handleMobileUpload(
     />
 
     {uploadingDesktop && (
-      <p className="mt-2 text-[#D4AF37]">
+      <p className="mt-2 text-pink-400">
         Uploading...
       </p>
     )}
@@ -332,28 +338,29 @@ async function handleMobileUpload(
 
   <div>
 
-    <label className="block text-gray-500 uppercase text-sm mb-3">
+    <label className="block text-zinc-400 uppercase text-sm mb-3">
       Mobile Banner
     </label>
 
     <label
       htmlFor="mobile-upload"
       className="
-      h-64
-      rounded-3xl
-      border-2
-      border-dashed
-      border-gray-300
-      hover:border-[#D4AF37]
-      hover:bg-[#FFFBEF]
-      transition
-      cursor-pointer
-      overflow-hidden
-      flex
-      items-center
-      justify-center
-      block
-      "
+h-64
+rounded-3xl
+border-2
+border-dashed
+border-zinc-700
+bg-zinc-900
+hover:border-pink-500
+hover:bg-zinc-800
+transition
+cursor-pointer
+overflow-hidden
+flex
+items-center
+justify-center
+block
+"
     >
 
       {mobileImage ? (
@@ -368,11 +375,11 @@ async function handleMobileUpload(
 
         <div className="text-center">
 
-          <h3 className="text-xl font-bold text-black">
+          <h3 className="text-xl font-bold text-white">
             Upload Mobile Banner
           </h3>
 
-          <p className="mt-2 text-gray-500">
+          <p className="mt-2 text-zinc-500">
             Recommended: 900 × 1200
           </p>
 
@@ -391,7 +398,7 @@ async function handleMobileUpload(
     />
 
     {uploadingMobile && (
-      <p className="mt-2 text-[#D4AF37]">
+      <p className="mt-2 text-pink-400">
         Uploading...
       </p>
     )}
@@ -407,7 +414,7 @@ async function handleMobileUpload(
 
   <div>
 
-    <label className="block text-gray-500 uppercase text-sm mb-3">
+    <label className="block text-zinc-400 uppercase text-sm mb-3">
       Button Text
     </label>
 
@@ -416,23 +423,27 @@ async function handleMobileUpload(
       onChange={(e) => setButtonText(e.target.value)}
       placeholder="Shop Now"
       className="
-      w-full
-      rounded-2xl
-      border
-      border-gray-300
-      px-5
-      py-4
-      text-black
-      focus:border-[#D4AF37]
-      focus:outline-none
-      "
+w-full
+rounded-2xl
+bg-[#09090B]
+border
+border-zinc-700
+px-5
+py-4
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+focus:outline-none
+"
     />
 
   </div>
 
   <div>
 
-    <label className="block text-gray-500 uppercase text-sm mb-3">
+    <label className="block text-zinc-400 uppercase text-sm mb-3">
       Button Link
     </label>
 
@@ -441,16 +452,20 @@ async function handleMobileUpload(
       onChange={(e) => setButtonLink(e.target.value)}
       placeholder="/cars"
       className="
-      w-full
-      rounded-2xl
-      border
-      border-gray-300
-      px-5
-      py-4
-      text-black
-      focus:border-[#D4AF37]
-      focus:outline-none
-      "
+w-full
+rounded-2xl
+bg-[#09090B]
+border
+border-zinc-700
+px-5
+py-4
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+focus:outline-none
+"
     />
 
   </div>
@@ -464,7 +479,7 @@ async function handleMobileUpload(
 
   <div>
 
-    <label className="block text-gray-500 uppercase text-sm mb-3">
+    <label className="block text-zinc-400 uppercase text-sm mb-3">
       Display Order
     </label>
 
@@ -475,16 +490,20 @@ async function handleMobileUpload(
         setOrder(Number(e.target.value))
       }
       className="
-      w-full
-      rounded-2xl
-      border
-      border-gray-300
-      px-5
-      py-4
-      text-black
-      focus:border-[#D4AF37]
-      focus:outline-none
-      "
+w-full
+rounded-2xl
+bg-[#09090B]
+border
+border-zinc-700
+px-5
+py-4
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/20
+focus:outline-none
+"
     />
 
   </div>
@@ -498,12 +517,12 @@ async function handleMobileUpload(
     className="
       w-6
       h-6
-      accent-[#D4AF37]
+      accent-pink-500
       cursor-pointer
     "
   />
 
-  <span className="text-lg font-semibold text-black">
+  <span className="text-lg font-semibold text-white">
     Active Banner
   </span>
 
@@ -516,16 +535,20 @@ async function handleMobileUpload(
   <button
     type="submit"
     className="
-    bg-[#D4AF37]
-    text-black
-    font-semibold
-    px-8
-    py-4
-    rounded-2xl
-    hover:bg-[#c89f25]
-    hover:scale-105
-    transition-all
-    "
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+font-semibold
+px-8
+py-4
+rounded-2xl
+hover:scale-105
+hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
+transition-all
+duration-300
+"
   >
     Save Banner
   </button>

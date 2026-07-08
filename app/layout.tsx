@@ -26,7 +26,7 @@ const bebas = Bebas_Neue({
 
 export const metadata = {
 
-  title: "Diecast Universe",
+  title: "Shinsei Diecast",
 
   description: "Premium Diecast Collectibles",
 
@@ -51,20 +51,20 @@ export const metadata = {
   ],
 
  openGraph: {
-  title: "Diecast Universe",
+  title: "Shinsei Diecast",
   description:
     "Premium Diecast Collectibles",
   url:
     "https://diecastprotectors.in",
   siteName:
-    "Diecast Universe",
+    "Shinsei Diecast",
 
   images: [
     {
       url: "/logo.png",
       width: 512,
       height: 512,
-      alt: "Diecast Universe",
+      alt: "Shinsei Diecast",
     },
   ],
 
@@ -73,7 +73,7 @@ export const metadata = {
 },
 twitter: {
   card: "summary_large_image",
-  title: "Diecast Universe",
+  title: "Shinsei Diecast",
   description:
     "Premium Diecast Collectibles",
   images: ["/logo.png"],

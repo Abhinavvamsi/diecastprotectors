@@ -6,35 +6,11 @@ import { Button } from "@/components/ui/button"
 
 import { toast } from "sonner"
 
-import {
-  useUser,
-} from "@clerk/nextjs"
 
-import { useRouter } from "next/navigation"
 
 export default function AddProductPage() {
 
-  const { user, isLoaded } =
-    useUser()
-
-  const router = useRouter()
-
-  useEffect(() => {
-
-    if (!isLoaded) return
-
-    const isAdmin =
-      user?.primaryEmailAddress
-        ?.emailAddress ===
-      "abhinavvamsi2004@gmail.com"
-
-    if (!isAdmin) {
-
-      router.push("/")
-
-    }
-
-  }, [user, isLoaded, router])
+  
 
   const [name, setName] =
     useState("")
@@ -247,7 +223,7 @@ export default function AddProductPage() {
 
   return (
 
-    <main className="min-h-screen bg-white text-black p-6 md:p-8">
+    <main className="min-h-screen bg-[#09090B] text-white p-6 md:p-8">
 
       <div className="max-w-4xl mx-auto">
 
@@ -255,8 +231,8 @@ export default function AddProductPage() {
         {/* Header */}
         <div className="mb-12">
 
-          <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
-  Diecast Universe Admin
+          <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+  Shinsei Diecast Admin
 </p>
 
         <h1 className="text-5xl md:text-6xl font-bold mt-4">
@@ -272,12 +248,10 @@ export default function AddProductPage() {
         {/* Form */}
         <div
           className="
-          bg-white
+       bg-zinc-900
 border
-border-gray-200
-shadow-sm
-          border
-          border-zinc-800
+border-zinc-800
+shadow-2xl
           rounded-[2rem]
           p-6
           md:p-10
@@ -308,15 +282,15 @@ shadow-sm
               w-full
               h-14
               rounded-2xl
-              bg-white
-              border
-              border-zinc-800
+              bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
               px-5
-              text-black
               outline-none
-              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-[#D4AF37]/20
               transition-all
               "
             />
@@ -343,17 +317,17 @@ shadow-sm
               className="
               w-full
               rounded-2xl
-              bg-white
-              border
-              border-gray-300
-              text-black
+              bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
               px-5
               py-5
               min-h-[180px]
               outline-none
-              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-[#D4AF37]/20
               transition-all
               "
             />
@@ -382,15 +356,15 @@ shadow-sm
               w-full
               h-14
               rounded-2xl
-              bg-white
-              border
-              border-zinc-800
+              bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
               px-5
-              text-black
               outline-none
-              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-[#D4AF37]/20
               transition-all
               "
             />
@@ -417,10 +391,10 @@ shadow-sm
               border-2
               border-dashed
               border-zinc-700
-              bg-white
               cursor-pointer
-              hover:border-[#D4AF37]
-              hover:bg-[#FFFBEF]
+              bg-zinc-950
+hover:border-pink-500
+hover:bg-pink-500/5
               transition-all
               duration-300
               "
@@ -428,13 +402,13 @@ shadow-sm
 
               <div className="text-center">
 
-                <p className="text-2xl font-bold text-black">
+                <p className="text-2xl font-bold text-white">
 
                   Upload Product Images
 
                 </p>
 
-                <p className="text-gray-500 mt-3">
+                <p className="text-zinc-400 mt-3">
 
                   Click to browse images
 
@@ -453,7 +427,7 @@ shadow-sm
 
             {uploading && (
 
-              <p className="text-red-500">
+              <p className="text-pink-400">
 
                 Uploading image...
 
@@ -482,7 +456,7 @@ shadow-sm
                       object-contain
                       rounded-2xl
                       border
-                      border-zinc-800
+                      border-zinc-700
                       "
                     />
 
@@ -545,15 +519,18 @@ shadow-sm
               w-full
               h-14
               rounded-2xl
-              bg-white
-              border
-              border-zinc-800
+              bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
               px-5
-              text-black
+              
               outline-none
-              focus:border-[#D4AF37]
+              
               focus:ring-2
-              focus:ring-[#D4AF37]/20
+              
               transition-all
               "
             >
@@ -599,15 +576,15 @@ shadow-sm
     w-full
     h-14
     rounded-2xl
-    bg-white
-    border
-    border-gray-300
+    bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
     px-5
-    text-black
     outline-none
-    focus:border-[#D4AF37]
     focus:ring-2
-    focus:ring-[#D4AF37]/20
     "
   >
 
@@ -649,15 +626,15 @@ shadow-sm
               w-full
               h-14
               rounded-2xl
-              bg-white
-              border
-              border-zinc-800
+              bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
               px-5
-              text-black
               outline-none
-              focus:border-[#D4AF37]
               focus:ring-2
-              focus:ring-[#D4AF37]/20
               transition-all
               "
             >
@@ -723,9 +700,12 @@ shadow-sm
           flex-1
           h-14
           rounded-2xl
-          bg-white
-          border
-          border-zinc-800
+          bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
           px-5
           "
         />
@@ -752,9 +732,12 @@ shadow-sm
   flex-1
   h-14
   rounded-2xl
-  bg-white
-  border
-  border-zinc-800
+  bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
   px-5
   "
 />
@@ -777,9 +760,13 @@ shadow-sm
   h-14
   px-4
   rounded-2xl
-  bg-[#D4AF37]
-text-black
-hover:bg-[#B8941F]
+  bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
   text-black
   font-bold
   disabled:opacity-50
@@ -798,9 +785,13 @@ hover:bg-[#B8941F]
   <Button
   type="button"
   className="
-  bg-[#D4AF37]
-  text-black
-  hover:bg-[#B8941F]
+ bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
   "
     onClick={() =>
       setQuantityPricing([
@@ -840,21 +831,24 @@ hover:bg-[#B8941F]
               w-full
               h-14
               rounded-2xl
-              bg-white
-              border
-              border-zinc-800
+             bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-pink-500/30
               px-5
-              text-black
+             
               outline-none
-              focus:border-[#D4AF37]
+              
               focus:ring-2
-              focus:ring-[#D4AF37]/20
+              
               transition-all
               "
             />
 
           </div>
-<div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+<div className="bg-zinc-950 rounded-2xl p-6 border border-zinc-800">
 
   <h3 className="font-bold text-lg mb-4">
     Product Preview
@@ -864,11 +858,11 @@ hover:bg-[#B8941F]
     {name || "Product Name"}
   </p>
 
-  <p className="text-[#D4AF37] font-bold mt-2">
+  <p className="text-pink-400 font-bold mt-2">
     ₹{price || "0"}
   </p>
 
-  <p className="text-gray-500 mt-2">
+  <p className="text-zinc-400 mt-2">
     {category || "Category"}
   </p>
 
@@ -884,19 +878,18 @@ hover:bg-[#B8941F]
             rounded-2xl
             text-lg
             font-bold
-            bg-[#D4AF37]
-            text-black
+            bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+hover:scale-[1.02]
+hover:shadow-[0_0_40px_rgba(236,72,153,.45)]
             hover:scale-[1.01]
             active:scale-95
             transition-all
             duration-300
             shadow-lg
-            hover:bg-[#B8941F]
-
-shadow-[#D4AF37]/20
-
-hover:shadow-[#D4AF37]/40
-            
             "
           >
 

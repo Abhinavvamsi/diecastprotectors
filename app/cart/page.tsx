@@ -146,25 +146,55 @@ const hasUnavailableProducts =
 
   return (
 
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       {/* Global Navbar */}
       <Navbar />
+<div
+  className="
+  absolute
+  top-0
+  right-0
+  w-[450px]
+  h-[450px]
+  bg-purple-500/10
+  blur-[140px]
+  rounded-full
+  pointer-events-none
+  "
+/>
 
+<div
+  className="
+  absolute
+  bottom-0
+  left-0
+  w-[450px]
+  h-[450px]
+  bg-pink-500/10
+  blur-[140px]
+  rounded-full
+  pointer-events-none
+  "
+/>
       <div className="max-w-6xl mx-auto px-6 py-16">
 
         {/* Heading */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
 
           <div>
-<p className="text-[#D4AF37] uppercase tracking-widest text-sm mb-3">
-  Diecast Universe
+<p className="bg-gradient-to-r
+from-pink-500
+to-purple-500
+bg-clip-text
+text-transparent uppercase tracking-widest text-sm mb-3">
+  Shinsei Diecast
 </p>
             <h1 className="text-5xl font-bold">
               Your Cart
             </h1>
 
-            <p className="text-gray-600 mt-4">
+            <p className="text-gray-400 mt-4">
 
               Review your selected products before checkout.
 
@@ -181,9 +211,13 @@ const hasUnavailableProducts =
   px-8
   py-6
   text-lg
-  bg-[#D4AF37]
-  text-black
-  hover:bg-[#B8941F]
+ bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.4)]
   "
 >
 
@@ -202,9 +236,9 @@ const hasUnavailableProducts =
     p-4
     rounded-xl
     border
-    border-amber-400/30
-bg-amber-100
-text-amber-700
+    border-orange-500/30
+bg-orange-500/10
+text-orange-300
     "
   >
 
@@ -218,13 +252,24 @@ text-amber-700
 
           <div className="text-center py-24">
 
-            <p className="text-gray-600 text-xl">
+            <p className="text-gray-400 text-xl">
               Your cart is empty.
             </p>
 
             <Link href="/#products">
 
-              <Button className="mt-8 rounded-xl px-8 py-6 text-lg">
+              <Button className="
+mt-8
+rounded-xl
+px-8
+py-6
+bg-gradient-to-r
+from-pink-500
+to-purple-600
+text-white
+hover:scale-105
+transition
+">
 
                 Shop Products
 
@@ -248,14 +293,14 @@ flex-col
 md:flex-row
 md:items-center
 md:justify-between
-bg-white
+bg-[#15151D]
 border
-border-gray-200
+border-[#2B2B3A]
 rounded-3xl
 p-6
 shadow-sm
-hover:border-[#D4AF37]
-hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)]
+hover:border-pink-500
+hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
 transition-all
 duration-300
 "
@@ -271,9 +316,9 @@ duration-300
   h-32
   rounded-2xl
   overflow-hidden
-  bg-gray-50
+ bg-[#09090B]
   border
-  border-gray-100
+  border-[#2B2B3A]
   flex-shrink-0
   "
 >
@@ -289,11 +334,16 @@ duration-300
 
                   <div>
 
-                    <h2 className="text-2xl font-semibold">
+                    <h2 className="text-2xl font-bold text-white">
                       {item.name}
                     </h2>
 
-                    <p className="text-[#D4AF37] mt-2">
+                    <p className="bg-gradient-to-r
+from-pink-500
+to-purple-500
+bg-clip-text
+text-transparent
+font-bold mt-2">
                       ₹{getCurrentPrice(item)}
                     </p>
 
@@ -330,7 +380,7 @@ duration-300
 
 )}
 
-                    <p className="text-gray-600 mt-2">
+                    <p className="text-gray-400 mt-2">
 
                       Total:
                       {" "}
@@ -353,7 +403,8 @@ duration-300
   flex
   items-center
   border
-  border-gray-200
+  border-[#2B2B3A]
+bg-[#09090B]
   rounded-2xl
   overflow-hidden
   "
@@ -369,7 +420,8 @@ duration-300
     flex
     items-center
     justify-center
-    hover:bg-gray-100
+    hover:bg-[#1E1E2A]
+hover:text-pink-400
     transition
     "
   >
@@ -381,7 +433,8 @@ duration-300
     w-16
     text-center
     font-bold
-    text-lg
+text-lg
+text-white
     "
   >
     {item.quantity}
@@ -400,7 +453,8 @@ duration-300
     flex
     items-center
     justify-center
-    hover:bg-gray-100
+    hover:bg-[#1E1E2A]
+hover:text-pink-400
     transition
     disabled:opacity-40
     "
@@ -419,7 +473,7 @@ duration-300
   w-14
   h-14
   rounded-2xl
-  bg-red-50
+  bg-red-500/10
   text-red-500
   flex
   items-center
@@ -440,15 +494,15 @@ duration-300
             ))}
 
             {/* Footer */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-10 border-t border-gray-200">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-10 border-t border-[#2B2B3A]">
 
               <div>
 
-                <p className="text-[#D4AF37]">
+                <p className="text-pink-400">
                   Total
                 </p>
 
-                <h2 className="text-4xl font-bold mt-2">
+                <h2 className="text-4xl font-bold mt-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
                   ₹{totalPrice}
 
@@ -471,9 +525,13 @@ duration-300
   py-6
   text-lg
   rounded-xl
-  bg-[#D4AF37]
-  text-black
-  hover:bg-[#B8941F]
+ bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.4)]
   "
 >
 

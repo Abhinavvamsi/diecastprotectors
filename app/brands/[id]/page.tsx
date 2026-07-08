@@ -47,7 +47,7 @@ export default async function BrandPage({
 
   return (
 
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       <Navbar />
 
@@ -57,7 +57,7 @@ export default async function BrandPage({
 
         <div className="mb-14">
 
-          <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
+          <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
             Brand Collection
 
@@ -65,19 +65,36 @@ export default async function BrandPage({
 
           <div className="flex items-center gap-6 mt-4">
 
-            {brand.logo && (
+          {brand.logo && (
 
-              <img
-                src={brand.logo}
-                alt={brand.name}
-                className="
-                w-20
-                h-20
-                object-contain
-                "
-              />
+  <div
+    className="
+    w-24
+    h-24
+    rounded-2xl
+    bg-zinc-900
+    border
+    border-zinc-800
+    flex
+    items-center
+    justify-center
+    flex-shrink-0
+    "
+  >
 
-            )}
+    <img
+      src={brand.logo}
+      alt={brand.name}
+      className="
+      w-16
+      h-16
+      object-contain
+      "
+    />
+
+  </div>
+
+)}
 
             <div>
 
@@ -87,7 +104,7 @@ export default async function BrandPage({
 
               </h1>
 
-              <p className="text-gray-500 mt-2">
+              <p className="text-zinc-400 mt-2">
 
                 {brand.products.length}
                 {" "}
@@ -107,12 +124,13 @@ export default async function BrandPage({
 
           <div
             className="
-            border
-            border-gray-200
-            rounded-3xl
-            p-12
-            text-center
-            "
+bg-zinc-900
+border
+border-zinc-800
+rounded-3xl
+p-12
+text-center
+"
           >
 
             <h2 className="text-2xl font-bold">

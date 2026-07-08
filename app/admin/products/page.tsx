@@ -6,28 +6,12 @@ import AdminProductsList
 from "@/components/admin-products-list"
 
 import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/admin"
 
-import {
-  currentUser,
-} from "@clerk/nextjs/server"
-
-import { redirect } from "next/navigation"
 
 export default async function ProductsPage() {
 
-  const user =
-    await currentUser()
-
-  const isAdmin =
-    user?.primaryEmailAddress
-      ?.emailAddress ===
-    "abhinavvamsi2004@gmail.com"
-
-  if (!isAdmin) {
-
-    redirect("/")
-
-  }
+  await requireAdmin()
 
   const products =
   await prisma.product.findMany({
@@ -51,7 +35,7 @@ const brands =
   })
   return (
 
-  <main className="min-h-screen bg-white text-black p-8">
+  <main className="min-h-screen bg-[#09090B] text-white p-8">
 
     <div className="max-w-7xl mx-auto">
 
@@ -59,9 +43,9 @@ const brands =
 
   <div className="mb-12">
 
-    <p className="text-[#D4AF37] uppercase tracking-[0.3em] text-sm">
+    <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
-      Diecast Universe Admin
+      Shinsei Diecast Admin
 
     </p>
 
@@ -71,7 +55,7 @@ const brands =
 
     </h1>
 
-    <p className="text-gray-500 mt-2">
+    <p className="text-zinc-400 mt-2">
 
       Manage cars, protectors and collectibles.
 
@@ -88,24 +72,20 @@ const brands =
       <button
 
         className="
-
-        px-6
-
-        h-12
-
-        rounded-xl
-
-        bg-[#D4AF37]
-
-        text-black
-
-        font-semibold
-
-        hover:bg-[#B8941F]
-
-        transition
-
-        "
+px-6
+h-12
+rounded-xl
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+font-semibold
+transition-all
+duration-300
+hover:scale-105
+hover:shadow-[0_0_30px_rgba(236,72,153,.4)]
+"
 
       >
 
@@ -120,22 +100,22 @@ const brands =
       {products.length === 0 && (
 
         <div
-          className="
-          bg-white
-          border
-          border-gray-200
-          shadow-sm
-          rounded-3xl
-          p-12
-          text-center
-          "
+         className="
+bg-zinc-900
+border
+border-zinc-800
+rounded-3xl
+p-12
+text-center
+shadow-2xl
+"
         >
 
           <h2 className="text-2xl font-bold">
             No Products Found
           </h2>
 
-          <p className="text-gray-500 mt-2">
+          <p className="text-zinc-400 mt-2">
             Add your first product to get started.
           </p>
 

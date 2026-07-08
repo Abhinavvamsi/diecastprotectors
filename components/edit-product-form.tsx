@@ -175,15 +175,15 @@ async function handleImageUpload(
  return (
 
   <div
-    className="
-    bg-white
-    border
-    border-gray-200
-    shadow-sm
-    rounded-3xl
-    p-8
-    space-y-6
-    "
+   className="
+bg-zinc-900
+border
+border-zinc-800
+shadow-2xl
+rounded-3xl
+p-8
+space-y-6
+"
   >
 
     {/* Name */}
@@ -197,13 +197,16 @@ async function handleImageUpload(
       w-full
       h-14
       rounded-xl
-      bg-white
-      border
-      border-gray-300
+      bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
       px-4
-      text-black
       outline-none
-      focus:border-[#D4AF37]
       "
     />
 
@@ -219,14 +222,19 @@ async function handleImageUpload(
       w-full
       min-h-[180px]
       rounded-xl
-      bg-white
-      border
-      border-gray-300
+      bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
       px-4
       py-4
-      text-black
+      
       outline-none
-      focus:border-[#D4AF37]
+      
       "
     />
 
@@ -243,13 +251,18 @@ async function handleImageUpload(
       w-full
       h-14
       rounded-xl
-      bg-white
-      border
-      border-gray-300
+     bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
       px-4
-      text-black
+      
       outline-none
-      focus:border-[#D4AF37]
+      
       "
     />
 
@@ -259,7 +272,7 @@ async function handleImageUpload(
       <label
         className="
         text-sm
-        text-gray-500
+        text-zinc-400
         uppercase
         "
       >
@@ -277,15 +290,16 @@ async function handleImageUpload(
         rounded-2xl
         border-2
         border-dashed
-        border-gray-300
-        bg-gray-50
+        border-zinc-700
+bg-zinc-950
+hover:border-pink-500
+hover:bg-pink-500/5
         cursor-pointer
-        hover:border-[#D4AF37]
         transition
         "
       >
 
-        <span className="text-black font-medium">
+        <span className="text-white font-medium">
 
           Upload Images
 
@@ -302,7 +316,7 @@ async function handleImageUpload(
 
       {uploading && (
 
-        <p className="text-[#D4AF37]">
+        <p className="text-pink-400">
 
           Uploading...
 
@@ -318,9 +332,9 @@ async function handleImageUpload(
             key={img}
             className="
             relative
-            bg-gray-50
+            bg-zinc-950
+border-zinc-700
             border
-            border-gray-200
             rounded-xl
             p-2
             "
@@ -382,13 +396,18 @@ async function handleImageUpload(
       w-full
       h-14
       rounded-xl
-      bg-white
-      border
-      border-gray-300
+      bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
       px-4
-      text-black
+      
       outline-none
-      focus:border-[#D4AF37]
+      
       "
     >
 
@@ -433,10 +452,16 @@ async function handleImageUpload(
       h-10
       px-4
       rounded-xl
-      bg-[#D4AF37]
-      text-black
+      bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+hover:scale-105
+hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
+transition-all
+duration-300
       font-semibold
-      hover:bg-[#B8941F]
       transition
       "
     >
@@ -450,7 +475,7 @@ async function handleImageUpload(
 
       <div
         key={index}
-        className="flex gap-3"
+        className="flex flex-col md:flex-row gap-3"
       >
 
         <input
@@ -475,11 +500,16 @@ async function handleImageUpload(
           flex-1
           h-14
           rounded-xl
-          bg-white
-          border
-          border-gray-300
+          bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
           px-4
-          text-black
+          
           "
         />
 
@@ -505,11 +535,16 @@ async function handleImageUpload(
           flex-1
           h-14
           rounded-xl
-          bg-white
-          border
-          border-gray-300
+          bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
           px-4
-          text-black
+          
           "
         />
 
@@ -526,9 +561,14 @@ async function handleImageUpload(
           h-14
           px-4
           rounded-xl
-          bg-red-500
-          text-white
-          hover:bg-red-600
+          bg-gradient-to-r
+from-pink-500
+to-purple-600
+text-white
+hover:scale-105
+hover:shadow-[0_0_20px_rgba(236,72,153,.35)]
+transition-all
+duration-300
           "
         >
           ✕
@@ -557,13 +597,18 @@ async function handleImageUpload(
       w-full
       h-14
       rounded-xl
-      bg-white
-      border
-      border-gray-300
+     bg-zinc-950
+border-zinc-700
+text-white
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
+transition-all
       px-4
-      text-black
+      
       outline-none
-      focus:border-[#D4AF37]
+     
       "
     />
 
@@ -574,11 +619,17 @@ async function handleImageUpload(
       w-full
       h-14
       rounded-xl
-      bg-[#D4AF37]
-      text-black
+      bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+text-white
+transition-all
+duration-300
+hover:scale-[1.02]
+hover:shadow-[0_0_40px_rgba(236,72,153,.45)]
+active:scale-95
       font-bold
-      hover:bg-[#B8941F]
-      transition
       "
     >
 

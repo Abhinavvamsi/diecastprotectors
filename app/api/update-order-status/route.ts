@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { resend } from "@/lib/resend"
 import { NextResponse } from "next/server"
-import { currentUser } from "@clerk/nextjs/server"
+import { requireAdmin } from "@/lib/admin"
 
 export async function POST(
   req: Request
@@ -9,30 +9,8 @@ export async function POST(
 
   try {
 
-    const user =
-      await currentUser()
-
-    const isAdmin =
-      user?.primaryEmailAddress
-        ?.emailAddress ===
-      "abhinavvamsi2004@gmail.com"
-
-    if (!isAdmin) {
-
-      return NextResponse.json(
-
-        {
-          error:
-            "Unauthorized",
-        },
-
-        {
-          status: 401,
-        }
-
-      )
-
-    }
+    /* Protect API */
+    await requireAdmin()
 
     const body =
       await req.json()
@@ -51,8 +29,7 @@ export async function POST(
       return NextResponse.json(
 
         {
-          error:
-            "Order not found",
+          error: "Order not found",
         },
 
         {
@@ -65,8 +42,7 @@ export async function POST(
 
     /* Restore stock if cancelled */
     if (
-      body.status ===
-      "Cancelled"
+      body.status === "Cancelled"
     ) {
 
       const products =
@@ -83,8 +59,7 @@ export async function POST(
           data: {
 
             stock: {
-              increment:
-                item.quantity,
+              increment: item.quantity,
             },
 
           },
@@ -104,14 +79,13 @@ export async function POST(
 
         data: {
 
-          status:
-            body.status,
+          status: body.status,
 
         },
 
       })
 
-    // Email Notification
+    /* Email Notification */
     await resend.emails.send({
 
       from:
@@ -134,82 +108,53 @@ export async function POST(
         "
       >
 
-        <h1>
-          Order Status Updated
-        </h1>
+        <h1>Order Status Updated</h1>
 
         <p>
           Hi ${order.customer},
         </p>
 
         <p>
-          Your order status
-          has been updated.
+          Your order status has been updated.
         </p>
 
         <p>
-          <strong>
-            Order ID:
-          </strong>
+          <strong>Order ID:</strong>
           ${order.orderId}
         </p>
 
         <p>
-          <strong>
-            New Status:
-          </strong>
+          <strong>New Status:</strong>
           ${body.status}
         </p>
 
         <hr />
 
         ${
-          body.status ===
-          "Shipped"
+          body.status === "Shipped"
 
             ? `
-            <h2>
-              🚚 Your order has been shipped!
-            </h2>
-            <p>
-              It is now on the way.
-            </p>
+            <h2>🚚 Your order has been shipped!</h2>
+            <p>It is now on the way.</p>
             `
 
-            : body.status ===
-              "Delivered"
+            : body.status === "Delivered"
 
             ? `
-            <h2>
-              🎉 Order Delivered
-            </h2>
-            <p>
-              Thank you for shopping
-              with us.
-            </p>
+            <h2>🎉 Order Delivered</h2>
+            <p>Thank you for shopping with us.</p>
             `
 
-            : body.status ===
-              "Cancelled"
+            : body.status === "Cancelled"
 
             ? `
-            <h2>
-              ❌ Order Cancelled
-            </h2>
-            <p>
-              Your order has been
-              cancelled.
-            </p>
+            <h2>❌ Order Cancelled</h2>
+            <p>Your order has been cancelled.</p>
             `
 
             : `
-            <h2>
-              📦 Order Processing
-            </h2>
-            <p>
-              We are preparing
-              your order.
-            </p>
+            <h2>📦 Order Processing</h2>
+            <p>We are preparing your order.</p>
             `
         }
 
@@ -247,8 +192,7 @@ export async function POST(
     return NextResponse.json(
 
       {
-        error:
-          "Failed to update order",
+        error: "Failed to update order",
       },
 
       {

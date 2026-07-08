@@ -244,3 +244,8 @@
     transform: scale(1.08);
   }
 }
+
+select {
+  -webkit-appearance: none;
+  appearance: none;
+}

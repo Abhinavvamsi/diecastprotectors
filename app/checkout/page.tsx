@@ -405,7 +405,7 @@ async function applyCoupon() {
 
   return (
 
-    <main className="min-h-screen bg-white text-black">
+    <main className="min-h-screen bg-[#09090B] text-white">
 
       {/* Navbar */}
       <Navbar />
@@ -416,8 +416,8 @@ async function applyCoupon() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12">
 
           <div>
-<p className="text-[#D4AF37] uppercase tracking-widest text-sm mb-3">
-  Diecast Universe
+<p className="uppercase tracking-widest text-sm mb-3 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+  Shinsei Diecast
 </p>
             <h1 className="text-4xl md:text-5xl font-bold">
 
@@ -425,7 +425,7 @@ async function applyCoupon() {
 
             </h1>
 
-            <p className="text-[#D4AF37] mt-4">
+            <p className="mt-4 text-zinc-400">
 
               Complete your order securely.
 
@@ -439,10 +439,13 @@ async function applyCoupon() {
   variant="outline"
   className="
   rounded-xl
-  border-[#D4AF37]
-  text-[#D4AF37]
-  hover:bg-[#D4AF37]
-  hover:text-black
+  border-pink-500
+text-pink-400
+hover:bg-gradient-to-r
+hover:from-pink-500
+hover:to-purple-600
+hover:text-white
+hover:border-transparent
   "
 >
 
@@ -459,9 +462,9 @@ async function applyCoupon() {
           {/* LEFT SIDE */}
 <div>
 
-         <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+         <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800 shadow-sm">
 
-  <h2 className="text-2xl font-bold text-black mb-8">
+  <h2 className="text-2xl font-bold text-white mb-8">
     Shipping Details
   </h2>
 
@@ -479,14 +482,16 @@ async function applyCoupon() {
         w-full
         h-16
         rounded-xl
-        bg-white
-        text-black
-        placeholder:text-gray-400
+        bg-zinc-950
+text-white
+border-zinc-700
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
         border
-        border-gray-300
         px-5
         outline-none
-        focus:border-[#D4AF37]
         transition
         "
       />
@@ -506,14 +511,16 @@ async function applyCoupon() {
         w-full
         h-16
         rounded-xl
-        bg-white
-        text-black
-        placeholder:text-gray-400
+        bg-zinc-950
+text-white
+border-zinc-700
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
         border
-        border-gray-300
         px-5
         outline-none
-        focus:border-[#D4AF37]
         transition
         "
       />
@@ -532,14 +539,16 @@ async function applyCoupon() {
       w-full
       h-16
       rounded-xl
-      bg-white
-      text-black
-      placeholder:text-gray-400
+      bg-zinc-950
+text-white
+border-zinc-700
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
       border
-      border-gray-300
       px-5
       outline-none
-      focus:border-[#D4AF37]
       transition
       "
     />
@@ -559,15 +568,17 @@ async function applyCoupon() {
         w-full
         min-h-[140px]
         rounded-xl
-        bg-white
-        text-black
-        placeholder:text-gray-400
+        bg-zinc-950
+text-white
+border-zinc-700
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
         border
-        border-gray-300
         px-5
         py-4
         outline-none
-        focus:border-[#D4AF37]
         transition
         "
       />
@@ -580,7 +591,7 @@ async function applyCoupon() {
           z-50
           mt-2
           w-full
-          bg-white
+          bg-zinc-900
           border
           border-gray-200
           rounded-xl
@@ -620,8 +631,8 @@ async function applyCoupon() {
               text-left
               px-4
               py-3
-              text-black
-              hover:bg-gray-100
+              text-white
+              hover:bg-zinc-800
               transition
               "
             >
@@ -654,14 +665,16 @@ async function applyCoupon() {
         w-full
         h-16
         rounded-xl
-        bg-white
-        text-black
-        placeholder:text-gray-400
+        bg-zinc-950
+text-white
+border-zinc-700
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
         border
-        border-gray-300
         px-5
         outline-none
-        focus:border-[#D4AF37]
         transition
         "
       />
@@ -681,14 +694,16 @@ async function applyCoupon() {
         w-full
         h-16
         rounded-xl
-        bg-white
-        text-black
-        placeholder:text-gray-400
+        bg-zinc-950
+text-white
+border-zinc-700
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
         border
-        border-gray-300
         px-5
         outline-none
-        focus:border-[#D4AF37]
         transition
         "
       />
@@ -706,9 +721,9 @@ async function applyCoupon() {
           {/* RIGHT SIDE */}
 <div>
 
-  <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm sticky top-24">
+  <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800 shadow-sm sticky top-24">
 
-    <h2 className="text-2xl font-bold text-black mb-8">
+    <h2 className="text-2xl font-bold text-white mb-8">
       Order Summary
     </h2>
 
@@ -729,9 +744,9 @@ async function applyCoupon() {
             h-20
             rounded-xl
             overflow-hidden
-            bg-gray-100
+            bg-zinc-950
             border
-            border-gray-200
+            border-zinc-800
             "
           >
 
@@ -747,17 +762,15 @@ async function applyCoupon() {
           {/* Product Info */}
           <div className="flex-1">
 
-            <h3 className="font-semibold text-black">
+            <h3 className="font-semibold text-white">
 
               {item.name}
 
             </h3>
 
-            <p className="text-[#D4AF37] text-sm font-medium">
-
-              Premium Diecast Collectible
-
-            </p>
+         <p className="text-pink-400 text-sm font-medium">
+Premium Diecast Collectible
+</p>
 
             {/* Quantity Controls */}
             <div className="flex items-center gap-2 mt-3">
@@ -773,12 +786,14 @@ async function applyCoupon() {
   h-8
   rounded-lg
   border
-  border-[#D4AF37]
-  text-black
+  border-pink-500
+text-pink-400
+hover:bg-pink-500
+hover:text-black
+  text-white
   flex
   items-center
   justify-center
-  hover:bg-[#D4AF37]
   hover:text-black
   transition
   "
@@ -787,7 +802,7 @@ async function applyCoupon() {
   <Minus
     size={14}
     strokeWidth={3}
-    className="text-black"
+    className="text-white"
   />
 
 </button>
@@ -797,7 +812,7 @@ async function applyCoupon() {
                 w-6
                 text-center
                 font-semibold
-                text-black
+                text-white
                 "
               >
 
@@ -820,12 +835,14 @@ async function applyCoupon() {
   h-8
   rounded-lg
   border
-  border-[#D4AF37]
+  border-pink-500
+text-pink-400
+hover:bg-pink-500
+hover:text-white
   text-black
   flex
   items-center
   justify-center
-  hover:bg-[#D4AF37]
   hover:text-black
   transition
   disabled:opacity-40
@@ -835,7 +852,7 @@ async function applyCoupon() {
   <Plus
     size={14}
     strokeWidth={3}
-    className="text-black"
+    className="text-white"
   />
 
 </button>
@@ -848,8 +865,8 @@ async function applyCoupon() {
                 }
                 className="
                 ml-3
-                text-[#D4AF37]
-                hover:text-[#B8941F]
+                text-pink-400
+hover:text-pink-300
                 transition
                 "
               >
@@ -868,8 +885,13 @@ async function applyCoupon() {
             <p
               className="
               font-bold
-              text-black
-              text-lg
+text-lg
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-500
+bg-clip-text
+text-transparent
               "
             >
 
@@ -915,9 +937,9 @@ async function applyCoupon() {
         p-4
         rounded-xl
         border
-        border-amber-300
-        bg-amber-50
-        text-amber-700
+        bg-yellow-500/10
+border-yellow-500/30
+text-yellow-400
         "
       >
 
@@ -931,7 +953,7 @@ async function applyCoupon() {
 
 <div className="mb-8">
 
-  <p className="mb-3 font-semibold text-black">
+  <p className="mb-3 font-semibold text-white">
 
     Delivery Method
 
@@ -957,10 +979,10 @@ async function applyCoupon() {
       duration-300
 
       ${
-        deliveryMethod === "shipping"
-          ? "bg-[#D4AF37] border-[#D4AF37] text-black shadow-md"
-          : "bg-white border-gray-300 text-black hover:border-[#D4AF37]"
-      }
+  deliveryMethod === "shipping"
+    ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent shadow-md"
+    : "bg-zinc-950 border-zinc-700 text-zinc-300 hover:border-pink-500 hover:text-white"
+}
       `}
     >
 
@@ -988,10 +1010,10 @@ async function applyCoupon() {
         duration-300
 
         ${
-          deliveryMethod === "pickup"
-            ? "bg-green-500 border-green-500 text-white shadow-md"
-            : "bg-white border-gray-300 text-black hover:border-green-500"
-        }
+  deliveryMethod === "pickup"
+    ? "bg-gradient-to-r from-pink-500 to-purple-600 border-transparent text-white shadow-md"
+    : "bg-zinc-950 border-zinc-700 text-zinc-300 hover:border-pink-500 hover:text-white"
+}
         `}
       >
 
@@ -1006,7 +1028,7 @@ async function applyCoupon() {
 </div>
 <div className="mt-8">
 
-  <p className="mb-3 font-semibold text-black">
+  <p className="mb-3 font-semibold text-white">
 
     Coupon Code
 
@@ -1027,14 +1049,16 @@ async function applyCoupon() {
       flex-1
       h-14
       rounded-xl
-      bg-white
-      text-black
-      placeholder:text-gray-400
+     bg-zinc-950
+text-white
+border-zinc-700
+placeholder:text-zinc-500
+focus:border-pink-500
+focus:ring-2
+focus:ring-pink-500/30
       border
-      border-gray-300
       px-5
       outline-none
-      focus:border-[#D4AF37]
       transition
       "
     />
@@ -1050,10 +1074,16 @@ async function applyCoupon() {
       h-14
       px-6
       rounded-xl
-      bg-[#D4AF37]
+      bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+
+hover:scale-105
+
+hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
       text-black
       font-semibold
-      hover:bg-[#B8941F]
       hover:shadow-lg
       hover:shadow-[#D4AF37]/20
       transition-all
@@ -1072,10 +1102,10 @@ async function applyCoupon() {
 
 </div>
              {/* Totals */}
-<div className="border-t border-gray-200 mt-8 pt-8 space-y-4">
+<div className="border-t border-zinc-800 mt-8 pt-8 space-y-4">
 
   {/* Subtotal */}
-  <div className="flex items-center justify-between text-gray-600">
+  <div className="flex items-center justify-between text-zinc-400">
 
     <p>Subtotal</p>
 
@@ -1101,12 +1131,11 @@ async function applyCoupon() {
 
     <div
       className="
-      bg-green-50
-      border
-      border-green-200
+     bg-green-500/10
+border-green-500/30
+text-green-400
       rounded-xl
       p-3
-      text-green-700
       text-sm
       "
     >
@@ -1118,7 +1147,7 @@ async function applyCoupon() {
   )}
 
   {/* Shipping */}
-  <div className="flex items-center justify-between text-gray-600">
+  <div className="flex items-center justify-between text-zinc-400">
 
     <p>Shipping</p>
 
@@ -1140,7 +1169,7 @@ async function applyCoupon() {
 
     ) : (
 
-      <p className="text-[#D4AF37] font-medium">
+      <p className="text-pink-400 font-medium">
         Actual Charges
       </p>
 
@@ -1149,13 +1178,27 @@ async function applyCoupon() {
   </div>
 
   {/* Total */}
-  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+  <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
 
-    <p className="text-xl font-semibold text-black">
+    <p className="
+font-bold
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-500
+bg-clip-text
+text-transparent
+text-lg
+">
       Total
     </p>
 
-    <p className="text-3xl font-bold text-[#D4AF37]">
+    <p className="text-3xl font-bold bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-500
+bg-clip-text
+text-transparent">
 
       ₹{
         Math.max(
@@ -1185,12 +1228,12 @@ async function applyCoupon() {
     p-4
     rounded-xl
     border
-    border-[#D4AF37]/30
-    bg-[#D4AF37]/10
+    border-pink-500/30
+bg-pink-500/10
     "
   >
 
-    <p className="text-[#B8941F] text-sm font-medium">
+    <p className="text-pink-300 text-sm font-medium">
 
       {shippingMessage}
 
@@ -1209,20 +1252,26 @@ async function applyCoupon() {
   }
   
   className="
-bg-black
 h-14
 rounded-xl
 text-lg
 mt-10
 font-bold
-bg-[#D4AF37]
-text-black
+text-white
+
+bg-gradient-to-r
+from-pink-500
+via-fuchsia-500
+to-purple-600
+
+hover:scale-[1.02]
+
+hover:shadow-[0_0_40px_rgba(236,72,153,.45)]
 transition-all
 duration-300
-hover:bg-[#B8941F]
 hover:scale-[1.02]
 hover:shadow-lg
-hover:shadow-[#D4AF37]/30
+hover:shadow-pink-500/40
 active:scale-95
 disabled:opacity-50
 disabled:cursor-not-allowed
@@ -1408,8 +1457,8 @@ discount +
                       currency:
                         order.currency,
 
-                      name: "Diecast Universe",
-description: "Premium Diecast Collectibles",
+                     name: "Shinsei Diecast",
+description: "Premium Japanese Diecast Collectibles",
 
                       order_id:
                         order.id,
@@ -1523,8 +1572,8 @@ paymentId:
 
                       },
 
-                      theme: {
-  color: "#D4AF37",
+theme:{
+color:"#EC4899"
 },
 
                     }
@@ -1653,9 +1702,9 @@ if (
   mt-4
   text-center
   text-xs
-  border-[#D4AF37]/30
-bg-[#D4AF37]/10
-text-[#D4AF37]
+  border-pink-500/30
+bg-pink-500/10
+text-pink-400
   "
 >
   🔒 Secure Payment Powered by Razorpay
@@ -1666,9 +1715,10 @@ text-[#D4AF37]
   p-6
   rounded-2xl
   border
-  border-[#D4AF37]/30
-bg-[#D4AF37]/10
-text-[#D4AF37]
+  border-purple-500/30
+bg-gradient-to-br
+from-pink-500/10
+to-purple-600/10
   text-center
   "
 >
@@ -1677,17 +1727,21 @@ text-[#D4AF37]
     className="
     text-xl
     font-bold
-    text-green-400
+    bg-gradient-to-r
+from-pink-500
+to-purple-500
+bg-clip-text
+text-transparent
     "
   >
 
-    🎉 Join The Diecast Universe Community
+    🎉 Join the Shinsei Diecast Community
 
   </h3>
 
   <p
     className="
-    text-gray-600
+    text-zinc-400
     mt-3
     "
   >
@@ -1728,7 +1782,7 @@ text-[#D4AF37]
 </div>
 <div className="mt-10">
 
-  <h3 className="text-xl font-bold text-black mb-5">
+  <h3 className="text-xl font-bold text-white mb-5">
 
     You May Also Like
 
@@ -1751,11 +1805,13 @@ text-[#D4AF37]
             gap-4
             p-3
             rounded-2xl
-            bg-white
+            bg-zinc-900
+border-zinc-800
             border
-            border-gray-200
             shadow-sm
-            hover:border-[#D4AF37]
+            hover:border-pink-500
+hover:-translate-y-1
+hover:shadow-[0_0_25px_rgba(236,72,153,.25)]
             hover:shadow-md
             transition-all
             duration-300
@@ -1769,9 +1825,9 @@ text-[#D4AF37]
               h-16
               rounded-xl
               overflow-hidden
-              bg-gray-100
+              bg-zinc-950
+border-zinc-800
               border
-              border-gray-200
               "
             >
 
@@ -1786,13 +1842,13 @@ text-[#D4AF37]
 
             <div className="flex-1">
 
-              <p className="font-medium text-black line-clamp-2">
+              <p className="font-medium text-white line-clamp-2">
 
                 {product.name}
 
               </p>
 
-              <p className="text-[#D4AF37] font-semibold mt-1">
+              <p className="text-pink-400 font-semibold mt-1">
 
                 ₹{product.price}
 

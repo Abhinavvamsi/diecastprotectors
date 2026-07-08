@@ -49,10 +49,11 @@ export default function Navbar() {
     setAnimateCart
   ] = useState(false)
 
-  const isAdmin =
-    user?.primaryEmailAddress
-      ?.emailAddress ===
-    "abhinavvamsi2004@gmail.com"
+  const [isAdmin, setIsAdmin] =
+  useState(false)
+
+  const [role, setRole] =
+  useState("")
 
   /* Clear cart when account changes */
   useEffect(() => {
@@ -84,7 +85,67 @@ export default function Navbar() {
   )
 
 }, [user, clearCart])
+useEffect(() => {
 
+  if (!user) {
+
+    setIsAdmin(false)
+
+    localStorage.removeItem("is-admin")
+
+    return
+
+  }
+
+  // Show cached value immediately
+  const cached =
+    localStorage.getItem("is-admin")
+
+  if (cached !== null) {
+
+    setIsAdmin(
+      cached === "true"
+    )
+
+  }
+
+  async function checkAdmin() {
+
+  try {
+
+    const response =
+      await fetch("/api/admin/me")
+
+    const data =
+      await response.json()
+
+    setIsAdmin(data.isAdmin)
+
+    setRole(
+      data.role ?? ""
+    )
+
+    localStorage.setItem(
+      "is-admin",
+      String(data.isAdmin)
+    )
+
+    localStorage.setItem(
+      "admin-role",
+      data.role ?? ""
+    )
+
+  } catch (error) {
+
+    console.error(error)
+
+  }
+
+}
+
+  checkAdmin()
+
+}, [user])
   /* Cart animation */
   useEffect(() => {
 
@@ -109,15 +170,17 @@ export default function Navbar() {
   return (
 
     <nav
-  className="
-  border-b
-  border-gray-200
-  sticky
-  top-0
-  bg-white
-  z-[999]
-  shadow-sm
-  "
+ className="
+sticky
+top-0
+z-[999]
+border-b
+border-[#2B2B3A]
+bg-[#0B0B12]/90
+backdrop-blur-xl
+shadow-lg
+shadow-black/40
+"
 >
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6 flex items-center justify-between">
@@ -130,33 +193,33 @@ export default function Navbar() {
 
           <Image
   src="/logo.png"
-  alt="Diecast Universe"
+alt="Shinsei Diecast"
   width={48}
   height={48}
-  className="object-contain shrink-0"
+ className="object-contain shrink-0 drop-shadow-[0_0_12px_rgba(236,72,153,0.6)]"
 />
 
 <div className="leading-none min-w-0">
 
-  <p className="text-black text-lg md:text-xl font-bold tracking-wide truncate">
-    DIECAST UNIVERSE
+  <p className="text-white text-lg md:text-xl font-bold tracking-wide truncate">
+    SHINSEI DIECAST
   </p>
 
-  <p className="text-[#D4AF37] text-[10px] md:text-sm tracking-[0.2em] truncate">
-    DIECAST COLLECTIBLES
-  </p>
+ <p className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent text-[10px] md:text-sm tracking-[0.2em] truncate font-semibold">
+    PREMIUM DIECAST COLLECTION
+</p>
 
 </div>
         </Link>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-6 text-gray-700">
+        <div className="hidden md:flex items-center gap-6 text-gray-300">
 
          
 
           <Link
             href="/cars"
-            className="hover:text-[#D4AF37] transition"
+            className="hover:text-pink-400 transition"
           >
 
             Diecast Cars
@@ -165,7 +228,7 @@ export default function Navbar() {
 
           <Link
             href="/track-order"
-            className="hover:text-[#D4AF37] transition"
+            className="hover:text-pink-400 transition"
           >
 
             Track Order
@@ -175,7 +238,7 @@ export default function Navbar() {
           <Link
             href="/orders"
             prefetch
-            className="hover:text-[#D4AF37] transition"
+            className="hover:text-pink-400 transition"
           >
 
             My Orders
@@ -185,7 +248,7 @@ export default function Navbar() {
           {/* Cart */}
           <Link
             href="/cart"
-            className="relative hover:text-[#D4AF37] transition"
+            className="relative hover:text-pink-400 transition"
           >
 
             <div
@@ -212,8 +275,10 @@ export default function Navbar() {
                   h-5
                   px-1
                   rounded-full
-                  bg-[#D4AF37]
-text-black
+                 bg-gradient-to-r
+from-pink-500
+to-purple-600
+text-white
                   text-xs
                   font-bold
                   flex
@@ -236,7 +301,7 @@ text-black
 
             <Link
               href="/admin"
-              className="text-[#D4AF37] font-semibold"
+              className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent font-semibold"
             >
 
               Admin
@@ -253,7 +318,7 @@ text-black
 
             <SignInButton>
 
-              <button className="hover:text-[#D4AF37] transition">
+              <button className="hover:text-pink-400 transition">
 
                 Login
 
@@ -289,28 +354,31 @@ text-black
 
               <ShoppingCart
   size={24}
-  className="text-black"
+  className="text-white"
 />
 
               {cart.length > 0 && (
 
                 <span
                   className="
-                  absolute
-                  -top-2
-                  -right-2
-                  min-w-[18px]
-                  h-5
-                  px-1
-                  rounded-full
-                  bg-[#D4AF37]
-text-black
-                  text-xs
-                  font-bold
-                  flex
-                  items-center
-                  justify-center
-                  "
+absolute
+-top-2
+-right-2
+min-w-[18px]
+h-5
+px-1
+rounded-full
+bg-gradient-to-r
+from-pink-500
+to-purple-600
+text-white
+text-xs
+font-bold
+flex
+items-center
+justify-center
+shadow-[0_0_12px_rgba(236,72,153,0.5)]
+"
                 >
 
                   {cart.length}
@@ -336,12 +404,13 @@ text-black
             {mobileMenuOpen ? (
               <X
   size={28}
-  className="text-black"
+  className="text-white"
 />
             ) : (
               <Menu
   size={28}
-  className="text-black"
+  className="text-white"
+  
 />
             )}
 
@@ -354,12 +423,12 @@ text-black
       {/* Mobile Menu */}
       {mobileMenuOpen && (
 
-        <div className="md:hidden border-t border-gray-200 bg-white text-black px-6 py-6 space-y-6">
+        <div className="md:hidden border-t border-[#2B2B3A] bg-[#111118] text-white px-6 py-6 space-y-6">
 
         
           <Link
             href="/cars"
-            className="block text-lg font-medium text-black"
+            className="block text-lg font-medium text-white"
           >
 
             Diecast Cars
@@ -368,7 +437,7 @@ text-black
 
           <Link
             href="/track-order"
-            className="block text-lg font-medium text-black"
+            className="block text-lg font-medium text-white"
           >
 
             Track Order
@@ -377,7 +446,7 @@ text-black
 
           <Link
             href="/orders"
-            className="block text-lg font-medium text-black"
+            className="block text-lg font-medium text-white"
           >
 
             My Orders
@@ -388,7 +457,7 @@ text-black
 
             <Link
               href="/admin"
-              className="block text-lg text-[#D4AF37]"
+              className="block text-lg bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent"
             >
 
               Admin
@@ -405,7 +474,7 @@ text-black
 
             <SignInButton>
 
-              <button className="text-lg">
+              <button className="text-lg hover:text-pink-400 transition">
 
                 Login
 
