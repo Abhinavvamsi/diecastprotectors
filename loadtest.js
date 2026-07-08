@@ -7,6 +7,6 @@ export const options = {
 };
 
 export default function () {
-  http.get("https://www.diecastprotectors.in/checkout");
+  http.get("https://www.diecastprotectors.in/admin/bulk-import");
   sleep(1);
 }

@@ -41,6 +41,77 @@ const [showSummary, setShowSummary] =
 const [importResult, setImportResult] =
   useState<any>(null)
 
+
+
+async function testZip() {
+
+  if (!zipFile) return
+
+  const formData = new FormData()
+
+  formData.append(
+    "zip",
+    zipFile
+  )
+
+  const response = await fetch(
+    "/api/admin/test-zip",
+    {
+      method: "POST",
+      body: formData,
+    }
+  )
+
+  const data = await response.json()
+
+  console.log(data)
+
+  alert(
+    `ZIP contains ${data.count} images.\n\n${data.files.join("\n")}`
+  )
+
+}
+
+
+
+async function testCloudinary() {
+
+  if (!zipFile) return
+
+  const formData = new FormData()
+
+  formData.append(
+    "zip",
+    zipFile
+  )
+
+  const response = await fetch(
+    "/api/admin/test-cloudinary",
+    {
+      method: "POST",
+      body: formData,
+    }
+  )
+
+  const data = await response.json()
+
+  console.log(data)
+
+  if (!response.ok) {
+
+    alert(data.error)
+
+    return
+
+  }
+
+  alert(
+    `Successfully uploaded ${data.uploaded.length} images to Cloudinary.`
+  )
+
+}
+
+
   async function previewImport() {
 
   if (!excelFile) return
