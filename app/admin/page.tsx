@@ -648,6 +648,63 @@ text-white
   </Link>
 
 )}
+{admin.role === "OWNER" && (
+
+  <Link
+    href="/admin/bulk-import"
+    className="
+    group
+    bg-zinc-900
+    border
+    border-zinc-800
+    rounded-3xl
+    p-8
+    hover:border-pink-500/60
+    hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+    hover:-translate-y-2
+    transition-all
+    duration-300
+    "
+  >
+
+    <div className="space-y-6">
+
+      <div
+        className="
+        w-16
+        h-16
+        rounded-2xl
+        bg-gradient-to-r
+        from-pink-500
+        via-fuchsia-500
+        to-purple-600
+        text-white
+        flex
+        items-center
+        justify-center
+        text-3xl
+        "
+      >
+        📦
+      </div>
+
+      <div>
+
+        <h2 className="text-3xl font-bold">
+          Bulk Import
+        </h2>
+
+        <p className="text-zinc-400 mt-4">
+          Import hundreds of products using Excel and ZIP files.
+        </p>
+
+      </div>
+
+    </div>
+
+  </Link>
+
+)}
 
       </div>
 

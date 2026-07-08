@@ -47,13 +47,18 @@ export default function AdminNav() {
     },
 
     ...(role === "OWNER"
-      ? [
-          {
-            href: "/admin/admins",
-            label: "Admins",
-          },
-        ]
-      : []),
+  ? [
+      {
+        href: "/admin/admins",
+        label: "Admins",
+      },
+
+      {
+        href: "/admin/bulk-import",
+        label: "Bulk Import",
+      },
+    ]
+  : []),
 
     {
       href: "/admin/brands",

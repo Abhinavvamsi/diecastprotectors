@@ -249,3 +249,12 @@ select {
   -webkit-appearance: none;
   appearance: none;
 }
+.product-title {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

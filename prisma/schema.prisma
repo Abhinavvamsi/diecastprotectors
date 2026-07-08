@@ -28,7 +28,7 @@ model Order {
 
 model Product {
   id              String   @id @default(cuid())
-  name            String
+  name            String @unique
   description     String
   price           Int
   images          Json
