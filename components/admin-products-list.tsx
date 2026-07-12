@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import { Search } from "lucide-react"
 import { toast } from "sonner"
 
 export default function AdminProductsList({
@@ -14,20 +15,57 @@ export default function AdminProductsList({
 
   const [selectedBrand, setSelectedBrand] =
     useState("All")
+  const [search, setSearch] =
+    useState("")
 const [deletingId, setDeletingId] =
   useState("")
+
+  const normalizedSearch =
+    search.trim().toLowerCase()
+
   const filteredProducts =
-    selectedBrand === "All"
-      ? products
-      : products.filter(
-          (product) =>
-            product.brand?.name ===
-            selectedBrand
-        )
+    products.filter((product) => {
+      const matchesBrand =
+        selectedBrand === "All" ||
+        product.brand?.name === selectedBrand
+
+      const matchesSearch =
+        !normalizedSearch ||
+        product.name
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        product.category
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        product.brand?.name
+          ?.toLowerCase()
+          .includes(normalizedSearch)
+
+      return matchesBrand && matchesSearch
+    })
 
   return (
     <>
-      <div className="mb-10">
+      <div className="mb-10 flex flex-col gap-4 sm:flex-row">
+
+        <div className="relative flex-1">
+
+          <Search
+            size={20}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+          />
+
+          <input
+            type="search"
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+            placeholder="Search products, categories, or brands..."
+            className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-900 pl-12 pr-4 text-white outline-none transition-all placeholder:text-zinc-500 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30"
+          />
+
+        </div>
 
         <select
           value={selectedBrand}
@@ -268,6 +306,14 @@ disabled:opacity-60
         ))}
 
       </div>
+
+      {filteredProducts.length === 0 && (
+
+        <p className="py-12 text-center text-zinc-400">
+          No products match your search.
+        </p>
+
+      )}
 
     </>
   )

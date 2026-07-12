@@ -27,7 +27,19 @@ import {
 
 import { useCartStore } from "@/store/cart-store"
 
+const CARS_SCROLL_POSITION_KEY =
+  "cars-scroll-position"
+
 export default function Navbar() {
+
+  const saveCarsScrollPosition = () => {
+    if (window.location.pathname !== "/cars") return
+
+    sessionStorage.setItem(
+      CARS_SCROLL_POSITION_KEY,
+      String(window.scrollY)
+    )
+  }
 
   const { user } = useUser()
 
@@ -248,6 +260,7 @@ alt="Shinsei Diecast"
           {/* Cart */}
           <Link
             href="/cart"
+            onNavigate={saveCarsScrollPosition}
             className="relative hover:text-pink-400 transition"
           >
 
@@ -338,6 +351,7 @@ text-white
           {/* Mobile Cart */}
           <Link
             href="/cart"
+            onNavigate={saveCarsScrollPosition}
             className="relative"
           >
 

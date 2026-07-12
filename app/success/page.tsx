@@ -169,7 +169,7 @@ text-transparent
             </div>
 
             <a
-              href="https://chat.whatsapp.com/Gj5gV6SHqHM85CKDyDc3JJ?s=cl&p=i&ilr=0"
+              href="https://chat.whatsapp.com/LXeocqm0ctA0ohmQSNfP0t?s=cl&p=a&ilr=1&amv=2"
               target="_blank"
               rel="noopener noreferrer"
               className="

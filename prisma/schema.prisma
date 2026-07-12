@@ -21,26 +21,37 @@ model Order {
   products       Json
   totalAmount    Int
   paymentId      String?
+
+  // NEW
+  reservationId  String?
+
   createdAt      DateTime @default(now())
+
   deliveryMethod String   @default("shipping")
   pickupLocation String?
 }
 
 model Product {
   id              String   @id @default(cuid())
-  name            String @unique
+  name            String   @unique
   description     String
   price           Int
   images          Json
   category        String
   stock           Int
+
+  // NEW
+  reservedStock   Int @default(0)
+
   quantityPricing Json?
   createdAt       DateTime @default(now())
   badge           String?
-  brandId         String?
-  brand           Brand?   @relation(fields: [brandId], references: [id])
-}
 
+  brandId         String?
+  brand           Brand? @relation(fields: [brandId], references: [id])
+
+  reservationItems ReservationItem[]
+}
 model Coupon {
   id        String   @id @default(cuid())
   code      String   @unique
@@ -94,4 +105,40 @@ model Admin {
   role      String   @default("ADMIN")
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
+}
+
+
+model Reservation {
+  id        String   @id @default(cuid())
+
+  userId    String
+
+  status    ReservationStatus @default(ACTIVE)
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  items ReservationItem[]
+}
+
+model ReservationItem {
+  id String @id @default(cuid())
+
+  reservationId String
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  productId String
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  quantity Int
+
+  @@index([productId])
+}
+
+enum ReservationStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  CANCELLED
 }

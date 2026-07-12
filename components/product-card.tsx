@@ -26,6 +26,10 @@ type ProductCardProps = {
 
   badge?: string
 }
+
+const CARS_LAST_PRODUCT_KEY =
+  "cars-last-product-id"
+
 export default function ProductCard({
 
   id,
@@ -50,11 +54,21 @@ export default function ProductCard({
 
   const { user } = useUser()
 
+  const saveProductPosition = () => {
+    if (window.location.pathname !== "/cars") return
+
+    sessionStorage.setItem(
+      CARS_LAST_PRODUCT_KEY,
+      id
+    )
+  }
+
   return (
 
     <Link
   href={`/products/${id}`}
   prefetch
+  onNavigate={saveProductPosition}
 >
 
       <div

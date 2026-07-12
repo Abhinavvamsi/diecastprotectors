@@ -1,11 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 import { Search } from "lucide-react"
 import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
 import ProductCard from "@/components/product-card"
 import BrandMarquee from "@/components/brand-marquee"
+
+const CARS_SCROLL_POSITION_KEY =
+  "cars-scroll-position"
+
+const CARS_LAST_PRODUCT_KEY =
+  "cars-last-product-id"
+
 type Product = {
   id: string
   name: string
@@ -29,6 +40,9 @@ type Brand = {
 }
 
 export default function CarsPage() {
+
+  const hasRestoredScrollPosition =
+    useRef(false)
 
   const [products, setProducts] =
     useState<Product[]>([])
@@ -116,6 +130,74 @@ const [sortBy,
   fetchData()
 
 }, [])
+
+useEffect(() => {
+
+  const saveScrollPosition = () => {
+    sessionStorage.setItem(
+      CARS_SCROLL_POSITION_KEY,
+      String(window.scrollY)
+    )
+  }
+
+  window.addEventListener(
+    "pagehide",
+    saveScrollPosition
+  )
+
+  return () => {
+    if (hasRestoredScrollPosition.current) {
+      saveScrollPosition()
+    }
+    window.removeEventListener(
+      "pagehide",
+      saveScrollPosition
+    )
+  }
+
+}, [])
+
+useEffect(() => {
+
+  if (loading) return
+
+  const savedScrollPosition =
+    sessionStorage.getItem(
+      CARS_SCROLL_POSITION_KEY
+    )
+
+  const lastProductId =
+    sessionStorage.getItem(
+      CARS_LAST_PRODUCT_KEY
+    )
+
+  const animationFrame =
+    requestAnimationFrame(() => {
+      const lastProduct = lastProductId
+        ? document.getElementById(
+            `product-${lastProductId}`
+          )
+        : null
+
+      if (lastProduct) {
+        lastProduct.scrollIntoView({
+          block: "center",
+        })
+      } else if (savedScrollPosition) {
+        window.scrollTo({
+          top: Number(savedScrollPosition),
+          left: 0,
+        })
+      }
+
+      hasRestoredScrollPosition.current = true
+    })
+
+  return () =>
+    cancelAnimationFrame(animationFrame)
+
+}, [loading])
+
 const brandFilters: string[] = [
 
   "All",
@@ -605,7 +687,10 @@ focus:outline-none
 
   .map((product) => (
 
-    <div key={product.id}>
+    <div
+      id={`product-${product.id}`}
+      key={product.id}
+    >
 
       <ProductCard
         id={product.id}

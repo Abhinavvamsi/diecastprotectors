@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { resend } from "@/lib/resend"
 import { NextResponse } from "next/server"
+import { createHmac, timingSafeEqual } from "crypto"
 
 export async function POST(
   req: Request
@@ -10,6 +11,52 @@ export async function POST(
 
     const body =
       await req.json()
+const {
+  razorpay_order_id,
+  razorpay_payment_id,
+  razorpay_signature,
+} = body
+
+if (
+  !razorpay_order_id ||
+  !razorpay_payment_id ||
+  !razorpay_signature
+) {
+  return NextResponse.json(
+    { error: "Payment verification details are required" },
+    { status: 400 }
+  )
+}
+
+const expectedSignature = createHmac(
+  "sha256",
+  process.env.RAZORPAY_KEY_SECRET!
+)
+  .update(
+    `${razorpay_order_id}|${razorpay_payment_id}`
+  )
+  .digest("hex")
+
+const signatureIsValid =
+  expectedSignature.length ===
+    razorpay_signature.length &&
+  timingSafeEqual(
+    Buffer.from(expectedSignature),
+    Buffer.from(razorpay_signature)
+  )
+
+if (!signatureIsValid) {
+  return NextResponse.json(
+    { error: "Payment verification failed" },
+    { status: 400 }
+  )
+}
+    if (!body.reservationId) {
+      return NextResponse.json(
+        { error: "Reservation ID is required" },
+        { status: 400 }
+      )
+    }
 
     const orderId =
       `HWS-${Date.now()}`
@@ -17,6 +64,69 @@ export async function POST(
     const order =
   await prisma.$transaction(
     async (tx) => {
+
+      const reservation =
+        await tx.reservation.findUnique({
+          where: {
+            id: body.reservationId,
+          },
+          include: {
+            items: true,
+          },
+        })
+
+      if (
+        !reservation ||
+        reservation.status !== "ACTIVE" ||
+        reservation.expiresAt <= new Date()
+      ) {
+        throw new Error(
+          "Your stock reservation has expired"
+        )
+      }
+
+      if (reservation.userId !== body.userId) {
+        throw new Error("Invalid stock reservation")
+      }
+
+      const reservedItems = new Map(
+        reservation.items.map((item) => [
+          item.productId,
+          item.quantity,
+        ])
+      )
+
+      if (
+        reservedItems.size !== body.products.length ||
+        body.products.some(
+          (item: any) =>
+            reservedItems.get(item.id) !== item.quantity
+        )
+      ) {
+        throw new Error(
+          "Your cart no longer matches the reservation"
+        )
+      }
+
+      const completedReservation =
+        await tx.reservation.updateMany({
+          where: {
+            id: reservation.id,
+            status: "ACTIVE",
+            expiresAt: {
+              gt: new Date(),
+            },
+          },
+          data: {
+            status: "COMPLETED",
+          },
+        })
+
+      if (!completedReservation.count) {
+        throw new Error(
+          "Your stock reservation has expired"
+        )
+      }
 
       // Check stock first
 
@@ -41,7 +151,8 @@ export async function POST(
 
         if (
           product.stock <
-          item.quantity
+          item.quantity ||
+          product.reservedStock < item.quantity
         ) {
 
           throw new Error(
@@ -65,6 +176,11 @@ export async function POST(
           data: {
 
             stock: {
+              decrement:
+                item.quantity,
+            },
+
+            reservedStock: {
               decrement:
                 item.quantity,
             },
@@ -112,6 +228,9 @@ export async function POST(
 
   paymentId:
     body.paymentId,
+
+  reservationId:
+    body.reservationId,
 
   deliveryMethod:
     body.deliveryMethod || "shipping",

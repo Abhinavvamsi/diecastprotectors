@@ -1,137 +1,74 @@
 export const dynamic = "force-dynamic"
 
-import Image from "next/image"
 import AdminNav from "@/components/admin-nav"
-import AdminProductsList
-from "@/components/admin-products-list"
-
-import { prisma } from "@/lib/prisma"
+import AdminProductsList from "@/components/admin-products-list"
 import { requireAdmin } from "@/lib/admin"
-
+import { prisma } from "@/lib/prisma"
 
 export default async function ProductsPage() {
-
   await requireAdmin()
 
-  const products =
-  await prisma.product.findMany({
+  const [products, brands] = await Promise.all([
+    prisma.product.findMany({
+      include: {
+        brand: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+    prisma.brand.findMany({
+      orderBy: {
+        name: "asc",
+      },
+    }),
+  ])
 
-    include: {
-      brand: true,
-    },
-
-    orderBy: {
-      createdAt: "desc",
-    },
-
-  })
-const brands =
-  await prisma.brand.findMany({
-
-    orderBy: {
-      name: "asc",
-    },
-
-  })
   return (
+    <main className="min-h-screen bg-[#09090B] p-8 text-white">
+      <div className="mx-auto max-w-7xl">
+        <AdminNav />
 
-  <main className="min-h-screen bg-[#09090B] text-white p-8">
-
-    <div className="max-w-7xl mx-auto">
-
-  <AdminNav />
-
-  <div className="mb-12">
-
-    <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
-
-      Shinsei Diecast Admin
-
-    </p>
-
-    <h1 className="text-5xl font-bold mt-3">
-
-      Product Management
-
-    </h1>
-
-    <p className="text-zinc-400 mt-2">
-
-      Manage cars, protectors and collectibles.
-
-    </p>
-
-  </div>
-
-  {/* ADD HERE */}
-
-  <div className="flex justify-end mb-10">
-
-    <a href="/admin/add-product">
-
-      <button
-
-        className="
-px-6
-h-12
-rounded-xl
-bg-gradient-to-r
-from-pink-500
-via-fuchsia-500
-to-purple-600
-text-white
-font-semibold
-transition-all
-duration-300
-hover:scale-105
-hover:shadow-[0_0_30px_rgba(236,72,153,.4)]
-"
-
-      >
-
-        + Add Product
-
-      </button>
-
-    </a>
-
-  </div>
-
-      {products.length === 0 && (
-
-        <div
-         className="
-bg-zinc-900
-border
-border-zinc-800
-rounded-3xl
-p-12
-text-center
-shadow-2xl
-"
-        >
-
-          <h2 className="text-2xl font-bold">
-            No Products Found
-          </h2>
-
-          <p className="text-zinc-400 mt-2">
-            Add your first product to get started.
+        <div className="mb-12">
+          <p className="bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-sm uppercase tracking-[0.3em] text-transparent">
+            Shinsei Diecast Admin
           </p>
 
+          <h1 className="mt-3 text-5xl font-bold">
+            Product Management
+          </h1>
+
+          <p className="mt-2 text-zinc-400">
+            Manage cars, protectors and collectibles.
+          </p>
         </div>
 
-      )}
+        <div className="mb-10 flex justify-end">
+          <a
+            href="/admin/add-product"
+            className="flex h-12 items-center rounded-xl bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600 px-6 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(236,72,153,.4)]"
+          >
+            + Add Product
+          </a>
+        </div>
 
-      <AdminProductsList
-  products={products}
-  brands={brands}
-/>
+        {products.length === 0 ? (
+          <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-12 text-center shadow-2xl">
+            <h2 className="text-2xl font-bold">
+              No Products Found
+            </h2>
 
-    </div>
-
-  </main>
-
-)
-
+            <p className="mt-2 text-zinc-400">
+              Add your first product to get started.
+            </p>
+          </div>
+        ) : (
+          <AdminProductsList
+            products={products}
+            brands={brands}
+          />
+        )}
+      </div>
+    </main>
+  )
 }

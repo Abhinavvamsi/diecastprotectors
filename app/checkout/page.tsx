@@ -3,6 +3,7 @@
 import {
   useState,
   useEffect,
+  useRef,
 } from "react"
 
 import {
@@ -156,6 +157,12 @@ const [deliveryMethod,
 const [suggestedProducts, setSuggestedProducts] =
   useState<any[]>([])
 
+const [reservationId, setReservationId] =
+  useState<string | null>(null)
+
+const reservationIdRef =
+  useRef<string | null>(null)
+
 useEffect(() => {
 
   async function loadSettings() {
@@ -245,6 +252,26 @@ useEffect(() => {
 
 }, [couponCode])
 
+useEffect(() => {
+
+  if (!reservationId) return
+
+  return () => {
+    void fetch(
+      "/api/reservations/cancel",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reservationId }),
+        keepalive: true,
+      }
+    )
+  }
+
+}, [reservationId])
+
 if (!user) {
 
   return <RedirectToSignIn />
@@ -285,6 +312,28 @@ async function searchAddress(
 
     console.log(error)
 
+  }
+
+}
+
+async function cancelReservation(
+  id: string
+) {
+
+  try {
+    await fetch(
+      "/api/reservations/cancel",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reservationId: id }),
+      }
+    )
+  } finally {
+    reservationIdRef.current = null
+    setReservationId(null)
   }
 
 }
@@ -1409,6 +1458,40 @@ if (
 }
 
 setValidating(false)
+                    const reservationResponse =
+                      await fetch(
+                        "/api/reservations/create",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            items: cart.map((item) => ({
+                              productId: item.id,
+                              quantity: item.quantity,
+                            })),
+                          }),
+                        }
+                      )
+
+                    const reservationData =
+                      await reservationResponse.json()
+
+                    if (!reservationResponse.ok) {
+                      toast.error(
+                        reservationData.error ||
+                        "Unable to reserve these products"
+                      )
+                      return
+                    }
+
+                    const activeReservationId =
+                      reservationData.reservation.id
+
+                    reservationIdRef.current =
+                      activeReservationId
+                    setReservationId(activeReservationId)
                     setLoading(true)
 
                     const response =
@@ -1444,6 +1527,16 @@ discount +
 
                     const order =
                       await response.json()
+
+                    if (!response.ok) {
+                      await cancelReservation(
+                        activeReservationId
+                      )
+                      throw new Error(
+                        order.error ||
+                        "Failed to start payment"
+                      )
+                    }
 
                     const options = {
 
@@ -1503,6 +1596,8 @@ description: "Premium Japanese Diecast Collectibles",
 
                                       products:
                                         cart,
+                                      reservationId:
+                                        activeReservationId,
                                       couponCode,
 
                                       deliveryMethod,
@@ -1526,7 +1621,9 @@ discount +
 
 paymentId:
   response.razorpay_payment_id,
-
+razorpay_order_id: response.razorpay_order_id,
+razorpay_payment_id: response.razorpay_payment_id,
+razorpay_signature: response.razorpay_signature,
                                     }),
 
                                 }
@@ -1535,9 +1632,19 @@ paymentId:
                             const savedOrder =
                               await saveOrderResponse.json()
 
+                            if (!saveOrderResponse.ok) {
+                              throw new Error(
+                                savedOrder.error ||
+                                "Failed to save order"
+                              )
+                            }
+
                             toast.success(
                               "Payment successful 🎉"
                             )
+
+                            setReservationId(null)
+                            reservationIdRef.current = null
 
                             useCartStore
                               .getState()
@@ -1549,7 +1656,7 @@ paymentId:
                           } catch (error) {
 
                             toast.error(
-                              "Failed to save order"
+                              "Payment received, but the order could not be saved. Please contact support."
                             )
 
                             setLoading(false)
@@ -1561,6 +1668,10 @@ paymentId:
                       modal: {
 
                         ondismiss: function () {
+
+                          void cancelReservation(
+                            activeReservationId
+                          )
 
                           setLoading(false)
 
@@ -1577,26 +1688,6 @@ color:"#EC4899"
 },
 
                     }
-                                        const stockResponse =
-  await fetch(
-    "/api/check-stock",
-    {
-
-      method: "POST",
-
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
-
-      body: JSON.stringify({
-
-        products: cart,
-
-      }),
-
-    }
-  )
 if (couponCode) {
 
   const couponResponse =
@@ -1635,25 +1726,13 @@ if (couponCode) {
 
     setLoading(false)
 
+    await cancelReservation(
+      activeReservationId
+    )
+
     return
 
   }
-
-}
-const stockData =
-  await stockResponse.json()
-
-if (
-  !stockResponse.ok
-) {
-
-  toast.error(
-    stockData.message
-  )
-
-  setLoading(false)
-
-  return
 
 }
                     const razorpay =
@@ -1670,6 +1749,10 @@ if (
 
                       function () {
 
+                        void cancelReservation(
+                          activeReservationId
+                        )
+
                         toast.error(
                           "Payment failed"
                         )
@@ -1680,6 +1763,12 @@ if (
                     )
 
                   } catch (error) {
+
+                    if (reservationIdRef.current) {
+                      await cancelReservation(
+                        reservationIdRef.current
+                      )
+                    }
 
                     toast.error(
                       "Something went wrong"
@@ -1759,7 +1848,7 @@ text-transparent
   </p>
 
   <a
-    href="https://chat.whatsapp.com/Gj5gV6SHqHM85CKDyDc3JJ?s=cl&p=i&ilr=0"
+    href="https://chat.whatsapp.com/LXeocqm0ctA0ohmQSNfP0t?s=cl&p=a&ilr=1&amv=2"
     target="_blank"
     rel="noopener noreferrer"
     className="

@@ -202,7 +202,7 @@ text-transparent uppercase tracking-widest text-sm mb-3">
 
           </div>
 
-          <Link href="/#products">
+          <Link href="/cars">
 
             <Button
   className="
@@ -256,7 +256,7 @@ text-orange-300
               Your cart is empty.
             </p>
 
-            <Link href="/#products">
+            <Link href="/cars">
 
               <Button className="
 mt-8
