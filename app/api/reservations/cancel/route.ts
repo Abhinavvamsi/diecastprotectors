@@ -4,16 +4,6 @@ import { auth } from "@clerk/nextjs/server"
 
 export async function POST(req: Request) {
   try {
-
-    const { userId } = await auth()
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
-    }
-
     const { reservationId } = await req.json()
 
     if (!reservationId) {
@@ -28,7 +18,6 @@ export async function POST(req: Request) {
 
         where: {
           id: reservationId,
-          userId,
         },
 
         include: {
@@ -41,6 +30,15 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Reservation not found" },
         { status: 404 }
+      )
+    }
+
+    const { userId } = await auth()
+
+    if (userId && reservation.userId !== userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
       )
     }
 

@@ -14,6 +14,19 @@ import {
 import { redirect }
 from "next/navigation"
 
+function formatOrderTime(
+  value: Date
+) {
+  return new Intl.DateTimeFormat(
+    "en-IN",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Kolkata",
+    }
+  ).format(value)
+}
+
 export default async function OrdersPage() {
 
   const user =
@@ -163,9 +176,27 @@ text-transparent text-sm uppercase tracking-widest">
 
                   <p>
 
-                    {new Date(
+                    {formatOrderTime(
                       order.createdAt
-                    ).toLocaleString()}
+                    )}
+
+                  </p>
+
+                  <p className="text-pink-400 mt-6">
+
+                    Delivery Address
+
+                  </p>
+
+                  <p className="text-zinc-300 max-w-md leading-7">
+
+                    {order.address}
+                    {order.city
+                      ? `, ${order.city}`
+                      : ""}
+                    {order.pincode
+                      ? ` - ${order.pincode}`
+                      : ""}
 
                   </p>
 

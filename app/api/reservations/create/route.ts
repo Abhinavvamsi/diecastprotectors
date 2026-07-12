@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 
@@ -23,47 +24,53 @@ export async function POST(req: Request) {
       )
     }
 
-    // Lock in consistent order
-    items.sort((a: any, b: any) =>
+    const sortedItems = [...items].sort((a: any, b: any) =>
       a.productId.localeCompare(b.productId)
     )
+    const productIds = sortedItems.map((item: any) => item.productId)
 
     const reservation =
       await prisma.$transaction(async (tx) => {
 
-        // Lock + validate
-        for (const item of items) {
+        const products =
+          await tx.$queryRaw<any[]>`
+            SELECT id, stock, "reservedStock", name
+            FROM "Product"
+            WHERE id IN (${Prisma.join(productIds)})
+            FOR UPDATE
+          `
 
-          const products =
-            await tx.$queryRaw<any[]>`
-              SELECT *
-              FROM "Product"
-              WHERE id = ${item.productId}
-              FOR UPDATE
-            `
+        if (products.length !== productIds.length) {
+          const foundIds = new Set(
+            products.map((product) => product.id)
+          )
+          const missingProduct = sortedItems.find(
+            (item: any) => !foundIds.has(item.productId)
+          )
 
-          const product = products[0]
+          throw new Error(
+            `${missingProduct?.productId || "Product"} not found`
+          )
+        }
 
-          if (!product) {
-            throw new Error(
-              `${item.productId} not found`
-            )
-          }
+        const productMap = new Map(
+          products.map((product) => [product.id, product])
+        )
 
+        for (const item of sortedItems) {
+          const product = productMap.get(item.productId)
           const available =
-            product.stock -
-            product.reservedStock
+            product.stock - product.reservedStock
 
           if (available < item.quantity) {
             throw new Error(
               `${product.name} is sold out`
             )
           }
-
         }
 
         // Reserve stock
-        for (const item of items) {
+        for (const item of sortedItems) {
 
           await tx.product.update({
 
@@ -93,12 +100,12 @@ export async function POST(req: Request) {
             status: "ACTIVE",
 
             expiresAt: new Date(
-              Date.now() + 5 * 60 * 1000
+              Date.now() + 15 * 60 * 1000
             ),
 
             items: {
 
-              create: items.map((item: any) => ({
+              create: sortedItems.map((item: any) => ({
 
                 productId: item.productId,
 

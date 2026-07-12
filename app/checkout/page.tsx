@@ -10,6 +10,7 @@ import {
   Minus,
   Plus,
   Trash2,
+  Loader2,
 } from "lucide-react"
 
 import Image from "next/image"
@@ -160,10 +161,85 @@ const [suggestedProducts, setSuggestedProducts] =
 const [reservationId, setReservationId] =
   useState<string | null>(null)
 
+const [reservationExpiresAt,
+  setReservationExpiresAt
+] = useState<string | null>(null)
+
 const reservationIdRef =
   useRef<string | null>(null)
 
+const activeReservationStorageKey =
+  "active-checkout-reservation-id"
+
+const cancelReservationSilently =
+  async (id: string) => {
+    try {
+      const payload = JSON.stringify({
+        reservationId: id,
+      })
+
+      if (
+        typeof navigator !== "undefined" &&
+        "sendBeacon" in navigator
+      ) {
+        navigator.sendBeacon(
+          "/api/reservations/cancel",
+          new Blob([payload], {
+            type: "application/json",
+          })
+        )
+        return
+      }
+
+      await fetch(
+        "/api/reservations/cancel",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: payload,
+          keepalive: true,
+        }
+      )
+    } catch {
+      // Best-effort cleanup when the page is leaving.
+    }
+  }
+
+const clearStoredReservation = () => {
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem(
+      activeReservationStorageKey
+    )
+  }
+}
+
+function formatIstTime(value: string) {
+  return new Intl.DateTimeFormat(
+    "en-IN",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Asia/Kolkata",
+    }
+  ).format(new Date(value))
+}
+
 useEffect(() => {
+
+  const staleReservationId =
+    sessionStorage.getItem(
+      activeReservationStorageKey
+    )
+
+  if (staleReservationId) {
+    void cancelReservationSilently(
+      staleReservationId
+    )
+    clearStoredReservation()
+  }
 
   async function loadSettings() {
 
@@ -256,18 +332,52 @@ useEffect(() => {
 
   if (!reservationId) return
 
+  const handlePageExit = () => {
+    const activeReservation =
+      reservationIdRef.current ||
+      sessionStorage.getItem(
+        activeReservationStorageKey
+      )
+
+    if (activeReservation) {
+      void cancelReservationSilently(
+        activeReservation
+      )
+    }
+  }
+
+  window.addEventListener(
+    "pagehide",
+    handlePageExit
+  )
+  window.addEventListener(
+    "beforeunload",
+    handlePageExit
+  )
+  window.addEventListener(
+    "unload",
+    handlePageExit
+  )
+
   return () => {
-    void fetch(
-      "/api/reservations/cancel",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ reservationId }),
-        keepalive: true,
-      }
+    window.removeEventListener(
+      "pagehide",
+      handlePageExit
     )
+    window.removeEventListener(
+      "beforeunload",
+      handlePageExit
+    )
+    window.removeEventListener(
+      "unload",
+      handlePageExit
+    )
+    if (reservationIdRef.current) {
+      void cancelReservationSilently(
+        reservationIdRef.current
+      )
+    }
+    clearStoredReservation()
   }
 
 }, [reservationId])
@@ -321,19 +431,12 @@ async function cancelReservation(
 ) {
 
   try {
-    await fetch(
-      "/api/reservations/cancel",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ reservationId: id }),
-      }
-    )
+    await cancelReservationSilently(id)
   } finally {
     reservationIdRef.current = null
     setReservationId(null)
+    setReservationExpiresAt(null)
+    clearStoredReservation()
   }
 
 }
@@ -1492,6 +1595,13 @@ setValidating(false)
                     reservationIdRef.current =
                       activeReservationId
                     setReservationId(activeReservationId)
+                    setReservationExpiresAt(
+                      reservationData.reservation.expiresAt
+                    )
+                    sessionStorage.setItem(
+                      activeReservationStorageKey,
+                      activeReservationId
+                    )
                     setLoading(true)
 
                     const response =
@@ -1563,95 +1673,53 @@ description: "Premium Japanese Diecast Collectibles",
 
                           try {
 
-                            const saveOrderResponse =
-                              await fetch(
-                                "/api/save-order",
-                                {
-
-                                  method:
-                                    "POST",
-
-                                  headers: {
-                                    "Content-Type":
-                                      "application/json",
-                                  },
-
-                                  body:
-                                    JSON.stringify({
-                                        
-                                      userId:
-                                        user!.id,
-
-                                      customer,
-
-                                      email,
-
-                                      phone,
-
-                                      address,
-
-                                      city,
-
-                                      pincode,
-
-                                      products:
-                                        cart,
-                                      reservationId:
-                                        activeReservationId,
-                                      couponCode,
-
-                                      deliveryMethod,
-
-pickupLocation:
-  deliveryMethod === "pickup"
-    ? pickupLocation
-    : null,
-
-                                      totalAmount:
-  Math.max(
-    0,
-    total -
-discount +
-(
-  deliveryMethod === "pickup"
-    ? 0
-    : (shipping || 0)
-)
-  ),
-
-paymentId:
-  response.razorpay_payment_id,
-razorpay_order_id: response.razorpay_order_id,
-razorpay_payment_id: response.razorpay_payment_id,
-razorpay_signature: response.razorpay_signature,
-                                    }),
-
-                                }
-                              )
-
-                            const savedOrder =
-                              await saveOrderResponse.json()
-
-                            if (!saveOrderResponse.ok) {
-                              throw new Error(
-                                savedOrder.error ||
-                                "Failed to save order"
-                              )
+                            const pendingOrder = {
+                              userId: user!.id,
+                              customer,
+                              email,
+                              phone,
+                              address,
+                              city,
+                              pincode,
+                              products: cart,
+                              reservationId: activeReservationId,
+                              couponCode,
+                              deliveryMethod,
+                              pickupLocation:
+                                deliveryMethod === "pickup"
+                                  ? pickupLocation
+                                  : null,
+                              totalAmount: Math.max(
+                                0,
+                                total -
+                                  discount +
+                                  (deliveryMethod === "pickup"
+                                    ? 0
+                                    : (shipping || 0))
+                              ),
+                              paymentId:
+                                response.razorpay_payment_id,
+                              razorpay_order_id:
+                                response.razorpay_order_id,
+                              razorpay_payment_id:
+                                response.razorpay_payment_id,
+                              razorpay_signature:
+                                response.razorpay_signature,
                             }
 
-                            toast.success(
-                              "Payment successful 🎉"
+                            sessionStorage.setItem(
+                              "pending-order",
+                              JSON.stringify(pendingOrder)
                             )
 
-                            setReservationId(null)
                             reservationIdRef.current = null
+                            setReservationId(null)
+                            setReservationExpiresAt(null)
+                            clearStoredReservation()
 
-                            useCartStore
-                              .getState()
-                              .clearCart()
-
-                            window.location.href =
-                              `/success?orderId=${savedOrder.orderId}`
+                            window.location.replace(
+                              "/processing"
+                            )
 
                           } catch (error) {
 
@@ -1781,11 +1849,28 @@ if (couponCode) {
                 }}
               >
 
-                {loading
-                  ? "Processing Payment..."
-                  : "Proceed to Payment"} 
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Processing Payment...
+                  </span>
+                ) : (
+                  "Proceed to Payment"
+                )} 
 
               </Button>
+
+              {reservationExpiresAt && (
+                <div className="mt-4 rounded-xl border border-pink-500/20 bg-pink-500/10 px-4 py-3 text-sm text-pink-200">
+                  Reservation held until{" "}
+                  <span className="font-semibold">
+                    {formatIstTime(
+                      reservationExpiresAt
+                    )}
+                  </span>
+                </div>
+              )}
+
               <div
   className="
   mt-4

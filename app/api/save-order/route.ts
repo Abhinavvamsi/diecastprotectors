@@ -345,7 +345,7 @@ if (body.couponCode) {
         </p>
 
         <a
-          href="https://www.diecastprotectors.in/track-order"
+          href="https://www.shinseidiecast.com"
           style="
             display:inline-block;
             padding:12px 20px;
