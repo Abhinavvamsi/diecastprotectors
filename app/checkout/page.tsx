@@ -30,6 +30,14 @@ import {
   useUser,
 } from "@clerk/nextjs"
 
+type SavedCheckoutAddress = {
+  name: string
+  address: string
+  city: string
+  pincode: string
+  updatedAt: string
+}
+
 export default function CheckoutPage() {
 
   const cart = useCartStore(
@@ -108,9 +116,17 @@ const removeFromCart =
     setCity
   ] = useState("")
 
-  const [pincode,
-    setPincode
-  ] = useState("")
+const [pincode,
+  setPincode
+] = useState("")
+
+const [savedAddresses,
+  setSavedAddresses
+] = useState<SavedCheckoutAddress[]>([])
+
+const [selectedSavedAddress,
+  setSelectedSavedAddress
+] = useState<number | null>(null)
 
   const [suggestions,
   setSuggestions
@@ -227,6 +243,101 @@ function formatIstTime(value: string) {
   ).format(new Date(value))
 }
 
+const savedAddressesStorageKey = user
+  ? `saved-checkout-addresses-${user.id}`
+  : null
+
+function normalizeAddress(address: SavedCheckoutAddress) {
+  return {
+    ...address,
+    name: address.name.trim(),
+    address: address.address.trim(),
+    city: address.city.trim(),
+    pincode: address.pincode.trim(),
+  }
+}
+
+function readSavedAddresses() {
+  if (!savedAddressesStorageKey) return []
+
+  try {
+    const raw =
+      localStorage.getItem(
+        savedAddressesStorageKey
+      )
+
+    if (!raw) return []
+
+    const parsed = JSON.parse(raw)
+
+    if (!Array.isArray(parsed)) return []
+
+    return parsed.slice(0, 2)
+  } catch {
+    return []
+  }
+}
+
+function writeSavedAddresses(
+  nextAddresses: SavedCheckoutAddress[]
+) {
+  if (!savedAddressesStorageKey) return
+
+  localStorage.setItem(
+    savedAddressesStorageKey,
+    JSON.stringify(nextAddresses.slice(0, 2))
+  )
+}
+
+function applySavedAddress(
+  savedAddress: SavedCheckoutAddress,
+  index: number
+) {
+  setAddress(savedAddress.address)
+  setCity(savedAddress.city)
+  setPincode(savedAddress.pincode)
+  setSelectedSavedAddress(index)
+}
+
+function saveCurrentAddress() {
+  const nextAddress = normalizeAddress({
+    name: `Address ${
+      selectedSavedAddress !== null
+        ? selectedSavedAddress + 1
+        : savedAddresses.length + 1
+    }`,
+    address,
+    city,
+    pincode,
+    updatedAt: new Date().toISOString(),
+  })
+
+  if (!nextAddress.address || !nextAddress.city || !nextAddress.pincode) {
+    toast.error("Fill address, city and pincode first")
+    return
+  }
+
+  if (selectedSavedAddress !== null) {
+    const nextAddresses = [...savedAddresses]
+    nextAddresses[selectedSavedAddress] = nextAddress
+    setSavedAddresses(nextAddresses)
+    writeSavedAddresses(nextAddresses)
+    toast.success("Address updated")
+    return
+  }
+
+  if (savedAddresses.length >= 2) {
+    toast.error("You can save only 2 addresses")
+    return
+  }
+
+  const nextAddresses = [...savedAddresses, nextAddress]
+  setSavedAddresses(nextAddresses)
+  writeSavedAddresses(nextAddresses)
+  setSelectedSavedAddress(nextAddresses.length - 1)
+  toast.success("Address saved")
+}
+
 useEffect(() => {
 
   const staleReservationId =
@@ -327,6 +438,13 @@ useEffect(() => {
   }
 
 }, [couponCode])
+
+useEffect(() => {
+  if (!savedAddressesStorageKey) return
+
+  const existing = readSavedAddresses()
+  setSavedAddresses(existing)
+}, [savedAddressesStorageKey])
 
 useEffect(() => {
 
@@ -704,6 +822,90 @@ focus:ring-pink-500/30
       transition
       "
     />
+
+    {/* Saved Addresses */}
+    <div className="mb-5 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold text-white">
+            Saved Addresses
+          </h3>
+          <p className="text-xs text-zinc-400 mt-1">
+            Save up to 2 addresses and reuse them anytime.
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          onClick={saveCurrentAddress}
+          className="
+          h-10
+          rounded-lg
+          bg-gradient-to-r
+          from-pink-500
+          via-fuchsia-500
+          to-purple-600
+          text-white
+          px-4
+          "
+        >
+          {selectedSavedAddress !== null
+            ? "Update Saved Address"
+            : "Save Address"}
+        </Button>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 mt-4">
+        {[0, 1].map((index) => {
+          const savedAddress = savedAddresses[index]
+
+          return (
+            <button
+              key={index}
+              type="button"
+              onClick={() => {
+                if (savedAddress) {
+                  applySavedAddress(savedAddress, index)
+                  return
+                }
+
+                setSelectedSavedAddress(index)
+              }}
+              className={`
+                rounded-xl border p-4 text-left transition
+                ${
+                  selectedSavedAddress === index
+                    ? "border-pink-500 bg-pink-500/10"
+                    : "border-zinc-800 bg-zinc-900 hover:border-zinc-700"
+                }
+              `}
+            >
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-white">
+                  Address {index + 1}
+                </p>
+                <span className="text-[11px] uppercase tracking-widest text-zinc-400">
+                  {savedAddress ? "Saved" : "Empty"}
+                </span>
+              </div>
+
+              {savedAddress ? (
+                <div className="mt-3 space-y-1 text-sm text-zinc-300">
+                  <p>{savedAddress.address}</p>
+                  <p>
+                    {savedAddress.city} - {savedAddress.pincode}
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-zinc-500">
+                  Click to reserve this slot and save the current address here.
+                </p>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
 
     {/* Address */}
     <div className="relative">
