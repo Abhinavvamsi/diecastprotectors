@@ -85,7 +85,7 @@ export async function POST(
           </p>
 
           <a
-            href="https://www.shinseidiecast.com/track-order"
+            href="https://www.shinseidiecast/track-order"
             style="
               display:inline-block;
               padding:12px 20px;

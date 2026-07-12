@@ -382,7 +382,7 @@ if (body.couponCode) {
         "orders@shinseidiecast.com",
 
       to:
-        "marinegaming7864@gmail.com",
+        "abhinavvamsi2004@gmail.com",
 
       subject:
         `🚀 New Order Received - ${orderId}`,
