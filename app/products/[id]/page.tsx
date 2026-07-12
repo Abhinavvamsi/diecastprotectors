@@ -33,9 +33,17 @@ export default async function ProductPage({
 
   }
 
+  const availableProduct = {
+    ...product,
+    stock: Math.max(
+      0,
+      product.stock - product.reservedStock
+    ),
+  }
+
   return (
 
-    <ProductDetails product={product} />
+    <ProductDetails product={availableProduct} />
 
   )
 

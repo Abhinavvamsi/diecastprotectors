@@ -165,7 +165,11 @@ text-center
                   description={
                     product.description
                   }
-                  stock={product.stock}
+                  stock={Math.max(
+                    0,
+                    product.stock -
+                      (product.reservedStock || 0)
+                  )}
                   quantityPricing={
                     product.quantityPricing
                   }

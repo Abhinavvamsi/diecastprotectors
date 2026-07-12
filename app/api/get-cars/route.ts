@@ -20,6 +20,14 @@ export async function GET() {
 
     })
 
-  return NextResponse.json(products)
+  return NextResponse.json(
+    products.map((product) => ({
+      ...product,
+      stock: Math.max(
+        0,
+        product.stock - product.reservedStock
+      ),
+    }))
+  )
 
 }

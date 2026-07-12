@@ -1647,6 +1647,9 @@ disabled:cursor-not-allowed
 
                 onClick={async () => {
 
+                  setLoading(true)
+                  setValidating(true)
+
                   /* Validation */
 
                   if (customer.trim().length < 3) {
@@ -1654,6 +1657,9 @@ disabled:cursor-not-allowed
                     toast.error(
                       "Enter valid full name"
                     )
+
+                    setLoading(false)
+                    setValidating(false)
 
                     return
 
@@ -1668,6 +1674,9 @@ disabled:cursor-not-allowed
                       "Enter valid email"
                     )
 
+                    setLoading(false)
+                    setValidating(false)
+
                     return
 
                   }
@@ -1681,6 +1690,9 @@ disabled:cursor-not-allowed
                       "Enter valid 10-digit phone number"
                     )
 
+                    setLoading(false)
+                    setValidating(false)
+
                     return
 
                   }
@@ -1690,6 +1702,9 @@ disabled:cursor-not-allowed
                     toast.error(
                       "Enter complete address"
                     )
+
+                    setLoading(false)
+                    setValidating(false)
 
                     return
 
@@ -1704,6 +1719,9 @@ disabled:cursor-not-allowed
                       "Enter valid city"
                     )
 
+                    setLoading(false)
+                    setValidating(false)
+
                     return
 
                   }
@@ -1717,12 +1735,14 @@ disabled:cursor-not-allowed
                       "Enter valid 6-digit pincode"
                     )
 
+                    setLoading(false)
+                    setValidating(false)
+
                     return
 
                   }
 
                   try {
-                  setValidating(true)
                   if (discount > 0 && !couponCode.trim()) {
 
   toast.error(
@@ -1732,6 +1752,7 @@ disabled:cursor-not-allowed
   setDiscount(0)
 
   setLoading(false)
+  setValidating(false)
 
   return
 
@@ -1771,6 +1792,7 @@ if (
   )
 
   setValidating(false)
+  setLoading(false)
 
   return
 
@@ -1802,6 +1824,7 @@ setValidating(false)
                         reservationData.error ||
                         "Unable to reserve these products"
                       )
+                      setLoading(false)
                       return
                     }
 
@@ -2059,6 +2082,7 @@ if (couponCode) {
                     )
 
                     setLoading(false)
+                    setValidating(false)
 
                   }
 

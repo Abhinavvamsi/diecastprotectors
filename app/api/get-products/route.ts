@@ -17,13 +17,19 @@ export async function GET() {
   })
 
   return NextResponse.json(
-  products,
-  {
-    headers: {
-      "Cache-Control":
-        "no-store",
-    },
-  }
-)
+    products.map((product) => ({
+      ...product,
+      stock: Math.max(
+        0,
+        product.stock - product.reservedStock
+      ),
+    })),
+    {
+      headers: {
+        "Cache-Control":
+          "no-store",
+      },
+    }
+  )
 
 }
