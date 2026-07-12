@@ -83,6 +83,19 @@ export default function CartPage() {
 
   useEffect(() => {
 
+    async function cleanupExpiredReservations() {
+      try {
+        await fetch(
+          "/api/reservations/cleanup-user",
+          {
+            method: "POST",
+          }
+        )
+      } catch {
+        // Ignore cleanup failures and keep cart usable.
+      }
+    }
+
     async function refreshStock() {
 
       const response = await fetch(
@@ -128,6 +141,7 @@ cart.forEach((item) => {
 
     }
 
+    void cleanupExpiredReservations()
     refreshStock()
 
   }, [syncStock])

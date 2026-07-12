@@ -382,7 +382,21 @@ setPickupLocation(
 
   }
 
+  async function cleanupExpiredReservations() {
+    try {
+      await fetch(
+        "/api/reservations/cleanup-user",
+        {
+          method: "POST",
+        }
+      )
+    } catch {
+      // Ignore cleanup failures and let checkout continue.
+    }
+  }
+
   loadSettings()
+  void cleanupExpiredReservations()
 
 }, [])
 
