@@ -226,8 +226,7 @@ if (!signatureIsValid) {
   totalAmount:
     body.totalAmount,
 
-  paymentId:
-    body.paymentId,
+  paymentId: razorpay_payment_id,
 
   reservationId:
     body.reservationId,
@@ -294,7 +293,7 @@ if (body.couponCode) {
     await resend.emails.send({
 
       from:
-        "orders@diecastprotectors.in",
+        "orders@shinseidiecast.com",
 
       to:
         body.email,
@@ -380,10 +379,10 @@ if (body.couponCode) {
     await resend.emails.send({
 
       from:
-        "orders@diecastprotectors.in",
+        "orders@shinseidiecast.com",
 
       to:
-        "diecastprotectorsin@gmail.com",
+        "marinegaming7864@gmail.com",
 
       subject:
         `🚀 New Order Received - ${orderId}`,

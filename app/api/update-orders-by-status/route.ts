@@ -39,7 +39,7 @@ export async function POST(
       await resend.emails.send({
 
         from:
-          "orders@diecastprotectors.in",
+          "orders@shinseidiecast.com",
 
         to:
           order.email,
@@ -85,7 +85,7 @@ export async function POST(
           </p>
 
           <a
-            href="https://www.diecastprotectors.in/track-order"
+            href="https://www.shinseidiecast.com/track-order"
             style="
               display:inline-block;
               padding:12px 20px;
