@@ -80,6 +80,38 @@ export default async function EditPage({
   "
 >
 
+        <div className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-950/70 p-5">
+          <p className="text-sm uppercase tracking-[0.25em] text-pink-400">
+            Inventory Summary
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+              <p className="text-zinc-500 text-sm">Available</p>
+              <p className="mt-2 text-2xl font-bold text-white">
+                {Math.max(
+                  0,
+                  Number(product.stock || 0) -
+                    Number(product.reservedStock || 0)
+                )}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+              <p className="text-zinc-500 text-sm">Reserved</p>
+              <p className="mt-2 text-2xl font-bold text-white">
+                {Number(product.reservedStock || 0)}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+              <p className="text-zinc-500 text-sm">Total Stock</p>
+              <p className="mt-2 text-2xl font-bold text-white">
+                {Number(product.stock || 0)}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <EditProductForm
           product={{
             ...product,

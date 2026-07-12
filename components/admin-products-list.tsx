@@ -44,6 +44,14 @@ const [deletingId, setDeletingId] =
       return matchesBrand && matchesSearch
     })
 
+  function getAvailableStock(product: any) {
+    return Math.max(
+      0,
+      Number(product.stock || 0) -
+        Number(product.reservedStock || 0)
+    )
+  }
+
   return (
     <>
       <div className="mb-10 flex flex-col gap-4 sm:flex-row">
@@ -193,7 +201,13 @@ border-purple-500/30
 
               <p className="text-zinc-400 mt-3">
 
-                Stock: {product.stock}
+                Stock: {getAvailableStock(product)}
+                {" "}
+                <span className="text-zinc-500">
+                  (Reserved: {product.reservedStock || 0}
+                  {" "}
+                  / Total: {product.stock})
+                </span>
 
               </p>
 

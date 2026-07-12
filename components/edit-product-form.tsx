@@ -14,6 +14,7 @@ type Product = {
   images: string[]
   category: string
   stock: number
+  reservedStock?: number
 
   quantityPricing?: {
     quantity: string
@@ -54,6 +55,8 @@ export default function EditProductForm({
 
   const [stock, setStock] =
     useState(product.stock)
+  const [reservedStock, setReservedStock] =
+    useState(product.reservedStock || 0)
   
   const [
   quantityPricing,
@@ -122,7 +125,7 @@ async function handleImageUpload(
 
   async function handleUpdate() {
 
-    const response =
+  const response =
       await fetch(
         `/api/update-product?id=${product.id}`,
         {
@@ -134,7 +137,7 @@ async function handleImageUpload(
               "application/json",
           },
 
-          body: JSON.stringify({
+  body: JSON.stringify({
 
   name,
   description,
@@ -142,6 +145,7 @@ async function handleImageUpload(
   images,
   category,
   stock,
+  reservedStock,
 
   quantityPricing,
 
@@ -208,7 +212,64 @@ transition-all
       px-4
       outline-none
       "
-    />
+      />
+
+    <div className="grid gap-4 md:grid-cols-2">
+      <div>
+        <label className="mb-2 block text-sm text-zinc-400">
+          Total Stock
+        </label>
+        <input
+          type="number"
+          min={0}
+          value={stock}
+          onChange={(e) => setStock(Number(e.target.value))}
+          className="
+          w-full
+          h-14
+          rounded-xl
+          bg-zinc-950
+          border-zinc-700
+          text-white
+          focus:border-pink-500
+          focus:ring-2
+          focus:ring-pink-500/30
+          transition-all
+          px-4
+          outline-none
+          "
+        />
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm text-zinc-400">
+          Reserved Stock
+        </label>
+        <input
+          type="number"
+          min={0}
+          max={stock}
+          value={reservedStock}
+          onChange={(e) =>
+            setReservedStock(Number(e.target.value))
+          }
+          className="
+          w-full
+          h-14
+          rounded-xl
+          bg-zinc-950
+          border-zinc-700
+          text-white
+          focus:border-pink-500
+          focus:ring-2
+          focus:ring-pink-500/30
+          transition-all
+          px-4
+          outline-none
+          "
+        />
+      </div>
+    </div>
 
     {/* Description */}
     <textarea

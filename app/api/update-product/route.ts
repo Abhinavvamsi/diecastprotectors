@@ -66,6 +66,16 @@ export async function POST(
           stock:
             body.stock,
 
+          reservedStock: {
+            set: Math.max(
+              0,
+              Math.min(
+                Number(body.reservedStock || 0),
+                Number(body.stock || 0)
+              )
+            ),
+          },
+
           brandId:
             body.brandId,
 
