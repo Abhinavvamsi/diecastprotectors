@@ -24,8 +24,8 @@ export async function POST(
 
   if (existing) {
 
-    const updated =
-      await prisma.storeSettings.update({
+      const updated =
+        await prisma.storeSettings.update({
 
         where: {
           id: existing.id,
@@ -45,9 +45,12 @@ export async function POST(
           pickupLocation:
             body.pickupLocation,
 
-        },
+          maintenanceMode:
+            body.maintenanceMode ?? false,
 
-      })
+        } as any,
+
+        })
 
     return NextResponse.json(
       updated
@@ -55,8 +58,8 @@ export async function POST(
 
   }
 
-  const created =
-    await prisma.storeSettings.create({
+    const created =
+      await prisma.storeSettings.create({
 
       data: {
 
@@ -72,7 +75,10 @@ export async function POST(
         pickupLocation:
           body.pickupLocation || "",
 
-      },
+        maintenanceMode:
+          body.maintenanceMode ?? false,
+
+      } as any,
 
     })
 

@@ -17,9 +17,13 @@ export default function SettingsPage() {
   setPickupEnabled
 ] = useState(false)
 
-const [pickupLocation,
+  const [pickupLocation,
   setPickupLocation
 ] = useState("")
+
+const [maintenanceMode,
+  setMaintenanceMode
+] = useState(false)
 
   async function loadSettings() {
 
@@ -48,6 +52,10 @@ setPickupLocation(
         data.shippingMessage || ""
       )
 
+      setMaintenanceMode(
+        data.maintenanceMode || false
+      )
+
     }
 
   }
@@ -66,8 +74,8 @@ setPickupLocation(
               "application/json",
           },
 
-          body:
-            JSON.stringify({
+              body:
+                JSON.stringify({
 
               shippingCharge:
                 Number(
@@ -78,6 +86,8 @@ setPickupLocation(
               pickupEnabled,
 
 pickupLocation,
+
+maintenanceMode,
 
             }),
 
@@ -341,9 +351,42 @@ duration-300
 
           </button>
 
-        </div>
+          </div>
 
-      </div>
+          {/* Maintenance Mode */}
+
+          <div className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-black/20 px-4 py-4">
+            <div>
+              <p className="text-sm uppercase tracking-wider text-zinc-400">
+                Maintenance Mode
+              </p>
+              <p className="mt-1 text-sm text-zinc-500">
+                Turn this on to show the maintenance screen to customers while keeping owner and admin access.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setMaintenanceMode(!maintenanceMode)
+              }
+              className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors ${
+                maintenanceMode
+                  ? "bg-pink-500"
+                  : "bg-zinc-700"
+              }`}
+            >
+              <span
+                className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform ${
+                  maintenanceMode
+                    ? "translate-x-10"
+                    : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+
+        </div>
 
     </div>
 

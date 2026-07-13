@@ -69,6 +69,7 @@ model StoreSettings {
   shippingMessage String?
   pickupEnabled   Boolean @default(false)
   pickupLocation  String?
+  maintenanceMode Boolean @default(false)
 }
 
 model Brand {
