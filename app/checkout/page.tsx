@@ -1662,6 +1662,8 @@ disabled:cursor-not-allowed
                         name: item.name,
                         quantity: item.quantity,
                         originalPrice: item.originalPrice,
+                        price: item.price,
+                        image: item.image,
                         quantityPricing: item.quantityPricing,
                       })
                       return map
@@ -1936,7 +1938,27 @@ description: "Premium Japanese Diecast Collectibles",
                               address,
                               city,
                               pincode,
-                              products: cartSnapshot,
+                              products: cartSnapshot.map((item) => ({
+                                id: item.id,
+                                name: item.name,
+                                quantity: item.quantity,
+                                price:
+                                  Number(
+                                    (item.quantityPricing as any[] | undefined)?.filter(
+                                      (tier: any) =>
+                                        item.quantity >=
+                                        Number(tier.quantity)
+                                    ).sort(
+                                      (a: any, b: any) =>
+                                        Number(b.quantity) -
+                                        Number(a.quantity)
+                                    )[0]?.price
+                                  ) || item.originalPrice,
+                                originalPrice: item.originalPrice,
+                                image: item.image,
+                                images: item.image ? [item.image] : [],
+                                quantityPricing: item.quantityPricing || [],
+                              })),
                               reservationId: activeReservationId,
                               couponCode,
                               deliveryMethod,

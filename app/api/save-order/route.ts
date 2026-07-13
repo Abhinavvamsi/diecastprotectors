@@ -106,6 +106,25 @@ if (!signatureIsValid) {
         normalizedProductMap.values()
       )
 
+      const productsWithDisplayData =
+        normalizedProducts.map((item: any) => ({
+          ...item,
+          price:
+            item.price ??
+            item.unitPrice ??
+            item.originalPrice ??
+            0,
+          unitPrice:
+            item.unitPrice ??
+            item.price ??
+            item.originalPrice ??
+            0,
+          image: item.image || item.images?.[0] || null,
+          images:
+            item.images ||
+            (item.image ? [item.image] : []),
+        }))
+
       const reservedItems = new Map(
         reservation.items.map((item) => [
           item.productId,
@@ -238,7 +257,7 @@ if (!signatureIsValid) {
     body.pincode,
 
   products:
-    normalizedProducts as any,
+    productsWithDisplayData as any,
 
   totalAmount:
     body.totalAmount,

@@ -72,6 +72,33 @@ where: {
     },
 
   })
+
+const productIds = Array.from(
+  new Set(
+    orders.flatMap((order) =>
+      (order.products as any[]).map(
+        (product) => product.id
+      )
+    )
+  )
+)
+
+const products = productIds.length
+  ? await prisma.product.findMany({
+      where: {
+        id: {
+          in: productIds,
+        },
+      },
+    })
+  : []
+
+const productMap = new Map(
+  products.map((product) => [
+    product.id,
+    product,
+  ])
+)
 const [
   pendingCount,
   packedCount,
@@ -700,7 +727,23 @@ shadow-sm pt-8">
                       (
                         product,
                         index
-                      ) => (
+                      ) => {
+                        const fallbackProduct =
+                          productMap.get(product.id)
+                        const displayImage =
+                          product.image ||
+                          product.images?.[0] ||
+                          (fallbackProduct as any)?.images?.[0] ||
+                          (fallbackProduct as any)?.image ||
+                          ""
+                        const displayPrice =
+                          product.price ??
+                          product.unitPrice ??
+                          product.originalPrice ??
+                          fallbackProduct?.price ??
+                          0
+
+                        return (
 
                         <div
                           key={index}
@@ -730,7 +773,7 @@ shadow-sm pt-8">
 
                             <Image
                               src={
-                                product.image
+                                displayImage
                               }
                               alt={
                                 product.name
@@ -763,7 +806,7 @@ shadow-sm pt-8">
 
                               Unit Price:
                               {" "}
-                              ₹{product.price}
+                              ₹{displayPrice}
 
                             </p>
 
@@ -775,7 +818,7 @@ shadow-sm pt-8">
 
                               ₹
                               {
-                                product.price *
+                                displayPrice *
                                 product.quantity
                               }
 
@@ -785,7 +828,8 @@ shadow-sm pt-8">
 
                         </div>
 
-                      )
+                        )
+                      }
                     )}
 
                 </div>
