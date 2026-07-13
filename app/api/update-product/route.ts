@@ -36,54 +36,122 @@ export async function POST(
     const body =
       await req.json()
 
+    const desiredReservedStock = Math.max(
+      0,
+      Math.min(
+        Number(body.reservedStock || 0),
+        Number(body.stock || 0)
+      )
+    )
+
     const updatedProduct =
-      await prisma.product.update({
+      await prisma.$transaction(async (tx) => {
+        const currentProduct =
+          await tx.product.findUnique({
+            where: {
+              id,
+            },
+          })
 
-        where: {
-          id,
-        },
+        if (!currentProduct) {
+          throw new Error(
+            "Product not found"
+          )
+        }
 
-        data: {
+        if (
+          Number(currentProduct.reservedStock || 0) !==
+          desiredReservedStock
+        ) {
+          const activeReservations =
+            await tx.reservation.findMany({
+              where: {
+                status: "ACTIVE",
+                items: {
+                  some: {
+                    productId: id,
+                  },
+                },
+              },
+              include: {
+                items: true,
+              },
+            })
 
-          name:
-            body.name,
-
-          description:
-            body.description,
-
-          price:
-            body.price,
-
-          images:
-            body.images,
-
-          category:
-            body.category,
-
-          badge:
-            body.badge,
-
-          stock:
-            body.stock,
-
-          reservedStock: {
-            set: Math.max(
-              0,
-              Math.min(
-                Number(body.reservedStock || 0),
-                Number(body.stock || 0)
+          for (const reservation of activeReservations) {
+            const reservationItem =
+              reservation.items.find(
+                (item) => item.productId === id
               )
-            ),
+
+            if (!reservationItem) continue
+
+            await tx.reservation.updateMany({
+              where: {
+                id: reservation.id,
+                status: "ACTIVE",
+              },
+              data: {
+                status: "CANCELLED",
+              },
+            })
+
+            await tx.product.update({
+              where: {
+                id,
+              },
+              data: {
+                reservedStock: {
+                  decrement:
+                    reservationItem.quantity,
+                },
+              },
+            })
+          }
+        }
+
+        return await tx.product.update({
+
+          where: {
+            id,
           },
 
-          brandId:
-            body.brandId,
+          data: {
 
-          quantityPricing:
-            body.quantityPricing,
+            name:
+              body.name,
 
-        },
+            description:
+              body.description,
 
+            price:
+              body.price,
+
+            images:
+              body.images,
+
+            category:
+              body.category,
+
+            badge:
+              body.badge,
+
+            stock:
+              body.stock,
+
+            reservedStock: {
+              set: desiredReservedStock,
+            },
+
+            brandId:
+              body.brandId,
+
+            quantityPricing:
+              body.quantityPricing,
+
+          },
+
+        })
       })
 
     return NextResponse.json(

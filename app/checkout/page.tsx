@@ -1649,6 +1649,24 @@ disabled:cursor-not-allowed
 
                   setLoading(true)
                   setValidating(true)
+                  const cartSnapshot = Array.from(
+                    cart.reduce((map, item) => {
+                      const existing = map.get(item.id)
+                      if (existing) {
+                        existing.quantity += item.quantity
+                        return map
+                      }
+
+                      map.set(item.id, {
+                        id: item.id,
+                        name: item.name,
+                        quantity: item.quantity,
+                        originalPrice: item.originalPrice,
+                        quantityPricing: item.quantityPricing,
+                      })
+                      return map
+                    }, new Map<string, any>())
+                  .values())
 
                   /* Validation */
 
@@ -1758,37 +1776,35 @@ disabled:cursor-not-allowed
 
 }
 
-const productsResponse =
+const stockCheckResponse =
   await fetch(
-    "/api/get-products",
+    "/api/check-stock",
     {
-      cache: "no-store",
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+        body: JSON.stringify({
+        products: cartSnapshot.map(
+          (item) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+          })
+        ),
+      }),
     }
   )
 
-const products =
-  await productsResponse.json()
+const stockCheck =
+  await stockCheckResponse.json()
 
-const validIds =
-  products.map(
-    (product: any) =>
-      product.id
-  )
-
-const deletedItems =
-  cart.filter(
-    (item) =>
-      !validIds.includes(
-        item.id
-      )
-  )
-
-if (
-  deletedItems.length > 0
-) {
+if (!stockCheckResponse.ok || !stockCheck.valid) {
 
   toast.error(
-    "Some products in your cart are no longer available"
+    stockCheck.message ||
+      "Some products in your cart are no longer available"
   )
 
   setValidating(false)
@@ -1808,7 +1824,7 @@ setValidating(false)
                             "Content-Type": "application/json",
                           },
                           body: JSON.stringify({
-                            items: cart.map((item) => ({
+                            items: cartSnapshot.map((item) => ({
                               productId: item.id,
                               quantity: item.quantity,
                             })),
@@ -1920,7 +1936,7 @@ description: "Premium Japanese Diecast Collectibles",
                               address,
                               city,
                               pincode,
-                              products: cart,
+                              products: cartSnapshot,
                               reservationId: activeReservationId,
                               couponCode,
                               deliveryMethod,
@@ -2055,10 +2071,6 @@ if (couponCode) {
                       "payment.failed",
 
                       function () {
-
-                        void cancelReservation(
-                          activeReservationId
-                        )
 
                         toast.error(
                           "Payment failed"

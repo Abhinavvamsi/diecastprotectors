@@ -89,6 +89,23 @@ if (!signatureIsValid) {
         throw new Error("Invalid stock reservation")
       }
 
+      const normalizedProductMap = new Map<string, any>()
+      for (const item of body.products as Array<{
+        id: string
+        quantity: number
+      }>) {
+        const existing = normalizedProductMap.get(item.id)
+        if (existing) {
+          existing.quantity += item.quantity
+        } else {
+          normalizedProductMap.set(item.id, { ...item })
+        }
+      }
+
+      const normalizedProducts = Array.from(
+        normalizedProductMap.values()
+      )
+
       const reservedItems = new Map(
         reservation.items.map((item) => [
           item.productId,
@@ -97,8 +114,8 @@ if (!signatureIsValid) {
       )
 
       if (
-        reservedItems.size !== body.products.length ||
-        body.products.some(
+        reservedItems.size !== normalizedProducts.length ||
+        normalizedProducts.some(
           (item: any) =>
             reservedItems.get(item.id) !== item.quantity
         )
@@ -130,7 +147,7 @@ if (!signatureIsValid) {
 
       // Check stock first
 
-      for (const item of body.products) {
+      for (const item of normalizedProducts) {
 
         const product =
           await tx.product.findUnique({
@@ -165,7 +182,7 @@ if (!signatureIsValid) {
 
       // Reduce stock
 
-      for (const item of body.products) {
+      for (const item of normalizedProducts) {
 
         await tx.product.update({
 
@@ -221,7 +238,7 @@ if (!signatureIsValid) {
     body.pincode,
 
   products:
-    body.products,
+    normalizedProducts as any,
 
   totalAmount:
     body.totalAmount,
@@ -243,65 +260,61 @@ if (!signatureIsValid) {
 
     }
   )
-  // Mark coupon as used
-if (body.couponCode) {
+    if (body.couponCode) {
+      const coupon =
+        await prisma.coupon.findUnique({
+          where: {
+            code:
+              body.couponCode,
+          },
+        })
 
-  const coupon =
-    await prisma.coupon.findUnique({
+      if (coupon) {
+        const usedBy =
+          (coupon.usedBy as string[]) || []
 
-      where: {
+        await prisma.coupon.update({
+          where: {
+            code:
+              body.couponCode,
+          },
+          data: {
+            usedBy: [
+              ...usedBy,
+              body.userId,
+            ],
+          },
+        })
+      }
+    }
 
-        code:
-          body.couponCode,
+    const sendWithTimeout = async (
+      payload: Parameters<
+        typeof resend.emails.send
+      >[0]
+    ) => {
+      return Promise.race([
+        resend.emails.send(payload),
+        new Promise((_, reject) =>
+          setTimeout(
+            () =>
+              reject(new Error("Email timeout")),
+            8000
+          )
+        ),
+      ])
+    }
 
-      },
-
-    })
-
-  if (coupon) {
-
-    const usedBy =
-      (coupon.usedBy as string[]) || []
-
-    await prisma.coupon.update({
-
-      where: {
-
-        code:
-          body.couponCode,
-
-      },
-
-      data: {
-
-        usedBy: [
-
-          ...usedBy,
-
-          body.userId,
-
-        ],
-
-      },
-
-    })
-
-  }
-
-}
-    // Customer Email
-    await resend.emails.send({
-
-      from:
-        "orders@shinseidiecast.com",
-
-      to:
-        body.email,
-
-      subject:
-        "Order Confirmed 🎉",
-
-      html: `
+    // Send notifications after the order is already saved.
+    await Promise.allSettled([
+      sendWithTimeout({
+        from:
+          "orders@shinseidiecast.com",
+        to:
+          body.email,
+        subject:
+          "Order Confirmed 🎉",
+        html: `
 
       <div
         style="
@@ -371,23 +384,16 @@ if (body.couponCode) {
 
       </div>
 
-      `,
-
-    })
-
-    // Admin Email
-    await resend.emails.send({
-
-      from:
-        "orders@shinseidiecast.com",
-
-      to:
-        "abhinavvamsi2004@gmail.com",
-
-      subject:
-        `🚀 New Order Received - ${orderId}`,
-
-      html: `
+        `,
+      }),
+      sendWithTimeout({
+        from:
+          "orders@shinseidiecast.com",
+        to:
+          "abhinavvamsi2004@gmail.com",
+        subject:
+          `🚀 New Order Received - ${orderId}`,
+        html: `
 
       <div
         style="
@@ -484,8 +490,19 @@ if (body.couponCode) {
 
       </div>
 
-      `,
-
+        `,
+      }),
+    ]).then((results) => {
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(
+            index === 0
+              ? "Customer email failed:"
+              : "Admin email failed:",
+            result.reason
+          )
+        }
+      })
     })
 
     return NextResponse.json(

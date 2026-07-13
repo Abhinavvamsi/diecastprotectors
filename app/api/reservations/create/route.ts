@@ -24,7 +24,22 @@ export async function POST(req: Request) {
       )
     }
 
-    const sortedItems = [...items].sort((a: any, b: any) =>
+    const normalizedItemMap = new Map<string, any>()
+    for (const item of items as Array<{
+      productId: string
+      quantity: number
+    }>) {
+      const existing = normalizedItemMap.get(item.productId)
+      if (existing) {
+        existing.quantity += item.quantity
+      } else {
+        normalizedItemMap.set(item.productId, { ...item })
+      }
+    }
+
+    const normalizedItems = Array.from(normalizedItemMap.values())
+
+    const sortedItems = [...normalizedItems].sort((a: any, b: any) =>
       a.productId.localeCompare(b.productId)
     )
     const productIds = sortedItems.map((item: any) => item.productId)

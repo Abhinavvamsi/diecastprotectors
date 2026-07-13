@@ -39,7 +39,7 @@ export async function POST(
     }
 
     if (
-      product.stock <
+      product.stock - (product.reservedStock || 0) <
       item.quantity
     ) {
 

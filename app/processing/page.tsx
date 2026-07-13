@@ -12,27 +12,31 @@ export default function ProcessingPage() {
   )
 
   useEffect(() => {
+    let cancelled = false
+
     async function savePendingOrder() {
       const rawPendingOrder =
         sessionStorage.getItem("pending-order")
 
       if (!rawPendingOrder) {
-        setMessage("We could not find the payment details. Redirecting back to checkout.")
-        window.setTimeout(() => {
-          router.replace("/checkout")
-        }, 1800)
+        setMessage(
+          "Finalizing your order. Please keep this page open."
+        )
         return
       }
 
       try {
         const pendingOrder = JSON.parse(rawPendingOrder)
-        const saveOrderResponse = await fetch("/api/save-order", {
+        const saveOrderResponse = await fetch(
+          "/api/save-order",
+          {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(pendingOrder),
-        })
+        }
+        )
 
         const savedOrder = await saveOrderResponse.json()
 
@@ -45,15 +49,25 @@ export default function ProcessingPage() {
         sessionStorage.removeItem("pending-order")
         useCartStore.getState().clearCart()
 
-        router.replace(`/success?orderId=${savedOrder.orderId}`)
+        if (!cancelled) {
+          window.location.replace(
+            `/success?orderId=${savedOrder.orderId}`
+          )
+        }
       } catch (error) {
+        if (cancelled) return
+
         setMessage(
-          "We received your payment, but the order is taking longer than expected. Please contact support."
+          "We hit a temporary issue while saving your order. Please keep this page open."
         )
       }
     }
 
     void savePendingOrder()
+
+    return () => {
+      cancelled = true
+    }
   }, [router])
 
   return (
