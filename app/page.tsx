@@ -120,7 +120,10 @@ const [banners, setBanners] = useState<Banner[]>([])
 ])
 
 const data = await productsResponse.json()
-setProducts(data.slice(0, 9))
+const inStockProducts = data.filter(
+  (product: Product) => product.stock > 0
+)
+setProducts(inStockProducts.slice(0, 9))
 
 const brandData = await brandsResponse.json()
 setBrands(brandData)
@@ -128,20 +131,9 @@ setBrands(brandData)
 const bannerData = await bannersResponse.json()
 setBanners(bannerData)
 
-data.forEach((product: Product) => {
+inStockProducts.forEach((product: Product) => {
   syncStock(product.id, product.stock)
 })
-setBrands(brandData)
-        data.forEach(
-          (product: Product) => {
-
-            syncStock(
-              product.id,
-              product.stock
-            )
-
-          }
-        )
 
       } catch (error) {
 

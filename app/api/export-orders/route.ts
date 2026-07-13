@@ -14,58 +14,36 @@ export async function GET() {
 
     })
 
-  const rows =
-  orders.flatMap((order) =>
+  const rows = orders.map((order) => {
+    const products = (order.products as any[]) || []
+    const totalQuantity = products.reduce(
+      (sum, product) => sum + Number(product.quantity || 0),
+      0
+    )
 
-    (order.products as any[])
-      .map((product) => ({
-
-        "Order ID":
-          order.orderId,
-
-        Customer:
-          order.customer,
-
-        Phone:
-          order.phone,
-
-        Address:
-          `${order.address},
-          ${order.city}
-          - ${order.pincode}`,
-
-        "Product Name":
-          product.name,
-
-        Quantity:
-          product.quantity,
-
-        "Unit Price":
-          product.price,
-
-        Amount:
-          product.price *
-          product.quantity,
-
-        Status:
-          order.status,
-
-        "Payment ID":
-          order.paymentId,
-
-        Date:
-  new Date(
-    order.createdAt
-  ).toLocaleString(
-    "en-IN",
-    {
-      timeZone:
-        "Asia/Kolkata",
+    return {
+      "Order ID": order.orderId,
+      Customer: order.customer,
+      Phone: order.phone,
+      Address: `${order.address}, ${order.city} - ${order.pincode}`,
+      Products: products
+        .map(
+          (product) =>
+            `${product.name} x${product.quantity}`
+        )
+        .join(" | "),
+      "Total Items": totalQuantity,
+      "Total Amount": order.totalAmount,
+      Status: order.status,
+      "Payment ID": order.paymentId,
+      Date: new Date(order.createdAt).toLocaleString(
+        "en-IN",
+        {
+          timeZone: "Asia/Kolkata",
+        }
+      ),
     }
-  )
-      }))
-
-  )
+  })
 
   const worksheet =
     XLSX.utils.json_to_sheet(
