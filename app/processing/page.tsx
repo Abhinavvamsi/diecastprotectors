@@ -2,73 +2,78 @@
 
 import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useCartStore } from "@/store/cart-store"
 
 export default function ProcessingPage() {
-  const router = useRouter()
   const [message, setMessage] = useState(
     "Your payment is confirmed. We are saving your order now."
   )
 
   useEffect(() => {
     let cancelled = false
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
 
     async function savePendingOrder() {
-      const rawPendingOrder =
-        sessionStorage.getItem("pending-order")
+      const trySave = async (): Promise<boolean> => {
+        const rawPendingOrder = sessionStorage.getItem("pending-order")
 
-      if (!rawPendingOrder) {
-        setMessage(
-          "Finalizing your order. Please keep this page open."
-        )
-        return
-      }
+        if (!rawPendingOrder) {
+          return false
+        }
 
-      try {
         const pendingOrder = JSON.parse(rawPendingOrder)
-        const saveOrderResponse = await fetch(
-          "/api/save-order",
-          {
+        const saveOrderResponse = await fetch("/api/save-order", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(pendingOrder),
-        }
-        )
+        })
 
         const savedOrder = await saveOrderResponse.json()
 
         if (!saveOrderResponse.ok) {
-          throw new Error(
-            savedOrder.error || "Failed to save order"
-          )
+          throw new Error(savedOrder.error || "Failed to save order")
         }
 
         sessionStorage.removeItem("pending-order")
         useCartStore.getState().clearCart()
 
         if (!cancelled) {
-          window.location.replace(
-            `/success?orderId=${savedOrder.orderId}`
-          )
+          window.location.replace(`/success?orderId=${savedOrder.orderId}`)
         }
-      } catch (error) {
+
+        return true
+      }
+
+      const attemptLoop = async () => {
         if (cancelled) return
 
-        setMessage(
-          "We hit a temporary issue while saving your order. Please keep this page open."
-        )
+        try {
+          setMessage("Saving your order securely...")
+          const saved = await trySave()
+
+          if (!saved && !cancelled) {
+            setMessage("Finalizing your order. Please keep this page open.")
+            timeoutId = setTimeout(attemptLoop, 1200)
+          }
+        } catch {
+          if (cancelled) return
+          setMessage("Still working on it... please wait a moment.")
+          timeoutId = setTimeout(attemptLoop, 1800)
+        }
       }
+
+      void attemptLoop()
     }
 
     void savePendingOrder()
 
     return () => {
       cancelled = true
+      if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [router])
+  }, [])
 
   return (
     <main className="min-h-screen bg-[#09090B] text-white flex items-center justify-center px-6">
