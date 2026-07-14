@@ -285,7 +285,7 @@ useEffect(() => {
   brands={brands}
 />
       {/* Brands Section */}
-      <BrandsSection />
+      <BrandsSection brands={brands} />
 
       {/* Products Section */}
 

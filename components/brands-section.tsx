@@ -2,34 +2,13 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useEffect, useState } from "react"
 
-export default function BrandsSection() {
-
-  const [brands, setBrands] =
-    useState<any[]>([])
-
-  useEffect(() => {
-
-    async function loadBrands() {
-
-      const response =
-        await fetch(
-          "/api/admin/brands"
-        )
-
-      const data =
-        await response.json()
-
-      setBrands(data)
-
-    }
-
-    loadBrands()
-
-  }, [])
-
-  if (brands.length === 0) {
+export default function BrandsSection({
+  brands,
+}: {
+  brands: any[]
+}) {
+  if (!brands.length) {
 
     return null
 
