@@ -645,7 +645,8 @@ async function applyCoupon() {
 
     if (
       data.coupon.type ===
-      "PERCENTAGE"
+      "PERCENT" ||
+      data.coupon.type === "PERCENTAGE"
     ) {
 
       discountAmount =
@@ -1874,19 +1875,9 @@ setValidating(false)
                           },
 
                           body: JSON.stringify({
-
-                           amount:
-  Math.max(
-    0,
-    total -
-discount +
-(
-  deliveryMethod === "pickup"
-    ? 0
-    : (shipping || 0)
-)
-  )
-
+                            reservationId: activeReservationId,
+                            couponCode,
+                            deliveryMethod,
                           }),
 
                         }

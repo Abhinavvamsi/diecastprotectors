@@ -2,12 +2,30 @@ import { prisma } from "@/lib/prisma"
 import { resend } from "@/lib/resend"
 import { NextResponse } from "next/server"
 import { createHmac, timingSafeEqual } from "crypto"
+import { auth } from "@clerk/nextjs/server"
+
+function getTierPrice(product: any, quantity: number) {
+  const tiers = (product.quantityPricing || []) as Array<{
+    quantity: string
+    price: string
+  }>
+
+  const activeTier = tiers
+    .filter((tier) => quantity >= Number(tier.quantity))
+    .sort(
+      (a, b) =>
+        Number(b.quantity) - Number(a.quantity)
+    )[0]
+
+  return activeTier ? Number(activeTier.price) : Number(product.price || 0)
+}
 
 export async function POST(
   req: Request
 ) {
 
   try {
+    const { userId } = await auth()
 
     const body =
       await req.json()
@@ -89,6 +107,10 @@ if (!signatureIsValid) {
         throw new Error("Invalid stock reservation")
       }
 
+      if (userId !== reservation.userId) {
+        throw new Error("Unauthorized")
+      }
+
       const normalizedProductMap = new Map<string, any>()
       for (const item of body.products as Array<{
         id: string
@@ -164,6 +186,8 @@ if (!signatureIsValid) {
         )
       }
 
+      let subtotal = 0
+
       // Check stock first
 
       for (const item of normalizedProducts) {
@@ -197,6 +221,10 @@ if (!signatureIsValid) {
 
         }
 
+        subtotal +=
+          getTierPrice(product, item.quantity) *
+          item.quantity
+
       }
 
       // Reduce stock
@@ -229,6 +257,42 @@ if (!signatureIsValid) {
 
       // Create order
 
+      const settings = await tx.storeSettings.findFirst()
+      const shippingCharge =
+        body.deliveryMethod === "pickup"
+          ? 0
+          : Number(settings?.shippingCharge || 0)
+
+      let discount = 0
+
+      if (body.couponCode) {
+        const coupon = await tx.coupon.findUnique({
+          where: {
+            code: body.couponCode.toUpperCase(),
+          },
+        })
+
+        if (coupon && coupon.active) {
+          const usedBy = (coupon.usedBy as string[]) || []
+          if (!usedBy.includes(body.userId)) {
+            if (subtotal >= Number(coupon.minOrder || 0)) {
+              discount =
+                coupon.type === "PERCENT" ||
+                coupon.type === "PERCENTAGE"
+                  ? Math.floor(
+                      (subtotal * Number(coupon.value)) / 100
+                    )
+                  : Number(coupon.value || 0)
+            }
+          }
+        }
+      }
+
+      const totalAmount = Math.max(
+        0,
+        subtotal + shippingCharge - discount
+      )
+
       return await tx.order.create({
 
         data: {
@@ -260,7 +324,7 @@ if (!signatureIsValid) {
     productsWithDisplayData as any,
 
   totalAmount:
-    body.totalAmount,
+    totalAmount,
 
   paymentId: razorpay_payment_id,
 
