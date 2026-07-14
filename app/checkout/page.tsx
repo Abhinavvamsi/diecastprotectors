@@ -136,8 +136,12 @@ const [selectedSavedAddress,
     setLoading
   ] = useState(false)
 
-  const [couponCode,
+const [couponCode,
   setCouponCode
+] = useState("")
+
+const [appliedCouponCode,
+  setAppliedCouponCode
 ] = useState("")
 
 const [discount,
@@ -417,6 +421,14 @@ useEffect(() => {
       data
         .filter(
           (product: any) =>
+            Math.max(
+              0,
+              Number(product.stock || 0) -
+                Number(product.reservedStock || 0)
+            ) > 0
+        )
+        .filter(
+          (product: any) =>
             !cartIds.includes(
               product.id
             )
@@ -452,6 +464,55 @@ useEffect(() => {
   }
 
 }, [couponCode])
+
+useEffect(() => {
+  let cancelled = false
+
+  async function syncAppliedCouponWithCart() {
+    if (!appliedCouponCode.trim() || !user?.id || discount <= 0) return
+
+    try {
+      const response = await fetch("/api/validate-coupon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: appliedCouponCode.trim(),
+          userId: user.id,
+          total,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (cancelled) return
+
+      if (!response.ok || !data.valid) {
+        setDiscount(0)
+        return
+      }
+
+      const discountAmount =
+        data.coupon.type === "PERCENT" ||
+        data.coupon.type === "PERCENTAGE"
+          ? Math.floor((total * Number(data.coupon.value)) / 100)
+          : Number(data.coupon.value || 0)
+
+      setDiscount(Math.min(discountAmount, total))
+    } catch {
+      if (!cancelled) {
+        setDiscount(0)
+      }
+    }
+  }
+
+  syncAppliedCouponWithCart()
+
+  return () => {
+    cancelled = true
+  }
+}, [total, appliedCouponCode, user?.id, discount])
 
 useEffect(() => {
   if (!savedAddressesStorageKey) return
@@ -663,12 +724,13 @@ async function applyCoupon() {
 
     }
 
-    setDiscount(
+  setDiscount(
   Math.min(
     discountAmount,
     total
   )
 )
+    setAppliedCouponCode(couponCode.trim())
 
     toast.success(
       `Coupon Applied - ₹${discountAmount} Off`

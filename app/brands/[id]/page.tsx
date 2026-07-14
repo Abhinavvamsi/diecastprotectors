@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import ProductCard from "@/components/product-card"
+import BrandProducts from "@/components/brand-products"
 
 type Props = {
   params: Promise<{
@@ -120,70 +120,9 @@ export default async function BrandPage({
 
         {/* Products */}
 
-        {brand.products.length === 0 ? (
-
-          <div
-            className="
-bg-zinc-900
-border
-border-zinc-800
-rounded-3xl
-p-12
-text-center
-"
-          >
-
-            <h2 className="text-2xl font-bold">
-
-              No Products Found
-
-            </h2>
-
-          </div>
-
-        ) : (
-
-          <div
-            className="
-            grid
-            grid-cols-1
-            md:grid-cols-2
-            xl:grid-cols-3
-            gap-8
-            "
-          >
-
-            {brand.products.map(
-              (product: any) => (
-
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  image={product.images?.[0]}
-                  description={
-                    product.description
-                  }
-                  stock={Math.max(
-                    0,
-                    product.stock -
-                      (product.reservedStock || 0)
-                  )}
-                  quantityPricing={
-                    product.quantityPricing
-                  }
-                  badge={
-                    product.badge
-                  }
-                />
-
-              )
-            )}
-
-          </div>
-
-        )}
+        <BrandProducts
+          products={brand.products as any[]}
+        />
 
       </div>
 
