@@ -64,14 +64,14 @@ export default function BrandProducts({
   return (
     <>
       <div className="mb-8">
-        <div className="relative group">
+        <div className="relative group rounded-2xl shadow-[0_0_30px_rgba(236,72,153,.14)] ring-1 ring-pink-500/20">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-pink-500 transition-colors duration-300" />
           <input
             type="text"
             placeholder="Search this brand..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-16 pl-14 pr-5 rounded-2xl border border-[#2B2B3A] bg-[#15151D] text-white placeholder:text-gray-400 transition-all duration-300 focus:outline-none focus:border-pink-500 focus:shadow-[0_0_30px_rgba(236,72,153,.25)] hover:border-pink-500/60 hover:-translate-y-0.5"
+            className="w-full h-16 pl-14 pr-5 rounded-2xl border border-[#2B2B3A] bg-[#15151D] text-white placeholder:text-gray-400 transition-all duration-300 focus:outline-none focus:border-pink-500 focus:shadow-[0_0_42px_rgba(236,72,153,.38)] hover:border-pink-500/60 hover:-translate-y-0.5 hover:shadow-[0_0_28px_rgba(236,72,153,.18)]"
           />
         </div>
       </div>
@@ -100,16 +100,19 @@ export default function BrandProducts({
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <p className="text-gray-400">Showing {filteredProducts.length} Products</p>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="h-12 px-4 rounded-xl border border-[#2B2B3A] bg-[#15151D] text-white focus:border-pink-500 focus:outline-none"
-        >
-          <option value="Newest">Newest</option>
-          <option value="Price Low">Price: Low to High</option>
-          <option value="Price High">Price: High to Low</option>
-          <option value="Name A-Z">Name: A-Z</option>
-        </select>
+        <div className="flex flex-col gap-2">
+          <p className="text-pink-400 text-sm font-medium">Sort By</p>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="h-12 px-4 rounded-xl border border-[#2B2B3A] bg-[#15151D] text-white focus:border-pink-500 focus:outline-none"
+          >
+            <option value="Newest">Newest</option>
+            <option value="Price Low">Price: Low to High</option>
+            <option value="Price High">Price: High to Low</option>
+            <option value="Name A-Z">Name: A-Z</option>
+          </select>
+        </div>
       </div>
 
       {filteredProducts.length === 0 ? (

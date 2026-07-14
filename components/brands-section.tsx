@@ -70,7 +70,7 @@ export default function BrandsSection() {
           <Link
             key={brand.id}
             href={`/brands/${brand.id}`}
-            prefetch
+            prefetch={true}
           >
 
             <div

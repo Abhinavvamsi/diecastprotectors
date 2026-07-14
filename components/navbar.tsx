@@ -231,6 +231,7 @@ alt="Shinsei Diecast"
 
           <Link
             href="/cars"
+            prefetch={true}
             className="hover:text-pink-400 transition"
           >
 
@@ -240,6 +241,7 @@ alt="Shinsei Diecast"
 
           <Link
             href="/track-order"
+            prefetch={true}
             className="hover:text-pink-400 transition"
           >
 
@@ -260,6 +262,7 @@ alt="Shinsei Diecast"
           {/* Cart */}
           <Link
             href="/cart"
+            prefetch={true}
             onNavigate={saveCarsScrollPosition}
             className="relative hover:text-pink-400 transition"
           >
@@ -314,6 +317,7 @@ text-white
 
             <Link
               href="/admin"
+              prefetch={true}
               className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent font-semibold"
             >
 
@@ -351,6 +355,7 @@ text-white
           {/* Mobile Cart */}
           <Link
             href="/cart"
+            prefetch={true}
             onNavigate={saveCarsScrollPosition}
             className="relative"
           >

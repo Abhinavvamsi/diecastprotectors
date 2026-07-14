@@ -389,12 +389,16 @@ to-purple-600
 
 <div className="mb-10">
 
-  <div
-    className="
-    relative
-    group
-    "
-  >
+<div
+  className="
+  relative
+  group
+  rounded-2xl
+  shadow-[0_0_30px_rgba(236,72,153,.14)]
+  ring-1
+  ring-pink-500/20
+  "
+>
 
     <Search
       className="
@@ -418,7 +422,7 @@ to-purple-600
       onChange={(e) =>
         setSearch(e.target.value)
       }
-      className="
+    className="
       w-full
       h-16
       pl-14
@@ -440,11 +444,12 @@ to-purple-600
       focus:outline-none
       focus:border-pink-500
 
-      focus:shadow-[0_0_30px_rgba(236,72,153,.25)]
+      focus:shadow-[0_0_42px_rgba(236,72,153,.38)]
 
       hover:border-pink-500/60
 
       hover:-translate-y-0.5
+      hover:shadow-[0_0_28px_rgba(236,72,153,.18)]
       "
     />
 
@@ -587,27 +592,32 @@ to-purple-600
 
   </p>
 
-  <select
-    value={sortBy}
-    onChange={(e) =>
-      setSortBy(e.target.value)
-    }
-    className="
-    h-12
-    px-4
-    rounded-xl
-    border
-    border-[#2B2B3A]
-bg-[#15151D]
-text-white
-focus:border-pink-500
-focus:outline-none
-    "
-  >
+  <div className="flex flex-col gap-2">
+    <p className="text-pink-400 text-sm font-medium">
+      Sort By
+    </p>
 
-    <option value="Newest">
-      Newest
-    </option>
+    <select
+      value={sortBy}
+      onChange={(e) =>
+        setSortBy(e.target.value)
+      }
+      className="
+      h-12
+      px-4
+      rounded-xl
+      border
+      border-[#2B2B3A]
+      bg-[#15151D]
+      text-white
+      focus:border-pink-500
+      focus:outline-none
+      "
+    >
+
+      <option value="Newest">
+        Newest
+      </option>
 
     <option value="Price Low">
       Price: Low to High
@@ -617,11 +627,12 @@ focus:outline-none
       Price: High to Low
     </option>
 
-    <option value="Name A-Z">
-      Name: A-Z
-    </option>
+      <option value="Name A-Z">
+        Name: A-Z
+      </option>
 
-  </select>
+    </select>
+  </div>
 
 </div>
           {/* Products */}
