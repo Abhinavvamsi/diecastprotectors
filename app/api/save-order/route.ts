@@ -3,6 +3,7 @@ import { resend } from "@/lib/resend"
 import { NextResponse } from "next/server"
 import { createHmac, timingSafeEqual } from "crypto"
 import { auth } from "@clerk/nextjs/server"
+import { calculateShippingCharge } from "@/lib/shipping"
 
 function getTierPrice(product: any, quantity: number) {
   const tiers = (product.quantityPricing || []) as Array<{
@@ -257,11 +258,14 @@ if (!signatureIsValid) {
 
       // Create order
 
-      const settings = await tx.storeSettings.findFirst()
-      const shippingCharge =
-        body.deliveryMethod === "pickup"
-          ? 0
-          : Number(settings?.shippingCharge || 0)
+      const shippingCharge = calculateShippingCharge({
+        subtotal,
+        itemCount: normalizedProducts.reduce(
+          (sum: number, item: any) => sum + item.quantity,
+          0
+        ),
+        deliveryMethod: body.deliveryMethod,
+      })
 
       let discount = 0
 

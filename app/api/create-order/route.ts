@@ -2,6 +2,7 @@ import Razorpay from "razorpay"
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
+import { calculateShippingCharge } from "@/lib/shipping"
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -73,12 +74,6 @@ export async function POST(req: Request) {
       return sum + getTierPrice(product, item.quantity) * item.quantity
     }, 0)
 
-    const settings = await prisma.storeSettings.findFirst()
-    const shippingCharge =
-      deliveryMethod === "pickup"
-        ? 0
-        : Number(settings?.shippingCharge || 0)
-
     let discount = 0
 
     if (couponCode) {
@@ -101,6 +96,12 @@ export async function POST(req: Request) {
         }
       }
     }
+
+    const shippingCharge = calculateShippingCharge({
+      subtotal,
+      itemCount: reservation.items.reduce((sum, item) => sum + item.quantity, 0),
+      deliveryMethod,
+    })
 
     const amount = Math.max(0, subtotal + shippingCharge - discount)
 

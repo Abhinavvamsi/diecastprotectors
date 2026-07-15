@@ -29,6 +29,11 @@ import {
   RedirectToSignIn,
   useUser,
 } from "@clerk/nextjs"
+import {
+  calculateShippingCharge,
+  getAmountNeededForFreeShipping,
+  getFreeShippingProgress,
+} from "@/lib/shipping"
 
 type SavedCheckoutAddress = {
   name: string
@@ -90,6 +95,19 @@ const removeFromCart =
   },
   0
 )
+
+const itemCount = cart.reduce(
+  (sum, item) => sum + item.quantity,
+  0
+)
+
+const subtotalForShipping = total
+
+const amountNeededForFreeShipping =
+  getAmountNeededForFreeShipping(subtotalForShipping)
+
+const freeShippingProgress =
+  getFreeShippingProgress(subtotalForShipping)
 
   const [customer,
     setCustomer
@@ -374,9 +392,6 @@ useEffect(() => {
 setPickupLocation(
   data.pickupLocation || ""
 )
-      setShipping(
-        data.shippingCharge
-      )
 
       setShippingMessage(
         data.shippingMessage || ""
@@ -403,6 +418,16 @@ setPickupLocation(
   void cleanupExpiredReservations()
 
 }, [])
+
+useEffect(() => {
+  setShipping(
+    calculateShippingCharge({
+      subtotal: total,
+      itemCount,
+      deliveryMethod,
+    })
+  )
+}, [total, itemCount, deliveryMethod])
 
 useEffect(() => {
 
@@ -1547,15 +1572,17 @@ hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
   </div>
 
   {/* Discount */}
-  <div className="flex items-center justify-between text-green-600">
+  {discount > 0 && (
+    <div className="flex items-center justify-between text-green-600">
 
-    <p>Discount</p>
+      <p>Discount</p>
 
-    <p className="font-medium">
-      -₹{discount}
-    </p>
+      <p className="font-medium">
+        -₹{discount}
+      </p>
 
-  </div>
+    </div>
+  )}
 
   {/* Saved Banner */}
   {discount > 0 && (
@@ -1588,6 +1615,19 @@ text-green-400
         FREE
       </p>
 
+    ) : subtotalForShipping >= 10000 ? (
+
+      <div className="flex items-center gap-3">
+        <span className="relative flex h-3 w-3">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-green-400" />
+        </span>
+
+        <p className="font-semibold text-green-400">
+          FREE SHIPPING UNLOCKED
+        </p>
+      </div>
+
     ) : shipping === null ? (
 
       <p>Loading...</p>
@@ -1607,6 +1647,44 @@ text-green-400
     )}
 
   </div>
+
+  {deliveryMethod !== "pickup" && (
+    <div className={`rounded-2xl border p-4 ${
+      subtotalForShipping >= 10000
+        ? "border-green-500/30 bg-green-500/10"
+        : "border-pink-500/20 bg-pink-500/5"
+    }`}>
+      <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.25em] text-zinc-400">
+        <span>Free Shipping Progress</span>
+        {amountNeededForFreeShipping > 0 ? (
+          <span>₹{amountNeededForFreeShipping} more to go</span>
+        ) : (
+          <span className="text-green-400">Free shipping unlocked</span>
+        )}
+      </div>
+
+      <div className="h-3 overflow-hidden rounded-full bg-zinc-800">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${
+            subtotalForShipping >= 10000
+              ? "bg-gradient-to-r from-green-400 via-emerald-400 to-lime-400 animate-pulse"
+              : "bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500"
+          }`}
+          style={{
+            width: `${Math.max(4, freeShippingProgress * 100)}%`,
+          }}
+        />
+      </div>
+
+      <div className={`mt-2 text-sm ${
+        subtotalForShipping >= 10000 ? "text-green-300" : "text-zinc-400"
+      }`}>
+        {subtotalForShipping >= 10000
+          ? "You have unlocked free shipping."
+          : "Add more items to unlock free shipping at ₹10,000."}
+      </div>
+    </div>
+  )}
 
   {/* Total */}
   <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
