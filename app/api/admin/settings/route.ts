@@ -48,6 +48,9 @@ export async function POST(
           maintenanceMode:
             body.maintenanceMode ?? false,
 
+          superDealProductIds:
+            body.superDealProductIds ?? [],
+
         } as any,
 
         })
@@ -77,6 +80,9 @@ export async function POST(
 
         maintenanceMode:
           body.maintenanceMode ?? false,
+
+        superDealProductIds:
+          body.superDealProductIds ?? [],
 
       } as any,
 

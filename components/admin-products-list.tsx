@@ -15,6 +15,8 @@ export default function AdminProductsList({
 
   const [selectedBrand, setSelectedBrand] =
     useState("All")
+  const [stockFilter, setStockFilter] =
+    useState("All")
   const [search, setSearch] =
     useState("")
 const [deletingId, setDeletingId] =
@@ -29,6 +31,16 @@ const [deletingId, setDeletingId] =
         selectedBrand === "All" ||
         product.brand?.name === selectedBrand
 
+      const availableStock = getAvailableStock(product)
+      const matchesStock =
+        stockFilter === "All"
+          ? true
+          : stockFilter === "In Stock"
+          ? availableStock > 0
+          : stockFilter === "Reserved"
+          ? Number(product.reservedStock || 0) > 0
+          : availableStock === 0
+
       const matchesSearch =
         !normalizedSearch ||
         product.name
@@ -41,7 +53,7 @@ const [deletingId, setDeletingId] =
           ?.toLowerCase()
           .includes(normalizedSearch)
 
-      return matchesBrand && matchesSearch
+      return matchesBrand && matchesSearch && matchesStock
     })
 
   function getAvailableStock(product: any) {
@@ -54,35 +66,56 @@ const [deletingId, setDeletingId] =
 
   return (
     <>
-      <div className="mb-10 flex flex-col gap-4 sm:flex-row">
+      <div className="mb-10 flex flex-col gap-4">
 
-        <div className="relative flex-1">
-
-          <Search
-            size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
-          />
-
-          <input
-            type="search"
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
-            placeholder="Search products, categories, or brands..."
-            className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-900 pl-12 pr-4 text-white outline-none transition-all placeholder:text-zinc-500 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30"
-          />
-
+        <div className="flex flex-wrap gap-3">
+          {["All", "In Stock", "Reserved", "Out of Stock"].map((filter) => (
+            <button
+              key={filter}
+              type="button"
+              onClick={() => setStockFilter(filter)}
+              className={`
+                h-11 px-5 rounded-full border text-sm font-semibold transition-all duration-300
+                ${
+                  stockFilter === filter
+                    ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent"
+                    : "border-zinc-700 text-zinc-300 hover:border-pink-500"
+                }
+              `}
+            >
+              {filter}
+            </button>
+          ))}
         </div>
 
-        <select
-          value={selectedBrand}
-          onChange={(e) =>
-            setSelectedBrand(
-              e.target.value
-            )
-          }
-          className="
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="relative flex-1">
+
+            <Search
+              size={20}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+            />
+
+            <input
+              type="search"
+              value={search}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
+              placeholder="Search products, categories, or brands..."
+              className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-900 pl-12 pr-4 text-white outline-none transition-all placeholder:text-zinc-500 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30"
+            />
+
+          </div>
+
+          <select
+            value={selectedBrand}
+            onChange={(e) =>
+              setSelectedBrand(
+                e.target.value
+              )
+            }
+            className="
 h-12
 px-4
 rounded-xl
@@ -96,7 +129,7 @@ focus:ring-2
 focus:ring-pink-500/30
 transition-all
 "
-        >
+          >
 
           <option value="All">
             All
@@ -113,7 +146,9 @@ transition-all
 
           ))}
 
-        </select>
+          </select>
+
+        </div>
 
       </div>
 

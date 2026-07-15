@@ -19,6 +19,7 @@ import Footer from "@/components/footer"
 import BrandsSection from "@/components/brands-section"
 
 import BrandMarquee from "@/components/brand-marquee"
+import SuperDealsSection from "@/components/super-deals-section"
 import PremiumLoader from "@/components/premium-loader"
 
 
@@ -91,11 +92,13 @@ export default function Home() {
   setStockFilter
 ] = useState("All")
 
-  const [search,
+const [search,
     setSearch
   ] = useState("")
 const [brands, setBrands] = useState<any[]>([])
 const [banners, setBanners] = useState<Banner[]>([])
+const [allProducts, setAllProducts] = useState<Product[]>([])
+const [storeSettings, setStoreSettings] = useState<any>(null)
   const [showLoader, setShowLoader] =
   useState(true)
 
@@ -113,16 +116,19 @@ const [banners, setBanners] = useState<Banner[]>([])
   productsResponse,
   brandsResponse,
   bannersResponse,
+  settingsResponse,
 ] = await Promise.all([
   fetch("/api/get-products"),
   fetch("/api/admin/brands"),
   fetch("/api/banners"),
+  fetch("/api/admin/settings"),
 ])
 
 const data = await productsResponse.json()
 const inStockProducts = data.filter(
   (product: Product) => product.stock > 0
 )
+setAllProducts(inStockProducts)
 setProducts(inStockProducts.slice(0, 9))
 
 const brandData = await brandsResponse.json()
@@ -130,6 +136,9 @@ setBrands(brandData)
 
 const bannerData = await bannersResponse.json()
 setBanners(bannerData)
+
+const settingsData = await settingsResponse.json()
+setStoreSettings(settingsData)
 
 inStockProducts.forEach((product: Product) => {
   syncStock(product.id, product.stock)
@@ -202,6 +211,31 @@ useEffect(() => {
   ),
 
 ]
+
+  const superDealProducts = (() => {
+    const selectedIds = Array.isArray(storeSettings?.superDealProductIds)
+      ? storeSettings.superDealProductIds
+      : []
+    const picked: Product[] = []
+    const usedIds = new Set<string>()
+
+    for (const id of selectedIds) {
+      const product = allProducts.find((item) => item.id === id)
+      if (product && !usedIds.has(product.id)) {
+        picked.push(product)
+        usedIds.add(product.id)
+      }
+    }
+
+    for (const product of allProducts) {
+      if (picked.length >= 6) break
+      if (usedIds.has(product.id)) continue
+      picked.push(product)
+      usedIds.add(product.id)
+    }
+
+    return picked.slice(0, 6)
+  })()
 
   const filteredProducts =
   products.filter((product) => {
@@ -284,6 +318,7 @@ useEffect(() => {
 <BrandMarquee
   brands={brands}
 />
+<SuperDealsSection products={superDealProducts} />
       {/* Brands Section */}
       <BrandsSection brands={brands} />
 

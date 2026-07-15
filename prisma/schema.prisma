@@ -70,6 +70,7 @@ model StoreSettings {
   pickupEnabled   Boolean @default(false)
   pickupLocation  String?
   maintenanceMode Boolean @default(false)
+  superDealProductIds Json?
 }
 
 model Brand {
