@@ -10,8 +10,23 @@ export default async function ProductsPage() {
 
   const [products, brands] = await Promise.all([
     prisma.product.findMany({
-      include: {
-        brand: true,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        images: true,
+        category: true,
+        stock: true,
+        reservedStock: true,
+        badge: true,
+        brandId: true,
+        brand: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",

@@ -28,6 +28,25 @@ export default async function OrdersPage({
   
   const orders =
   await prisma.order.findMany({
+    select: {
+      id: true,
+      orderId: true,
+      userId: true,
+      customer: true,
+      email: true,
+      phone: true,
+      address: true,
+      city: true,
+      pincode: true,
+      products: true,
+      totalAmount: true,
+      paymentId: true,
+      reservationId: true,
+      createdAt: true,
+      deliveryMethod: true,
+      pickupLocation: true,
+      status: true,
+    },
     
 where: {
 
@@ -72,33 +91,6 @@ where: {
     },
 
   })
-
-const productIds = Array.from(
-  new Set(
-    orders.flatMap((order) =>
-      (order.products as any[]).map(
-        (product) => product.id
-      )
-    )
-  )
-)
-
-const products = productIds.length
-  ? await prisma.product.findMany({
-      where: {
-        id: {
-          in: productIds,
-        },
-      },
-    })
-  : []
-
-const productMap = new Map(
-  products.map((product) => [
-    product.id,
-    product,
-  ])
-)
 const [
   pendingCount,
   packedCount,
@@ -728,19 +720,14 @@ shadow-sm pt-8">
                         product,
                         index
                       ) => {
-                        const fallbackProduct =
-                          productMap.get(product.id)
                         const displayImage =
                           product.image ||
                           product.images?.[0] ||
-                          (fallbackProduct as any)?.images?.[0] ||
-                          (fallbackProduct as any)?.image ||
                           ""
                         const displayPrice =
                           product.price ??
                           product.unitPrice ??
                           product.originalPrice ??
-                          fallbackProduct?.price ??
                           0
 
                         return (
