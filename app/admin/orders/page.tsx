@@ -105,7 +105,7 @@ const [
 
   prisma.order.count({
     where: {
-      status: "Pending",
+      status: "Confirmed",
     },
   }),
 
@@ -143,7 +143,7 @@ const [
 
   prisma.order.count({
     where: {
-      status: "Pending",
+      status: "Confirmed",
     },
   }),
 
@@ -289,7 +289,7 @@ shadow-2xl
 
     <p className="text-zinc-400">
 
-      Pending
+      Confirmed
 
     </p>
 
@@ -336,7 +336,7 @@ shadow-2xl
   },
 
   {
-    name: "Pending",
+    name: "Confirmed",
     count: pendingCount,
   },
 
@@ -394,10 +394,10 @@ shadow-2xl
 >
   <div className="mb-6">
 
-  {status === "Pending" && (
+  {status === "Confirmed" && (
 
     <BulkStatusButton
-      currentStatus="Pending"
+      currentStatus="Confirmed"
       newStatus="Packed"
       label={`Mark All ${pendingCount} Orders as Packed`}
     />
@@ -665,7 +665,7 @@ text-purple-400
       border
 
       ${
-        order.status === "Pending"
+        order.status === "Confirmed"
           ? "bg-yellow-500/15 border-yellow-500/30 text-yellow-400"
 
           : order.status === "Packed"

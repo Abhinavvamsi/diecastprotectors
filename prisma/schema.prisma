@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Order {
-  status         String   @default("Pending")
+  status         String   @default("Confirmed")
   id             String   @id @default(cuid())
   orderId        String   @unique
   userId         String?

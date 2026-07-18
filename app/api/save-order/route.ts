@@ -77,6 +77,23 @@ if (!signatureIsValid) {
       )
     }
 
+    const existingOrder =
+      await prisma.order.findFirst({
+        where: {
+          reservationId: body.reservationId,
+        },
+        select: {
+          orderId: true,
+        },
+      })
+
+    if (existingOrder) {
+      return NextResponse.json({
+        orderId: existingOrder.orderId,
+        alreadySaved: true,
+      })
+    }
+
     const orderId =
       `HWS-${Date.now()}`
 
@@ -93,6 +110,23 @@ if (!signatureIsValid) {
             items: true,
           },
         })
+
+      const savedOrder =
+        await tx.order.findFirst({
+          where: {
+            reservationId: body.reservationId,
+          },
+          select: {
+            orderId: true,
+          },
+        })
+
+      if (savedOrder) {
+        return {
+          orderId: savedOrder.orderId,
+          alreadySaved: true,
+        }
+      }
 
       if (
         !reservation ||
@@ -300,6 +334,8 @@ if (!signatureIsValid) {
       return await tx.order.create({
 
         data: {
+
+  status: "Confirmed",
 
   orderId,
 

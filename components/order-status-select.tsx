@@ -68,8 +68,8 @@ export default function OrderStatusSelect({
       "
     >
 
-      <option value="Pending">
-        Pending
+      <option value="Confirmed">
+        Confirmed
       </option>
 
       <option value="Packed">

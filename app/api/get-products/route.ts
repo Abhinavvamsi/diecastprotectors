@@ -16,20 +16,20 @@ export async function GET() {
 
   })
 
-  return NextResponse.json(
-    products.map((product) => ({
-      ...product,
-      stock: Math.max(
-        0,
-        product.stock - product.reservedStock
-      ),
-    })),
-    {
-      headers: {
-        "Cache-Control":
-          "no-store",
-      },
-    }
-  )
+    return NextResponse.json(
+      products.map((product) => ({
+        ...product,
+        stock: Math.max(
+          0,
+          product.stock - product.reservedStock
+        ),
+      })),
+      {
+        headers: {
+          "Cache-Control":
+            "public, s-maxage=60, stale-while-revalidate=300",
+        },
+      }
+    )
 
 }

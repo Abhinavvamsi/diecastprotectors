@@ -351,7 +351,7 @@ text-transparent
 
                     <span
                       className={`px-5 py-3 rounded-full text-sm font-semibold border ${
-                        order.status === "Pending"
+                        order.status === "Confirmed"
                           ? "bg-yellow-500/20 text-yellow-600 border-yellow-500/30"
 
                           : order.status === "Packed"

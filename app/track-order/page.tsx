@@ -292,13 +292,13 @@ disabled:opacity-50
             {/* Status Timeline */}
             <div className="mt-12 space-y-6">
 
-              {/* Pending */}
+              {/* Confirmed */}
               <div className="flex items-center gap-4">
 
                 <div
                   className={`w-5 h-5 rounded-full ${
                     [
-                      "Pending",
+                      "Confirmed",
                       "Packed",
                       "Shipped",
                       "Delivered",
@@ -312,7 +312,7 @@ disabled:opacity-50
 
                 <p className="text-lg text-zinc-300">
 
-                  Pending
+                  Confirmed
 
                 </p>
 
