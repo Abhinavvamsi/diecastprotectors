@@ -30,10 +30,17 @@ export async function POST(
 
     const body =
       await req.json()
+    const reservationId = body.reservationId
+    const razorpayOrderId =
+      body.razorpay_order_id || body.orderId
+    const razorpayPaymentId =
+      body.razorpay_payment_id || body.paymentId
+    const razorpaySignature =
+      body.razorpay_signature || body.signature
 
     const existingOrder = await prisma.order.findFirst({
       where: {
-        reservationId: body.reservationId,
+        reservationId,
       },
       select: {
         orderId: true,
@@ -47,16 +54,11 @@ export async function POST(
         orderId: existingOrder.orderId,
       })
     }
-const {
-  razorpay_order_id,
-  razorpay_payment_id,
-  razorpay_signature,
-} = body
-
 if (
-  !razorpay_order_id ||
-  !razorpay_payment_id ||
-  !razorpay_signature
+  !reservationId ||
+  !razorpayOrderId ||
+  !razorpayPaymentId ||
+  !razorpaySignature
 ) {
   return NextResponse.json(
     { error: "Payment verification details are required" },
@@ -69,16 +71,16 @@ const expectedSignature = createHmac(
   process.env.RAZORPAY_KEY_SECRET!
 )
   .update(
-    `${razorpay_order_id}|${razorpay_payment_id}`
+    `${razorpayOrderId}|${razorpayPaymentId}`
   )
   .digest("hex")
 
 const signatureIsValid =
   expectedSignature.length ===
-    razorpay_signature.length &&
+    razorpaySignature.length &&
   timingSafeEqual(
     Buffer.from(expectedSignature),
-    Buffer.from(razorpay_signature)
+    Buffer.from(razorpaySignature)
   )
 
 if (!signatureIsValid) {
@@ -87,28 +89,11 @@ if (!signatureIsValid) {
     { status: 400 }
   )
 }
-    if (!body.reservationId) {
+    if (!reservationId) {
       return NextResponse.json(
         { error: "Reservation ID is required" },
         { status: 400 }
       )
-    }
-
-    const existingOrder =
-      await prisma.order.findFirst({
-        where: {
-          reservationId: body.reservationId,
-        },
-        select: {
-          orderId: true,
-        },
-      })
-
-    if (existingOrder) {
-      return NextResponse.json({
-        orderId: existingOrder.orderId,
-        alreadySaved: true,
-      })
     }
 
     const orderId =
@@ -121,7 +106,7 @@ if (!signatureIsValid) {
       const reservation =
         await tx.reservation.findUnique({
           where: {
-            id: body.reservationId,
+            id: reservationId,
           },
           include: {
             items: true,
@@ -131,7 +116,7 @@ if (!signatureIsValid) {
       const savedOrder =
         await tx.order.findFirst({
           where: {
-            reservationId: body.reservationId,
+            reservationId,
           },
           select: {
             orderId: true,
@@ -217,7 +202,7 @@ if (!signatureIsValid) {
         )
       }
 
-      const completedReservation =
+      if (reservation.status !== "COMPLETED") {
         await tx.reservation.updateMany({
           where: {
             id: reservation.id,
@@ -229,14 +214,10 @@ if (!signatureIsValid) {
             status: "COMPLETED",
           },
         })
-
-      if (!completedReservation.count) {
-        throw new Error(
-          "Your stock reservation has expired"
-        )
       }
 
       let subtotal = 0
+      const productLookup = new Map<string, any>()
 
       // Check stock first
 
@@ -259,17 +240,15 @@ if (!signatureIsValid) {
 
         }
 
-        if (
-          product.stock <
-          item.quantity ||
-          product.reservedStock < item.quantity
-        ) {
+        if (product.stock < item.quantity) {
 
           throw new Error(
             `${product.name} is out of stock`
           )
 
         }
+
+        productLookup.set(item.id, product)
 
         subtotal +=
           getTierPrice(product, item.quantity) *
@@ -280,6 +259,7 @@ if (!signatureIsValid) {
       // Reduce stock
 
       for (const item of normalizedProducts) {
+        const product = productLookup.get(item.id)
 
         await tx.product.update({
 
@@ -296,7 +276,10 @@ if (!signatureIsValid) {
 
             reservedStock: {
               decrement:
-                item.quantity,
+                Math.min(
+                  product?.reservedStock || 0,
+                  item.quantity
+                ),
             },
 
           },
@@ -381,10 +364,10 @@ if (!signatureIsValid) {
   totalAmount:
     totalAmount,
 
-  paymentId: razorpay_payment_id,
+  paymentId: razorpayPaymentId,
 
   reservationId:
-    body.reservationId,
+    reservationId,
 
   deliveryMethod:
     body.deliveryMethod || "shipping",
