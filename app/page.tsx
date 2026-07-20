@@ -2,7 +2,8 @@
 import BannerSlider from "@/components/banner-slider"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { Bebas_Neue } from "next/font/google"
 
@@ -70,6 +71,7 @@ type Banner = {
 }
 
 export default function Home() {
+  const router = useRouter()
 
   const syncStock =
     useCartStore(
@@ -236,6 +238,22 @@ useEffect(() => {
 
     return picked.slice(0, 6)
   })()
+
+  const brandRouteIds = useMemo(() => {
+    return brands.slice(0, 6).map((brand) => brand.id)
+  }, [brands])
+
+  useEffect(() => {
+    if (loading) return
+
+    brandRouteIds.forEach((brandId) => {
+      router.prefetch(`/brands/${brandId}`)
+    })
+
+    superDealProducts.forEach((product) => {
+      router.prefetch(`/products/${product.id}`)
+    })
+  }, [loading, router, brandRouteIds, superDealProducts])
 
   const filteredProducts =
   products.filter((product) => {

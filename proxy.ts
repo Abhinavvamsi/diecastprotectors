@@ -1,16 +1,36 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { clerkMiddleware } from "@clerk/nextjs/server"
 
+async function fetchWithTimeout(
+  url: URL,
+  request: NextRequest,
+  timeoutMs: number
+) {
+  const controller = new AbortController()
+  const timeout = setTimeout(
+    () => controller.abort(),
+    timeoutMs
+  )
+
+  try {
+    return await fetch(url, {
+      headers: {
+        cookie: request.headers.get("cookie") || "",
+      },
+      cache: "no-store",
+      signal: controller.signal,
+    })
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 async function isMaintenanceEnabled(request: NextRequest) {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       new URL("/api/admin/settings", request.url),
-      {
-        headers: {
-          cookie: request.headers.get("cookie") || "",
-        },
-        cache: "no-store",
-      }
+      request,
+      1500
     )
 
     if (!response.ok) return false
@@ -24,14 +44,10 @@ async function isMaintenanceEnabled(request: NextRequest) {
 
 async function isAdmin(request: NextRequest) {
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       new URL("/api/admin/me", request.url),
-      {
-        headers: {
-          cookie: request.headers.get("cookie") || "",
-        },
-        cache: "no-store",
-      }
+      request,
+      1500
     )
 
     if (!response.ok) return false

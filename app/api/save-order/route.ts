@@ -30,6 +30,23 @@ export async function POST(
 
     const body =
       await req.json()
+
+    const existingOrder = await prisma.order.findFirst({
+      where: {
+        reservationId: body.reservationId,
+      },
+      select: {
+        orderId: true,
+      },
+    })
+
+    if (existingOrder) {
+      return NextResponse.json({
+        success: true,
+        alreadySaved: true,
+        orderId: existingOrder.orderId,
+      })
+    }
 const {
   razorpay_order_id,
   razorpay_payment_id,
@@ -130,8 +147,7 @@ if (!signatureIsValid) {
 
       if (
         !reservation ||
-        reservation.status !== "ACTIVE" ||
-        reservation.expiresAt <= new Date()
+        reservation.status === "CANCELLED"
       ) {
         throw new Error(
           "Your stock reservation has expired"
@@ -205,9 +221,8 @@ if (!signatureIsValid) {
         await tx.reservation.updateMany({
           where: {
             id: reservation.id,
-            status: "ACTIVE",
-            expiresAt: {
-              gt: new Date(),
+            status: {
+              in: ["ACTIVE", "EXPIRED"],
             },
           },
           data: {
