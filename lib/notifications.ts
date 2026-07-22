@@ -32,33 +32,18 @@ export async function sendWhatsAppOrderMessage(
   const recipientPhone =
     process.env.WHATSAPP_NOTIFY_TO || order.phone
 
-  if (
-    !accessToken ||
-    !phoneNumberId ||
-    !recipientPhone
-  ) {
+  if (!accessToken || !phoneNumberId || !recipientPhone) {
     return { skipped: true }
   }
 
-  const templateName =
-    process.env.WHATSAPP_TEMPLATE_NAME
+  const templateName = process.env.WHATSAPP_TEMPLATE_NAME
   const templateLanguage =
-    process.env.WHATSAPP_TEMPLATE_LANGUAGE_CODE ||
-    "en_US"
+    process.env.WHATSAPP_TEMPLATE_LANGUAGE_CODE || "en_US"
 
   const bodyParameters = [
-    {
-      type: "text",
-      text: order.customer,
-    },
-    {
-      type: "text",
-      text: order.orderId,
-    },
-    {
-      type: "text",
-      text: order.status,
-    },
+    { type: "text", text: order.customer },
+    { type: "text", text: order.orderId },
+    { type: "text", text: order.status },
     {
       type: "text",
       text:
@@ -69,7 +54,7 @@ export async function sendWhatsAppOrderMessage(
   ]
 
   const response = await fetch(
-      'https://graph.facebook.com/v25.0/1137362226136255/messages',
+    `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
     {
       method: "POST",
       headers: {

@@ -181,7 +181,7 @@ export async function POST(
 
       `,
 
-      }),
+    }),
       sendWhatsAppOrderMessage({
         orderId: order.orderId,
         customer: order.customer,

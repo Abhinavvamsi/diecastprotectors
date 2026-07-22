@@ -641,6 +641,16 @@ if (!signatureIsValid) {
 
         `,
       }),
+      sendWhatsAppOrderMessage({
+        orderId,
+        customer: body.customer,
+        phone: body.phone,
+        status: "Confirmed",
+        totalAmount:
+          "totalAmount" in order
+            ? order.totalAmount
+            : Number(body.totalAmount || 0),
+      }),
     ]).then((results) => {
       results.forEach((result, index) => {
         if (result.status === "rejected") {
