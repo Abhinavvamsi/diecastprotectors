@@ -54,6 +54,10 @@ export default function ProductCard({
   badge,
 
 }: ProductCardProps) {
+  const isOutOfStock = Number(stock || 0) <= 0
+  const isLowStock =
+    Number(stock || 0) > 0 &&
+    Number(stock || 0) <= 3
 
   const addToCart =
     useCartStore(
@@ -174,7 +178,7 @@ shadow-lg
           )}
 
           {/* Low Stock Badge */}
-          {!isPreOrder && stock > 0 && stock <= 3 && (
+          {isLowStock && (
 
             <div
               className="
@@ -202,7 +206,7 @@ shadow-lg
           )}
 
           {/* Out of Stock */}
-          {!isPreOrder && stock === 0 && (
+          {isOutOfStock && (
 
             <div
               className="
@@ -280,7 +284,7 @@ shadow-lg
           {/* Stock */}
           <p
             className={`mt-4 font-medium ${
-              stock > 0
+              Number(stock || 0) > 0
                 ? "text-green-500"
                 : "text-red-500"
             }`}
@@ -288,7 +292,7 @@ shadow-lg
 
               {isPreOrder
               ? "Pre Order"
-              : stock > 0
+              : Number(stock || 0) > 0
               ? `In Stock: ${stock}`
               : "Out of Stock"}
 
@@ -299,7 +303,7 @@ shadow-lg
 
             {/* Add to Cart */}
             <Button
-              disabled={!isPreOrder && stock === 0}
+              disabled={isOutOfStock}
 
               className="
 flex-1
@@ -365,7 +369,7 @@ disabled:opacity-40
               }}
             >
 
-              {(!isPreOrder && stock === 0)
+              {isOutOfStock
                 ? "Out of Stock"
                 : "Add to Cart"}
 
@@ -373,7 +377,7 @@ disabled:opacity-40
 
             {/* Buy Now */}
             <Button
-              disabled={!isPreOrder && stock === 0}
+              disabled={isOutOfStock}
 
               variant="outline"
 
@@ -439,9 +443,7 @@ disabled:opacity-40
               }}
             >
 
-              {(!isPreOrder && stock === 0)
-                ? "Unavailable"
-                : "Buy Now"}
+              {isOutOfStock ? "Unavailable" : "Buy Now"}
 
             </Button>
 

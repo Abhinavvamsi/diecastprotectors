@@ -5,6 +5,7 @@ import { NextResponse } from "next/server"
 import { createHmac, timingSafeEqual } from "crypto"
 import { auth } from "@clerk/nextjs/server"
 import { calculateShippingCharge } from "@/lib/shipping"
+import { getProductPayablePrice } from "@/lib/preorder"
 
 function getTierPrice(product: any, quantity: number) {
   const tiers = (product.quantityPricing || []) as Array<{
@@ -148,65 +149,48 @@ if (!signatureIsValid) {
         throw new Error("Unauthorized")
       }
 
-      const normalizedProductMap = new Map<string, any>()
-      for (const item of body.products as Array<{
+      const bodyProducts = Array.isArray(body.products)
+        ? body.products
+        : []
+      const bodyProductMap = new Map<string, any>()
+      for (const item of bodyProducts as Array<{
         id: string
         quantity: number
       }>) {
-        const existing = normalizedProductMap.get(item.id)
+        const existing = bodyProductMap.get(item.id)
         if (existing) {
           existing.quantity += item.quantity
         } else {
-          normalizedProductMap.set(item.id, { ...item })
+          bodyProductMap.set(item.id, { ...item })
         }
       }
 
-      const normalizedProducts = Array.from(
-        normalizedProductMap.values()
-      )
+      const orderedItems = reservation.items.map((item) => {
+        const bodyItem = bodyProductMap.get(item.productId) || {}
 
-      const productsWithDisplayData =
-        normalizedProducts.map((item: any) => ({
-          ...item,
+        return {
+          id: item.productId,
+          quantity: item.quantity,
           price:
-            item.price ??
-            item.unitPrice ??
-            item.originalPrice ??
+            bodyItem.price ??
+            bodyItem.unitPrice ??
+            bodyItem.originalPrice ??
             0,
           unitPrice:
-            item.unitPrice ??
-            item.price ??
-            item.originalPrice ??
+            bodyItem.unitPrice ??
+            bodyItem.price ??
+            bodyItem.originalPrice ??
             0,
-          image: item.image || item.images?.[0] || null,
+          image: bodyItem.image || bodyItem.images?.[0] || null,
           images:
-            item.images ||
-            (item.image ? [item.image] : []),
-          isPreOrder: Boolean(item.isPreOrder),
-          depositAmount:
-            Number(item.depositAmount ?? 50),
-          expectedArrival:
-            item.expectedArrival || null,
-        }))
-
-      const reservedItems = new Map(
-        reservation.items.map((item) => [
-          item.productId,
-          item.quantity,
-        ])
-      )
-
-      if (
-        reservedItems.size !== normalizedProducts.length ||
-        normalizedProducts.some(
-          (item: any) =>
-            reservedItems.get(item.id) !== item.quantity
-        )
-      ) {
-        throw new Error(
-          "Your cart no longer matches the reservation"
-        )
-      }
+            bodyItem.images ||
+            (bodyItem.image ? [bodyItem.image] : []),
+          isPreOrder: Boolean(bodyItem.isPreOrder),
+          depositAmount: Number(bodyItem.depositAmount ?? 50),
+          expectedArrival: bodyItem.expectedArrival || null,
+          name: bodyItem.name || item.productId,
+        }
+      })
 
       if (reservation.status !== "COMPLETED") {
         await tx.reservation.updateMany({
@@ -227,13 +211,13 @@ if (!signatureIsValid) {
 
       // Check stock first
 
-      for (const item of normalizedProducts) {
+      for (const item of reservation.items) {
 
         const product =
           await tx.product.findUnique({
 
             where: {
-              id: item.id,
+              id: item.productId,
             },
 
           })
@@ -241,23 +225,12 @@ if (!signatureIsValid) {
         if (!product) {
 
           throw new Error(
-            `${item.name} no longer exists`
-          )
+          `${item.productId} no longer exists`
+        )
 
-        }
+      }
 
-        if (
-          !product.isPreOrder &&
-          product.stock < item.quantity
-        ) {
-
-          throw new Error(
-            `${product.name} is out of stock`
-          )
-
-        }
-
-        productLookup.set(item.id, product)
+      productLookup.set(item.productId, product)
 
         const currentPrice = getTierPrice(
           product,
@@ -265,11 +238,10 @@ if (!signatureIsValid) {
         )
 
         const payablePrice = product.isPreOrder
-          ? Math.floor(
-              (currentPrice *
-                Number(product.depositAmount ?? 50)) /
-                100
-            )
+          ? getProductPayablePrice({
+              ...product,
+              price: currentPrice,
+            })
           : currentPrice
 
         subtotal +=
@@ -279,20 +251,23 @@ if (!signatureIsValid) {
 
       // Reduce stock
 
-      for (const item of normalizedProducts) {
-        const product = productLookup.get(item.id)
+      for (const item of reservation.items) {
+        const product = productLookup.get(item.productId)
+        const nextStock = Math.max(
+          0,
+          Number(product?.stock || 0) - item.quantity
+        )
 
         await tx.product.update({
 
           where: {
-            id: item.id,
+            id: item.productId,
           },
 
           data: {
 
             stock: {
-              decrement:
-                item.quantity,
+              set: nextStock,
             },
 
             reservedStock: {
@@ -311,13 +286,20 @@ if (!signatureIsValid) {
 
       // Create order
 
+      const hasOnlyPreOrderItems =
+        reservation.items.length > 0 &&
+        reservation.items.every((item) =>
+          Boolean(productLookup.get(item.productId)?.isPreOrder)
+        )
+
       const shippingCharge = calculateShippingCharge({
         subtotal,
-        itemCount: normalizedProducts.reduce(
+        itemCount: reservation.items.reduce(
           (sum: number, item: any) => sum + item.quantity,
           0
         ),
         deliveryMethod: body.deliveryMethod,
+        hasOnlyPreOrderItems,
       })
 
       let discount = 0
@@ -380,7 +362,7 @@ if (!signatureIsValid) {
     body.pincode,
 
   products:
-    productsWithDisplayData as any,
+    orderedItems as any,
 
   totalAmount:
     totalAmount,

@@ -20,15 +20,17 @@ export default async function PreOrdersPage() {
   })
 
   return (
-    <main className="min-h-screen bg-[#09090B] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-white">
       <Navbar />
+      <div className="pointer-events-none absolute -top-24 right-0 h-[420px] w-[420px] rounded-full bg-fuchsia-500/10 blur-[150px] animate-pulse" />
+      <div className="pointer-events-none absolute left-0 top-1/3 h-[360px] w-[360px] rounded-full bg-cyan-500/10 blur-[150px] animate-pulse" />
 
       <section className="relative overflow-hidden px-6 py-16 md:py-24">
         <div className="mx-auto max-w-7xl">
-          <p className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-500 bg-clip-text text-sm uppercase tracking-[0.35em] text-transparent">
+          <p className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-500 bg-clip-text text-sm uppercase tracking-[0.35em] text-transparent drop-shadow-[0_0_16px_rgba(34,211,238,.35)]">
             Pre Orders
           </p>
-          <h1 className="mt-4 text-5xl md:text-7xl font-black">
+          <h1 className="mt-4 text-5xl md:text-7xl font-black bg-gradient-to-r from-white via-pink-100 to-fuchsia-200 bg-clip-text text-transparent drop-shadow-[0_0_24px_rgba(236,72,153,.2)]">
             Secure your next drop early
           </h1>
           <p className="mt-5 max-w-2xl text-zinc-400 text-lg">
@@ -55,7 +57,11 @@ export default async function PreOrdersPage() {
                 price={getProductPayablePrice(product)}
                 image={product.images?.[0] || ""}
                 description={product.description}
-                stock={product.stock}
+                stock={Math.max(
+                  0,
+                  Number(product.stock || 0) -
+                    Number(product.reservedStock || 0)
+                )}
                 badge={product.badge}
                 quantityPricing={product.quantityPricing}
                 isPreOrder={product.isPreOrder}

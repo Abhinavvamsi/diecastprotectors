@@ -595,14 +595,17 @@ focus:ring-pink-500/30
               <input
                 type="number"
                 min={1}
-                max={100}
-                placeholder="Deposit %"
+                placeholder="Deposit % or ₹ amount"
                 value={depositAmount}
                 onChange={(e) =>
                   setDepositAmount(e.target.value)
                 }
                 className="w-full h-14 rounded-2xl bg-zinc-950 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-pink-500 focus:ring-pink-500/30 px-5 outline-none focus:ring-2 transition-all"
               />
+
+              <p className="md:col-span-3 -mt-2 text-xs text-zinc-500">
+                Enter 1-100 for percentage deposit. Enter any value above 100 for a fixed rupee deposit, like ₹600 or ₹1000.
+              </p>
 
               <input
                 type="text"

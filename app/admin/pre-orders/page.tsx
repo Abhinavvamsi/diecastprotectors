@@ -54,6 +54,14 @@ export default async function AdminPreOrdersPage() {
                 key={product.id}
                 className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6"
               >
+                {(() => {
+                  const availableStock = Math.max(
+                    0,
+                    Number(product.stock || 0) -
+                      Number(product.reservedStock || 0)
+                  )
+
+                  return (
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
                     <h2 className="text-2xl font-bold">{product.name}</h2>
@@ -64,14 +72,32 @@ export default async function AdminPreOrdersPage() {
                     <p className="mt-1 text-zinc-400">
                       Expected arrival: {product.expectedArrival || "Not set"}
                     </p>
+                    <p className="mt-1 text-zinc-400">
+                      Available stock: {availableStock} • Reserved: {Number(product.reservedStock || 0)} • Total: {Number(product.stock || 0)}
+                    </p>
                   </div>
-                  <Link
-                    href={`/admin/products/${product.id}/edit`}
-                    className="rounded-2xl bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600 px-5 py-3 font-semibold text-white transition hover:scale-105"
-                  >
-                    Edit
-                  </Link>
+                  {availableStock <= 0 && (
+                    <span className="inline-flex self-start rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-red-300 md:self-center">
+                      Sold Out
+                    </span>
+                  )}
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      href={`/admin/orders?productId=${product.id}`}
+                      className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-3 font-semibold text-cyan-100 transition hover:scale-105 hover:border-cyan-400"
+                    >
+                      View Orders
+                    </Link>
+                    <Link
+                      href={`/admin/products/${product.id}/edit`}
+                      className="rounded-2xl bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600 px-5 py-3 font-semibold text-white transition hover:scale-105"
+                    >
+                      Edit
+                    </Link>
+                  </div>
                 </div>
+                  )
+                })()}
               </div>
             ))
           )}

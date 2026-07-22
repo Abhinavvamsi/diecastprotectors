@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 
 import { useCartStore } from "@/store/cart-store"
+import { getProductPayablePrice } from "@/lib/preorder"
 
 export default function CartPage() {
 
@@ -131,12 +132,7 @@ cart.forEach((item) => {
         (product: any) => {
           syncProduct({
             id: product.id,
-            price: product.isPreOrder
-              ? Math.floor(
-                  (Number(product.price || 0) *
-                    Number(product.depositAmount ?? 50)) / 100
-                )
-              : Number(product.price || 0),
+            price: getProductPayablePrice(product),
             originalPrice: Number(product.price || 0),
             depositAmount: product.depositAmount,
             expectedArrival: product.expectedArrival || undefined,
@@ -171,10 +167,12 @@ const hasUnavailableProducts =
 
   return (
 
-    <main className="min-h-screen bg-[#09090B] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-white">
 
       {/* Global Navbar */}
       <Navbar />
+      <div className="pointer-events-none absolute -top-24 right-0 h-[420px] w-[420px] rounded-full bg-fuchsia-500/10 blur-[140px] animate-pulse" />
+      <div className="pointer-events-none absolute left-0 top-1/3 h-[360px] w-[360px] rounded-full bg-cyan-500/10 blur-[140px] animate-pulse" />
 <div
   className="
   absolute
@@ -308,11 +306,25 @@ transition
 
           <div className="space-y-6">
 
-            {cart.map((item) => (
+            {cart.map((item) => {
+              const quantity = Number(item.quantity ?? 0)
+              const originalUnitPrice = Number(item.originalPrice ?? item.price ?? 0)
+              const depositUnitPrice = Number(item.price ?? 0)
+              const regularUnitPrice = getCurrentPrice(item)
+              const lineOriginalPrice = originalUnitPrice * quantity
+              const lineDepositPrice = depositUnitPrice * quantity
+              const linePayablePrice = item.isPreOrder
+                ? lineDepositPrice
+                : regularUnitPrice * quantity
+              const lineRemainingPrice = Math.max(
+                0,
+                lineOriginalPrice - lineDepositPrice
+              )
 
+              return (
               <div
                 key={item.id}
-                className="
+              className="
 flex
 flex-col
 md:flex-row
@@ -323,9 +335,9 @@ border
 border-[#2B2B3A]
 rounded-3xl
 p-6
-shadow-sm
+shadow-[0_0_35px_rgba(236,72,153,.08)]
 hover:border-pink-500
-hover:shadow-[0_0_30px_rgba(236,72,153,.25)]
+hover:shadow-[0_0_40px_rgba(236,72,153,.28)]
 transition-all
 duration-300
 "
@@ -369,15 +381,15 @@ to-purple-500
 bg-clip-text
 text-transparent
 font-bold mt-2">
-                      ₹{Number(item.originalPrice ?? item.price ?? 0)}
+                      ₹{item.isPreOrder ? lineDepositPrice : linePayablePrice}
                     </p>
 
                     {item.isPreOrder && (
                       <div className="mt-3 inline-flex flex-col gap-1 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-cyan-100">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-300">Pre Order</span>
-                        <span className="text-sm">Original price: ₹{Number(item.originalPrice ?? 0)}</span>
-                        <span className="text-sm font-semibold text-cyan-300">Deposit now: ₹{Number(item.price ?? 0)}</span>
-                        <span className="text-sm">Remaining later: ₹{Math.max(0, Number(item.originalPrice ?? 0) - Number(item.price ?? 0))}</span>
+                        <span className="text-sm">Original price: ₹{lineOriginalPrice}</span>
+                        <span className="text-sm font-semibold text-cyan-300">Deposit now: ₹{lineDepositPrice}</span>
+                        <span className="text-sm">Remaining later: ₹{lineRemainingPrice}</span>
                       </div>
                     )}
 
@@ -524,12 +536,13 @@ hover:text-pink-400
 
                 </div>
 
-              </div>
+                </div>
 
-            ))}
+              )
+            })}
 
             {/* Footer */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-10 border-t border-[#2B2B3A]">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mt-10 border-t border-[#2B2B3A] pt-6">
 
               <div>
 
@@ -566,7 +579,7 @@ via-fuchsia-500
 to-purple-600
 text-white
 hover:scale-105
-hover:shadow-[0_0_25px_rgba(236,72,153,.4)]
+hover:shadow-[0_0_30px_rgba(236,72,153,.45)]
   "
 >
 

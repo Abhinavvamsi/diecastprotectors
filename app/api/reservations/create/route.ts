@@ -74,7 +74,6 @@ export async function POST(req: Request) {
 
         for (const item of sortedItems) {
           const product = productMap.get(item.productId)
-          if (product.isPreOrder) continue
           const available =
             product.stock - product.reservedStock
 
@@ -87,9 +86,6 @@ export async function POST(req: Request) {
 
         // Reserve stock
         for (const item of sortedItems) {
-          const product = productMap.get(item.productId)
-          if (product.isPreOrder) continue
-
           await tx.product.update({
 
             where: {

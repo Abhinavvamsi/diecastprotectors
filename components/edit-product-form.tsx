@@ -299,18 +299,20 @@ transition-all
 
       <div>
         <label className="mb-2 block text-sm text-zinc-400">
-          Deposit %
+          Deposit % or ₹ amount
         </label>
         <input
           type="number"
           min={1}
-          max={100}
           value={depositAmount}
           onChange={(e) =>
             setDepositAmount(Number(e.target.value))
           }
           className="w-full h-14 rounded-xl bg-zinc-950 border-zinc-700 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30 transition-all px-4 outline-none"
         />
+        <p className="mt-2 text-xs text-zinc-500">
+          Use 1-100 for percentage. Use a value above 100 for a fixed rupee deposit, like 600 or 1000.
+        </p>
       </div>
 
       <div>

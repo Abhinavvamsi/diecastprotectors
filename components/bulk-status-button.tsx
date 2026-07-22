@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+
 export default function BulkStatusButton({
   currentStatus,
   newStatus,
@@ -9,6 +11,7 @@ export default function BulkStatusButton({
   newStatus: string
   label: string
 }) {
+  const router = useRouter()
 
   async function handleUpdate() {
 
@@ -36,7 +39,7 @@ export default function BulkStatusButton({
       }
     )
 
-    location.reload()
+    router.refresh()
 
   }
 

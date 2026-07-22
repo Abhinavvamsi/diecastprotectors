@@ -106,7 +106,7 @@ export default async function EditPage({
             <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
               <p className="text-zinc-500 text-sm">Total Stock</p>
               <p className="mt-2 text-2xl font-bold text-white">
-                {Number(product.stock || 0)}
+                {Math.max(0, Number(product.stock || 0))}
               </p>
             </div>
           </div>

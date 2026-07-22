@@ -7,12 +7,18 @@ export function calculateShippingCharge({
   subtotal,
   itemCount,
   deliveryMethod,
+  hasOnlyPreOrderItems = false,
 }: {
   subtotal: number
   itemCount: number
   deliveryMethod?: string
+  hasOnlyPreOrderItems?: boolean
 }) {
   if (deliveryMethod === "pickup") {
+    return 0
+  }
+
+  if (hasOnlyPreOrderItems) {
     return 0
   }
 

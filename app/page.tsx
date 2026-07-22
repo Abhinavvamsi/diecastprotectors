@@ -335,6 +335,42 @@ useEffect(() => {
 
 {/* Hero Banner */}
 <BannerSlider banners={banners} />
+
+<section className="mx-auto max-w-7xl px-4 md:px-6 pt-8 pb-4">
+  <div className="grid gap-4 sm:grid-cols-2">
+    <Link href="/cars" prefetch>
+      <Button className="w-full rounded-2xl bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600 px-6 py-7 text-lg font-semibold text-white shadow-[0_0_30px_rgba(236,72,153,.28)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_42px_rgba(236,72,153,.45)]">
+        Diecast Cars
+      </Button>
+    </Link>
+    <Link href="/pre-orders" prefetch>
+      <Button className="w-full rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-6 py-7 text-lg font-semibold text-cyan-100 shadow-[0_0_30px_rgba(34,211,238,.14)] transition-all duration-300 hover:scale-[1.02] hover:border-cyan-300 hover:bg-cyan-500/15 hover:shadow-[0_0_42px_rgba(34,211,238,.28)]">
+        Pre Orders
+      </Button>
+    </Link>
+  </div>
+
+  <motion.div
+    className="mt-6 flex justify-center"
+    animate={{
+      y: [0, -10, 0],
+      rotate: [0, 2, -2, 0],
+    }}
+    transition={{
+      duration: 4,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+  >
+    <div className="inline-flex items-center gap-3 rounded-full border border-pink-500/25 bg-zinc-950/80 px-5 py-3 text-sm text-zinc-200 shadow-[0_0_30px_rgba(236,72,153,.14)]">
+      <span className="text-2xl">🏎️</span>
+      <span className="uppercase tracking-[0.25em] text-pink-300">
+        Fast moving diecasts
+      </span>
+    </div>
+  </motion.div>
+</section>
+
 <BrandMarquee
   brands={brands}
 />

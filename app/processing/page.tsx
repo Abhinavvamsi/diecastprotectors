@@ -14,6 +14,9 @@ export default function ProcessingPage() {
   useEffect(() => {
     let cancelled = false
 
+    const sleep = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms))
+
     async function savePendingOrder() {
       const rawPendingOrder =
         sessionStorage.getItem("pending-order")
@@ -25,41 +28,57 @@ export default function ProcessingPage() {
         return
       }
 
-      try {
-        const pendingOrder = JSON.parse(rawPendingOrder)
-        const saveOrderResponse = await fetch(
-          "/api/save-order",
-          {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(pendingOrder),
-        }
-        )
+      const pendingOrder = JSON.parse(rawPendingOrder)
 
-        const savedOrder = await saveOrderResponse.json()
-
-        if (!saveOrderResponse.ok) {
-          throw new Error(
-            savedOrder.error || "Failed to save order"
+      for (let attempt = 1; attempt <= 3; attempt += 1) {
+        try {
+          setMessage(
+            attempt === 1
+              ? "Saving your order now..."
+              : `Saving your order now... attempt ${attempt}/3`
           )
-        }
 
-        sessionStorage.removeItem("pending-order")
-        useCartStore.getState().clearCart()
-
-        if (!cancelled) {
-          window.location.replace(
-            `/success?orderId=${savedOrder.orderId}`
+          const saveOrderResponse = await fetch(
+            "/api/save-order",
+            {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(pendingOrder),
+          }
           )
-        }
-      } catch (error) {
-        if (cancelled) return
 
-        setMessage(
-          "We hit a temporary issue while saving your order. Please keep this page open."
-        )
+          const savedOrder = await saveOrderResponse.json()
+
+          if (!saveOrderResponse.ok) {
+            throw new Error(
+              savedOrder.error || "Failed to save order"
+            )
+          }
+
+          sessionStorage.removeItem("pending-order")
+          useCartStore.getState().clearCart()
+
+          if (!cancelled) {
+            window.location.replace(
+              `/success?orderId=${savedOrder.orderId}`
+            )
+          }
+          return
+        } catch (error) {
+          if (cancelled) return
+
+          if (attempt < 3) {
+            await sleep(1200 * attempt)
+            continue
+          }
+
+          setMessage(
+            "We hit a temporary issue while saving your order. Please keep this page open."
+          )
+          return
+        }
       }
     }
 

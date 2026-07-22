@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { calculateShippingCharge } from "@/lib/shipping"
+import { getProductPayablePrice } from "@/lib/preorder"
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -50,10 +51,10 @@ export async function POST(req: Request) {
       )
     }
 
-    const reservation = await prisma.reservation.findUnique({
-      where: { id: reservationId },
-      include: { items: true },
-    })
+  const reservation = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    include: { items: true },
+  })
 
     if (!reservation || reservation.userId !== userId) {
       return NextResponse.json(
@@ -68,10 +69,23 @@ export async function POST(req: Request) {
     })
 
     const productMap = new Map(products.map((product) => [product.id, product]))
+    const hasOnlyPreOrderItems =
+      reservation.items.length > 0 &&
+      reservation.items.every((item) =>
+        Boolean(productMap.get(item.productId)?.isPreOrder)
+      )
     const subtotal = reservation.items.reduce((sum, item) => {
       const product = productMap.get(item.productId)
       if (!product) return sum
-      return sum + getTierPrice(product, item.quantity) * item.quantity
+      const currentPrice = getTierPrice(product, item.quantity)
+      const payablePrice = product.isPreOrder
+        ? getProductPayablePrice({
+            ...product,
+            price: currentPrice,
+          })
+        : currentPrice
+
+      return sum + payablePrice * item.quantity
     }, 0)
 
     let discount = 0
@@ -101,6 +115,7 @@ export async function POST(req: Request) {
       subtotal,
       itemCount: reservation.items.reduce((sum, item) => sum + item.quantity, 0),
       deliveryMethod,
+      hasOnlyPreOrderItems,
     })
 
     const amount = Math.max(0, subtotal + shippingCharge - discount)
@@ -118,8 +133,9 @@ export async function POST(req: Request) {
       amount,
     })
   } catch (error) {
+    console.error("Create Order Error:", error)
     return NextResponse.json(
-      { error: "Failed to create Razorpay order" },
+      { error: error instanceof Error ? error.message : "Failed to create Razorpay order" },
       { status: 500 }
     )
   }

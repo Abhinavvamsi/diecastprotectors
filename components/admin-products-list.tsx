@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import Image from "next/image"
 import { Search } from "lucide-react"
 import { toast } from "sonner"
@@ -13,20 +14,30 @@ export default function AdminProductsList({
   brands: any[]
 }) {
 
+  const [items, setItems] =
+    useState(products)
   const [selectedBrand, setSelectedBrand] =
     useState("All")
   const [stockFilter, setStockFilter] =
     useState("All")
   const [search, setSearch] =
     useState("")
+  const [selectedIds, setSelectedIds] =
+    useState<string[]>([])
 const [deletingId, setDeletingId] =
   useState("")
+  const [showDeleteConfirm, setShowDeleteConfirm] =
+    useState(false)
+
+  useEffect(() => {
+    setItems(products)
+  }, [products])
 
   const normalizedSearch =
     search.trim().toLowerCase()
 
   const filteredProducts =
-    products.filter((product) => {
+    items.filter((product) => {
       const matchesBrand =
         selectedBrand === "All" ||
         product.brand?.name === selectedBrand
@@ -55,6 +66,12 @@ const [deletingId, setDeletingId] =
 
       return matchesBrand && matchesSearch && matchesStock
     })
+
+  const allVisibleSelected =
+    filteredProducts.length > 0 &&
+    filteredProducts.every((product) =>
+      selectedIds.includes(product.id)
+    )
 
   function getAvailableStock(product: any) {
     return Math.max(
@@ -150,7 +167,88 @@ transition-all
 
         </div>
 
+        <div className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-950/70 px-4 py-3">
+          <label className="flex items-center gap-3 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={() => {
+                setSelectedIds((current) => {
+                  const visibleIds = filteredProducts.map((product) => product.id)
+                  return allVisibleSelected
+                    ? current.filter((id) => !visibleIds.includes(id))
+                    : Array.from(new Set([...current, ...visibleIds]))
+                })
+              }}
+              className="h-4 w-4 rounded border-zinc-600 bg-zinc-900 text-pink-500 focus:ring-pink-500"
+            />
+            Select all visible products
+          </label>
+
+          <button
+            type="button"
+            disabled={selectedIds.length === 0}
+            onClick={() => setShowDeleteConfirm(true)}
+            className="h-11 rounded-xl bg-red-500 px-5 font-semibold text-white transition-all duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Delete Selected ({selectedIds.length})
+          </button>
+        </div>
+
       </div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
+            <h3 className="text-2xl font-bold text-white">Delete selected products?</h3>
+            <p className="mt-3 text-sm text-zinc-400">
+              This will permanently remove {selectedIds.length} selected product{selectedIds.length === 1 ? "" : "s"}.
+            </p>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="h-11 rounded-xl border border-zinc-700 px-5 font-semibold text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const response = await fetch("/api/delete-products", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        ids: selectedIds,
+                      }),
+                    })
+
+                    if (!response.ok) {
+                      toast.error("Failed to delete selected products")
+                      return
+                    }
+
+                    setItems((current) =>
+                      current.filter((product) => !selectedIds.includes(product.id))
+                    )
+                    setSelectedIds([])
+                    toast.success("Selected products deleted successfully")
+                    setShowDeleteConfirm(false)
+                  } catch {
+                    toast.error("Something went wrong")
+                  }
+                }}
+                className="h-11 rounded-xl bg-red-500 px-5 font-semibold text-white transition-colors hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
 
@@ -159,6 +257,7 @@ transition-all
           <div
             key={product.id}
             className="
+relative
 bg-zinc-900
 border
 border-zinc-800
@@ -172,6 +271,20 @@ hover:-translate-y-1
 hover:shadow-[0_0_30px_rgba(236,72,153,.18)]
 "
           >
+            <label className="absolute right-4 top-4 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-pink-500/40 bg-zinc-950/80 backdrop-blur">
+              <input
+                type="checkbox"
+                checked={selectedIds.includes(product.id)}
+                onChange={(event) => {
+                  setSelectedIds((current) =>
+                    event.target.checked
+                      ? Array.from(new Set([...current, product.id]))
+                      : current.filter((id) => id !== product.id)
+                  )
+                }}
+                className="h-4 w-4 rounded border-zinc-600 bg-zinc-900 text-pink-500 focus:ring-pink-500"
+              />
+            </label>
 
             <div className="relative h-72 bg-zinc-950">
 
@@ -248,7 +361,7 @@ border-purple-500/30
 
               <div className="flex gap-3 mt-6">
 
-                <a
+                <Link
   href={`/admin/products/${product.id}/edit`}
   className="
 flex-1
@@ -270,7 +383,7 @@ hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
 "
 >
   Edit
-</a>
+</Link>
 
                <button
   disabled={
@@ -308,11 +421,13 @@ hover:shadow-[0_0_25px_rgba(236,72,153,.35)]
         "Product deleted successfully"
       )
 
-      setTimeout(() => {
-
-        window.location.reload()
-
-      }, 800)
+      setItems((current) =>
+        current.filter((item) => item.id !== product.id)
+      )
+      setSelectedIds((current) =>
+        current.filter((id) => id !== product.id)
+      )
+      setDeletingId("")
 
     } catch {
 

@@ -62,8 +62,6 @@ export async function POST(req: Request) {
             },
           })
 
-          if (product?.isPreOrder) continue
-
           await tx.product.update({
             where: {
               id: item.productId,

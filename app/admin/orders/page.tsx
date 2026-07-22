@@ -9,6 +9,8 @@ import { prisma } from "@/lib/prisma"
 import OrderStatusSelect from "@/components/order-status-select"
 
 import { requireAdmin } from "@/lib/admin"
+import { calculateShippingCharge } from "@/lib/shipping"
+import { getOrderItemPricing } from "@/lib/preorder"
 
 export default async function OrdersPage({
   searchParams,
@@ -16,6 +18,8 @@ export default async function OrdersPage({
   searchParams: Promise<{
   search?: string
   status?: string
+  productId?: string
+  preorderFilter?: string
 }>
 }) {
 
@@ -24,8 +28,10 @@ export default async function OrdersPage({
   const {
   search = "",
   status = "All",
+  productId = "",
+  preorderFilter = "All",
 } = await searchParams
-  
+
   const orders =
   await prisma.order.findMany({
     select: {
@@ -91,6 +97,56 @@ where: {
     },
 
   })
+
+  const allProductIds = Array.from(
+    new Set(
+      orders.flatMap((order: any) =>
+        (order.products as any[]).map(
+          (product) => product.id
+        )
+      )
+    )
+  )
+
+  const allProducts = allProductIds.length
+    ? await prisma.product.findMany({
+        where: {
+          id: {
+            in: allProductIds,
+          },
+        },
+      })
+    : []
+
+  const productMap = new Map(
+    allProducts.map((product) => [
+      product.id,
+      product,
+    ])
+  )
+
+  const orderHasPreOrderItem = (order: any) =>
+    (order.products as any[]).some((item) => {
+      const fallbackProduct = productMap.get(item.id)
+      return Boolean(item.isPreOrder) || Boolean(fallbackProduct?.isPreOrder)
+    })
+
+  const productFilteredOrders = productId
+    ? orders.filter((order: any) =>
+        (order.products as any[]).some(
+          (item) => item.id === productId
+        )
+      )
+    : orders
+
+  const filteredOrders =
+    preorderFilter === "Pre Order"
+      ? productFilteredOrders.filter(orderHasPreOrderItem)
+      : preorderFilter === "Regular"
+      ? productFilteredOrders.filter(
+          (order: any) => !orderHasPreOrderItem(order)
+        )
+      : productFilteredOrders
 const [
   pendingCount,
   packedCount,
@@ -364,7 +420,7 @@ shadow-2xl
 
   <Link
   key={item.name}
-  href={`?search=${search}&status=${item.name}`}
+  href={`?search=${search}&status=${item.name}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}`}
   className={`
     px-5
     py-2
@@ -387,6 +443,43 @@ shadow-2xl
 ))}
 
 </div>
+
+<div className="mb-6">
+  <div className="mb-3 text-sm uppercase tracking-[0.25em] text-zinc-500">
+    Order Type
+  </div>
+  <div className="flex flex-wrap gap-3">
+    {[
+      { name: "All", count: productFilteredOrders.length },
+      {
+        name: "Pre Order",
+        count: productFilteredOrders.filter(orderHasPreOrderItem).length,
+      },
+      {
+        name: "Regular",
+        count: productFilteredOrders.filter(
+          (order: any) => !orderHasPreOrderItem(order)
+        ).length,
+      },
+    ].map((item) => (
+      <Link
+        key={item.name}
+        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}&preorderFilter=${item.name}`}
+        className={`
+          px-5 py-2 rounded-full border transition-all flex items-center gap-2
+          ${
+            preorderFilter === item.name
+              ? "bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 border-transparent text-white"
+              : "border-zinc-700 text-zinc-400 hover:border-cyan-500 hover:text-cyan-400"
+          }
+        `}
+      >
+        {item.name} ({item.count})
+      </Link>
+    ))}
+  </div>
+</div>
+
   <form
   className="mb-10"
   method="GET"
@@ -432,6 +525,18 @@ shadow-2xl
 />
 
 <input
+  type="hidden"
+  name="productId"
+  value={productId}
+/>
+
+<input
+  type="hidden"
+  name="preorderFilter"
+  value={preorderFilter}
+/>
+
+<input
   type="text"
   name="search"
   defaultValue={search}
@@ -456,7 +561,7 @@ focus:ring-pink-500/30
 
 </form>
 
-{orders.length === 0 && (
+{filteredOrders.length === 0 && (
 
   <div
     className="
@@ -480,7 +585,7 @@ border-zinc-800
 
 <div className="space-y-8">
 
-  {orders.map((order) => (
+          {filteredOrders.map((order) => (
 
     <div
       key={order.id}
@@ -696,6 +801,91 @@ text-purple-400
                     }
                   />
 
+                  <div className="mt-6 rounded-3xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+                    <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">
+                      Price Breakdown
+                    </p>
+                    {(() => {
+                      const orderItems = order.products as any[]
+                      const itemBreakdowns = orderItems.map((item) => {
+                        const fallbackProduct = productMap.get(item.id)
+                        return {
+                          item,
+                          pricing: getOrderItemPricing(
+                            item,
+                            fallbackProduct
+                          ),
+                        }
+                      })
+                      const itemCount = orderItems.reduce(
+                        (sum, item) =>
+                          sum + Number(item.quantity || 0),
+                        0
+                      )
+                      const hasOnlyPreOrderItems =
+                        orderItems.length > 0 &&
+                        orderItems.every((item) => {
+                          const fallbackProduct =
+                            productMap.get(item.id)
+                          return (
+                            Boolean(item.isPreOrder) ||
+                            Boolean(fallbackProduct?.isPreOrder)
+                          )
+                        })
+                      const payableSubtotal = itemBreakdowns.reduce(
+                        (sum, { pricing }) =>
+                          sum + pricing.linePayablePrice,
+                        0
+                      )
+                      const remainingLaterTotal =
+                        itemBreakdowns.reduce(
+                          (sum, { pricing }) =>
+                            sum + pricing.lineRemainingPrice,
+                          0
+                        )
+                      const shippingCharge =
+                        calculateShippingCharge({
+                          subtotal: payableSubtotal,
+                          itemCount,
+                          deliveryMethod: order.deliveryMethod,
+                          hasOnlyPreOrderItems,
+                        })
+                      const couponDiscount = Math.max(
+                        0,
+                        payableSubtotal +
+                          shippingCharge -
+                          Number(order.totalAmount || 0)
+                      )
+
+                      return (
+                        <div className="mt-4 space-y-2 text-sm text-zinc-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-zinc-400">Items Payable Now</span>
+                            <span>₹{payableSubtotal}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-zinc-400">Shipping</span>
+                            <span>₹{shippingCharge}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-zinc-400">Coupon Discount</span>
+                            <span>-₹{couponDiscount}</span>
+                          </div>
+                          <div className="flex items-center justify-between border-t border-cyan-500/20 pt-2 font-semibold text-cyan-100">
+                            <span>Total Paid</span>
+                            <span>₹{order.totalAmount}</span>
+                          </div>
+                          {remainingLaterTotal > 0 && (
+                            <div className="flex items-center justify-between text-cyan-200/80">
+                              <span>Pre-order Balance Later</span>
+                              <span>₹{remainingLaterTotal}</span>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
+                  </div>
+
                 </div>
 
               </div>
@@ -719,19 +909,31 @@ shadow-sm pt-8">
                       (
                         product,
                         index
-                      ) => {
+                    ) => {
+                        const fallbackProduct =
+                          productMap.get(product.id)
+                        const pricing = getOrderItemPricing(
+                          product,
+                          fallbackProduct
+                        )
                         const displayImage =
                           product.image ||
                           product.images?.[0] ||
+                          (fallbackProduct as any)?.images?.[0] ||
+                          (fallbackProduct as any)?.image ||
                           ""
                         const displayPrice =
                           product.price ??
                           product.unitPrice ??
                           product.originalPrice ??
+                          fallbackProduct?.price ??
                           0
-                        const isPreOrder = Boolean(
-                          product.isPreOrder
-                        )
+                        const isPreOrder =
+                          Boolean(product.isPreOrder) ||
+                          Boolean(fallbackProduct?.isPreOrder)
+                        const expectedArrival =
+                          product.expectedArrival ||
+                          fallbackProduct?.expectedArrival
 
                         return (
 
@@ -798,13 +1000,24 @@ shadow-sm pt-8">
                               </span>
                             )}
 
-                            <p className="text-pink-400">
+                            {isPreOrder && expectedArrival && (
+                              <p className="mt-2 text-xs text-cyan-300">
+                                Arrives {expectedArrival}
+                              </p>
+                            )}
 
-                              Unit Price:
-                              {" "}
-                              ₹{displayPrice}
-
-                            </p>
+                            {isPreOrder ? (
+                              <div className="mt-2 inline-flex flex-col rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-100">
+                                <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre Order</span>
+                                <span className="text-xs mt-1">Original amount: ₹{pricing.lineOriginalPrice}</span>
+                                <span className="text-xs">Deposit paid: ₹{pricing.linePayablePrice}</span>
+                                <span className="text-xs">Remaining to pay: ₹{pricing.lineRemainingPrice}</span>
+                              </div>
+                            ) : (
+                              <p className="text-pink-400">
+                                Unit Price: ₹{displayPrice}
+                              </p>
+                            )}
 
                           </div>
 
@@ -814,8 +1027,9 @@ shadow-sm pt-8">
 
                               ₹
                               {
-                                displayPrice *
-                                product.quantity
+                                isPreOrder
+                                  ? pricing.linePayablePrice
+                                  : displayPrice * product.quantity
                               }
 
                             </p>

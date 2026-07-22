@@ -13,6 +13,10 @@ import { Button } from "@/components/ui/button"
 import { useCartStore } from "@/store/cart-store"
 
 import { toast } from "sonner"
+import {
+  getProductPayablePrice,
+  getProductRemainingPrice,
+} from "@/lib/preorder"
 
 export default function ProductDetails({
   product,
@@ -43,23 +47,17 @@ const selectedPrice =
     ? Number(selectedTier.price)
     : Number(product.price)
 
-const depositPercent = Math.max(
-  0,
-  Math.min(
-    100,
-    Number(product.depositAmount ?? 50)
-  )
-)
-
 const preorderBasePrice = Number(product.price)
 
 const depositPrice = product.isPreOrder
-  ? Math.floor((preorderBasePrice * depositPercent) / 100)
+  ? getProductPayablePrice(product)
   : selectedPrice
 
 const remainingPrice = product.isPreOrder
-  ? Math.max(0, preorderBasePrice - depositPrice)
+  ? getProductRemainingPrice(product)
   : 0
+
+const availableStock = Number(product.stock || 0)
 
   const router = useRouter()
 
@@ -324,14 +322,14 @@ hover:bg-[#15151D] transition"
 
                   </div>
 
-                  <button
+  <button
   disabled={
-    quantity >= product.stock
+    quantity >= availableStock
   }
   onClick={() => {
 
     if (
-      quantity < product.stock
+      quantity < availableStock
     ) {
 
       setQuantity(
@@ -369,7 +367,7 @@ hover:bg-[#15151D]
 
                 {/* Add To Cart */}
                 <Button
-  disabled={product.stock === 0}
+  disabled={availableStock === 0}
   className="
 px-8
 py-6
@@ -388,11 +386,11 @@ disabled:opacity-40
 "
                   onClick={() => {
 if (
-  quantity > product.stock
+  quantity > availableStock
 ) {
 
   toast.error(
-    `Only ${product.stock} available`
+    `Only ${availableStock} available`
   )
 
   return
@@ -426,7 +424,7 @@ if (
     product.isPreOrder,
 
   depositAmount:
-    depositPercent,
+    Number(product.depositAmount ?? 50),
 
   expectedArrival:
     product.expectedArrival || undefined,
@@ -447,7 +445,7 @@ if (
 
                 {/* Buy Now */}
                 <Button
-  disabled={product.stock === 0}
+  disabled={availableStock === 0}
                   variant="outline"
                   className="
 px-8
@@ -471,12 +469,11 @@ disabled:opacity-40
 "
                   onClick={() => {
 if (
-  !product.isPreOrder &&
-  quantity > product.stock
+  quantity > availableStock
 ) {
 
   toast.error(
-    `Only ${product.stock} available`
+    `Only ${availableStock} available`
   )
 
   return
@@ -510,7 +507,7 @@ if (
     product.isPreOrder,
 
   depositAmount:
-    depositPercent,
+    Number(product.depositAmount ?? 50),
 
   expectedArrival:
     product.expectedArrival || undefined,
@@ -583,16 +580,15 @@ if (
 
           {/* Add To Cart */}
           <button
-            disabled={!product.isPreOrder && product.stock === 0}
+            disabled={availableStock === 0}
 
             onClick={() => {
 if (
-  !product.isPreOrder &&
-  quantity > product.stock
+  quantity > availableStock
 ) {
 
   toast.error(
-    `Only ${product.stock} available`
+    `Only ${availableStock} available`
   )
 
   return
@@ -626,7 +622,7 @@ if (
     product.isPreOrder,
 
   depositAmount:
-    depositPercent,
+    Number(product.depositAmount ?? 50),
 
   expectedArrival:
     product.expectedArrival || undefined,
@@ -659,7 +655,7 @@ disabled:cursor-not-allowed
 "
           >
 
-            {product.stock === 0
+            {availableStock === 0
               ? "Out of Stock"
               : "Add To Cart"}
 

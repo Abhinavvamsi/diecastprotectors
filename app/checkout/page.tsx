@@ -34,6 +34,7 @@ import {
   getAmountNeededForFreeShipping,
   getFreeShippingProgress,
 } from "@/lib/shipping"
+import { getProductPayablePrice } from "@/lib/preorder"
 
 type SavedCheckoutAddress = {
   name: string
@@ -82,12 +83,7 @@ const removeFromCart =
       for (const product of products) {
         syncProduct({
           id: product.id,
-          price: product.isPreOrder
-            ? Math.floor(
-                (Number(product.price || 0) *
-                  Number(product.depositAmount ?? 50)) / 100
-              )
-            : Number(product.price || 0),
+          price: getProductPayablePrice(product),
           originalPrice: Number(product.price || 0),
           depositAmount: product.depositAmount,
           expectedArrival: product.expectedArrival || undefined,
@@ -133,6 +129,10 @@ const subtotalForShipping = total
 const hasPreOrderItems = cart.some(
   (item) => item.isPreOrder
 )
+
+const hasOnlyPreOrderItems =
+  cart.length > 0 &&
+  cart.every((item) => item.isPreOrder)
 
 const amountNeededForFreeShipping =
   getAmountNeededForFreeShipping(subtotalForShipping)
@@ -442,9 +442,10 @@ useEffect(() => {
       subtotal: total,
       itemCount,
       deliveryMethod,
+      hasOnlyPreOrderItems,
     })
   )
-}, [total, itemCount, deliveryMethod])
+}, [total, itemCount, deliveryMethod, hasOnlyPreOrderItems])
 
 useEffect(() => {
 
@@ -794,10 +795,12 @@ async function applyCoupon() {
 
   return (
 
-    <main className="min-h-screen bg-[#09090B] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-white">
 
       {/* Navbar */}
       <Navbar />
+      <div className="pointer-events-none absolute -top-20 right-0 h-[460px] w-[460px] rounded-full bg-fuchsia-500/10 blur-[150px] animate-pulse" />
+      <div className="pointer-events-none absolute left-0 top-1/3 h-[380px] w-[380px] rounded-full bg-cyan-500/10 blur-[150px] animate-pulse" />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
 
@@ -851,7 +854,7 @@ hover:border-transparent
           {/* LEFT SIDE */}
 <div>
 
-         <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800 shadow-sm">
+         <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800 shadow-[0_0_40px_rgba(236,72,153,.08)] transition-all duration-300 hover:border-pink-500/40 hover:shadow-[0_0_55px_rgba(236,72,153,.18)]">
 
   <h2 className="text-2xl font-bold text-white mb-8">
     Shipping Details
@@ -1194,7 +1197,7 @@ focus:ring-pink-500/30
           {/* RIGHT SIDE */}
 <div>
 
-  <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800 shadow-sm sticky top-24">
+  <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800 shadow-[0_0_40px_rgba(168,85,247,.08)] transition-all duration-300 hover:border-pink-500/40 hover:shadow-[0_0_55px_rgba(168,85,247,.18)] sticky top-24">
 
     <h2 className="text-2xl font-bold text-white mb-8">
       Order Summary
@@ -1370,38 +1373,39 @@ text-transparent
 
               ₹{
                 item.isPreOrder
-                  ? Number(item.price ?? 0)
+                  ? Number(item.price ?? 0) * Number(item.quantity ?? 0)
                   : (
-                      item.quantityPricing
-                        ?.filter(
-                          (tier) =>
-                            item.quantity >=
-                            Number(
-                              tier.quantity
-                            )
-                        )
-                        .sort(
-                          (a, b) =>
-                            Number(
-                              b.quantity
-                            ) -
-                            Number(
-                              a.quantity
-                            )
-                        )[0]?.price ||
-                      item.originalPrice
+                      (Number(
+                        item.quantityPricing
+                          ?.filter(
+                            (tier) =>
+                              item.quantity >=
+                              Number(
+                                tier.quantity
+                              )
+                          )
+                          .sort(
+                            (a, b) =>
+                              Number(
+                                b.quantity
+                              ) -
+                              Number(
+                                a.quantity
+                              )
+                          )[0]?.price
+                      ) || Number(item.originalPrice ?? 0)) *
+                      Number(item.quantity ?? 0)
                     )
               }
 
             </p>
 
             {item.isPreOrder && (() => {
-              const originalLinePrice =
-                Number(item.originalPrice ?? 0)
-              const depositLinePrice = Math.floor(
-                (originalLinePrice *
-                  Number(item.depositAmount ?? 50)) / 100
-              )
+              const quantity = Number(item.quantity ?? 0)
+              const originalUnitPrice = Number(item.originalPrice ?? 0)
+              const depositUnitPrice = Number(item.price ?? 0)
+              const originalLinePrice = originalUnitPrice * quantity
+              const depositLinePrice = depositUnitPrice * quantity
               const remainingLinePrice = Math.max(
                 0,
                 originalLinePrice - depositLinePrice
@@ -1410,15 +1414,15 @@ text-transparent
               return (
                 <div className="mt-2 text-xs text-cyan-300 space-y-1">
                   <p>Original price: ₹{originalLinePrice}</p>
-                  <p className="font-semibold text-cyan-300">Deposit now: ₹{Number(item.price ?? depositLinePrice)}</p>
-                  <p>Remaining later: ₹{Math.max(0, originalLinePrice - Number(item.price ?? depositLinePrice))}</p>
+                  <p className="font-semibold text-cyan-300">Deposit now: ₹{depositLinePrice}</p>
+                  <p>Remaining later: ₹{remainingLinePrice}</p>
                 </div>
               )
             })()}
 
             {!item.isPreOrder && (
               <p className="mt-2 text-xs text-zinc-400">
-                Original price: ₹{item.originalPrice}
+                Original price: ₹{Number(item.originalPrice ?? 0) * Number(item.quantity ?? 0)}
               </p>
             )}
 
@@ -1619,7 +1623,9 @@ hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
 
   {hasPreOrderItems && (
     <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-sm text-cyan-100">
-      Your cart has pre order items. You only pay the deposit now and the remaining amount will be collected after arrival.
+      {hasOnlyPreOrderItems
+        ? "Your cart has only pre order items. You only pay the deposit now and the remaining amount plus shipping charges will be collected after arrival."
+        : "Your cart has pre order items. You only pay the deposit now and the remaining amount will be collected after arrival."}
     </div>
   )}
 
@@ -1667,6 +1673,12 @@ text-green-400
         FREE
       </p>
 
+    ) : hasOnlyPreOrderItems ? (
+
+      <p className="text-cyan-300 font-medium">
+        Collected later
+      </p>
+
     ) : subtotalForShipping >= 10000 ? (
 
       <div className="flex items-center gap-3">
@@ -1700,7 +1712,7 @@ text-green-400
 
   </div>
 
-  {deliveryMethod !== "pickup" && (
+  {deliveryMethod !== "pickup" && !hasOnlyPreOrderItems && (
     <div className={`rounded-2xl border p-4 ${
       subtotalForShipping >= 10000
         ? "border-green-500/30 bg-green-500/10"
@@ -2126,18 +2138,21 @@ description: "Premium Japanese Diecast Collectibles",
                                 name: item.name,
                                 quantity: item.quantity,
                                 price:
-                                  Number(
-                                    (item.quantityPricing as any[] | undefined)?.filter(
-                                      (tier: any) =>
-                                        item.quantity >=
-                                        Number(tier.quantity)
-                                    ).sort(
-                                      (a: any, b: any) =>
-                                        Number(b.quantity) -
-                                        Number(a.quantity)
-                                    )[0]?.price
-                                  ) || item.originalPrice,
+                                  item.isPreOrder
+                                    ? Number(item.price ?? 0)
+                                    : Number(
+                                        (item.quantityPricing as any[] | undefined)?.filter(
+                                          (tier: any) =>
+                                            item.quantity >=
+                                            Number(tier.quantity)
+                                        ).sort(
+                                          (a: any, b: any) =>
+                                            Number(b.quantity) -
+                                            Number(a.quantity)
+                                        )[0]?.price
+                                      ) || item.originalPrice,
                                 originalPrice: item.originalPrice,
+                                depositAmount: item.depositAmount,
                                 image: item.image,
                                 images: item.image ? [item.image] : [],
                                 quantityPricing: item.quantityPricing || [],
