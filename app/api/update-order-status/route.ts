@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { resend } from "@/lib/resend"
+import { sendWhatsAppOrderMessage } from "@/lib/notifications"
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/admin"
 
@@ -85,8 +86,9 @@ export async function POST(
 
       })
 
-    /* Email Notification */
-    await resend.emails.send({
+    /* Email + WhatsApp Notification */
+    await Promise.allSettled([
+      resend.emails.send({
 
       from:
         "orders@shinseidiecast.com",
@@ -179,7 +181,15 @@ export async function POST(
 
       `,
 
-    })
+      }),
+      sendWhatsAppOrderMessage({
+        orderId: order.orderId,
+        customer: order.customer,
+        phone: order.phone,
+        status: body.status,
+        totalAmount: order.totalAmount,
+      }),
+    ])
 
     return NextResponse.json(
       updatedOrder

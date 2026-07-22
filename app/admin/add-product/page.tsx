@@ -39,6 +39,15 @@ export default function AddProductPage() {
   const [stock, setStock] =
     useState("")
 
+  const [isPreOrder, setIsPreOrder] =
+    useState(false)
+
+  const [depositAmount, setDepositAmount] =
+    useState("50")
+
+  const [expectedArrival, setExpectedArrival] =
+    useState("")
+
   
   const [brandId, setBrandId] =
   useState("")
@@ -176,6 +185,14 @@ export default function AddProductPage() {
 
   badge,
 
+  isPreOrder,
+
+  depositAmount: Number(
+    depositAmount || 50
+  ),
+
+  expectedArrival,
+
   brandId,
 
   stock: Number(stock),
@@ -204,6 +221,9 @@ export default function AddProductPage() {
       setCategory("")
       setBadge("")
       setStock("")
+      setIsPreOrder(false)
+      setDepositAmount("50")
+      setExpectedArrival("")
       setQuantityPricing([
   {
     quantity: "",
@@ -550,6 +570,52 @@ focus:ring-pink-500/30
             </select>
 
           </div>
+
+          {/* Pre Order */}
+          <div className="space-y-3">
+
+            <label className="text-sm text-zinc-400 uppercase tracking-wider">
+              Pre Order
+            </label>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <label className="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-4">
+                <input
+                  type="checkbox"
+                  checked={isPreOrder}
+                  onChange={(e) =>
+                    setIsPreOrder(e.target.checked)
+                  }
+                />
+                <span className="text-white font-medium">
+                  Mark as preorder
+                </span>
+              </label>
+
+              <input
+                type="number"
+                min={1}
+                max={100}
+                placeholder="Deposit %"
+                value={depositAmount}
+                onChange={(e) =>
+                  setDepositAmount(e.target.value)
+                }
+                className="w-full h-14 rounded-2xl bg-zinc-950 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-pink-500 focus:ring-pink-500/30 px-5 outline-none focus:ring-2 transition-all"
+              />
+
+              <input
+                type="text"
+                placeholder="Expected arrival"
+                value={expectedArrival}
+                onChange={(e) =>
+                  setExpectedArrival(e.target.value)
+                }
+                className="w-full h-14 rounded-2xl bg-zinc-950 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-pink-500 focus:ring-pink-500/30 px-5 outline-none focus:ring-2 transition-all"
+              />
+            </div>
+          </div>
+
 <div className="space-y-3">
 
   <label

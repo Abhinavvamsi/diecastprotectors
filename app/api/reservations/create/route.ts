@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
         const products =
           await tx.$queryRaw<any[]>`
-            SELECT id, stock, "reservedStock", name
+            SELECT id, stock, "reservedStock", name, "isPreOrder"
             FROM "Product"
             WHERE id IN (${Prisma.join(productIds)})
             FOR UPDATE
@@ -74,6 +74,7 @@ export async function POST(req: Request) {
 
         for (const item of sortedItems) {
           const product = productMap.get(item.productId)
+          if (product.isPreOrder) continue
           const available =
             product.stock - product.reservedStock
 
@@ -86,6 +87,8 @@ export async function POST(req: Request) {
 
         // Reserve stock
         for (const item of sortedItems) {
+          const product = productMap.get(item.productId)
+          if (product.isPreOrder) continue
 
           await tx.product.update({
 

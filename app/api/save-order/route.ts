@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { resend } from "@/lib/resend"
+import { sendWhatsAppOrderMessage } from "@/lib/notifications"
 import { NextResponse } from "next/server"
 import { createHmac, timingSafeEqual } from "crypto"
 import { auth } from "@clerk/nextjs/server"
@@ -181,6 +182,11 @@ if (!signatureIsValid) {
           images:
             item.images ||
             (item.image ? [item.image] : []),
+          isPreOrder: Boolean(item.isPreOrder),
+          depositAmount:
+            Number(item.depositAmount ?? 50),
+          expectedArrival:
+            item.expectedArrival || null,
         }))
 
       const reservedItems = new Map(
@@ -240,7 +246,10 @@ if (!signatureIsValid) {
 
         }
 
-        if (product.stock < item.quantity) {
+        if (
+          !product.isPreOrder &&
+          product.stock < item.quantity
+        ) {
 
           throw new Error(
             `${product.name} is out of stock`
@@ -250,9 +259,21 @@ if (!signatureIsValid) {
 
         productLookup.set(item.id, product)
 
-        subtotal +=
-          getTierPrice(product, item.quantity) *
+        const currentPrice = getTierPrice(
+          product,
           item.quantity
+        )
+
+        const payablePrice = product.isPreOrder
+          ? Math.floor(
+              (currentPrice *
+                Number(product.depositAmount ?? 50)) /
+                100
+            )
+          : currentPrice
+
+        subtotal +=
+          payablePrice * item.quantity
 
       }
 
@@ -507,6 +528,13 @@ if (!signatureIsValid) {
 
         `,
       }),
+      sendWhatsAppOrderMessage({
+        orderId,
+        customer: body.customer,
+        phone: body.phone,
+        status: "Confirmed",
+        totalAmount: body.totalAmount,
+      }),
       sendWithTimeout({
         from:
           "orders@shinseidiecast.com",
@@ -619,6 +647,8 @@ if (!signatureIsValid) {
           console.error(
             index === 0
               ? "Customer email failed:"
+              : index === 1
+              ? "WhatsApp notification failed:"
               : "Admin email failed:",
             result.reason
           )

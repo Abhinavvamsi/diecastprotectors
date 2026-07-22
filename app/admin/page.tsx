@@ -192,6 +192,39 @@ text-white
 
         </Link>
 
+        <Link
+          href="/admin/pre-orders"
+          className="
+          group
+     bg-zinc-900
+border
+border-zinc-800
+shadow-sm
+          rounded-3xl
+          p-8
+          hover:border-cyan-500/60
+hover:shadow-[0_0_30px_rgba(34,211,238,.20)]
+          hover:-translate-y-2
+          transition-all
+          duration-300
+          "
+        >
+          <div className="space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-white flex items-center justify-center text-3xl font-bold">
+              ⏳
+            </div>
+
+            <div>
+              <h2 className="text-3xl font-bold">
+                Pre Orders
+              </h2>
+              <p className="text-zinc-400 mt-4 leading-relaxed">
+                Manage preorder items, deposits and arrival details.
+              </p>
+            </div>
+          </div>
+        </Link>
+
         {/* Orders */}
 
         <Link

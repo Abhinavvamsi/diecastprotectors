@@ -41,7 +41,25 @@ export default function ProductDetails({
 const selectedPrice =
   selectedTier
     ? Number(selectedTier.price)
-    : product.price
+    : Number(product.price)
+
+const depositPercent = Math.max(
+  0,
+  Math.min(
+    100,
+    Number(product.depositAmount ?? 50)
+  )
+)
+
+const preorderBasePrice = Number(product.price)
+
+const depositPrice = product.isPreOrder
+  ? Math.floor((preorderBasePrice * depositPercent) / 100)
+  : selectedPrice
+
+const remainingPrice = product.isPreOrder
+  ? Math.max(0, preorderBasePrice - depositPrice)
+  : 0
 
   const router = useRouter()
 
@@ -155,9 +173,21 @@ text-transparent uppercase tracking-widest text-sm font-semibold">
 
               <p className="text-5xl font-bold mt-6 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
-  ₹{selectedPrice}
+  ₹{product.isPreOrder ? depositPrice : selectedPrice}
 
 </p>
+
+{product.isPreOrder && (
+  <div className="mt-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-cyan-100">
+    <p className="font-semibold">Pre Order</p>
+    <p className="mt-1 text-sm">Original price: ₹{selectedPrice}</p>
+    <p className="mt-1 text-sm">Deposit now: ₹{depositPrice}</p>
+    <p className="text-sm">Remaining later: ₹{remainingPrice}</p>
+    {product.expectedArrival && (
+      <p className="text-sm">Expected arrival: {product.expectedArrival}</p>
+    )}
+  </div>
+)}
 
               <p className="text-gray-400 mt-8 leading-relaxed text-lg">
 
@@ -168,13 +198,15 @@ text-transparent uppercase tracking-widest text-sm font-semibold">
               {/* Stock */}
               <p
                 className={`mt-6 font-semibold ${
-                  product.stock > 0
+                  product.isPreOrder || product.stock > 0
                     ? "text-green-500"
                     : "text-red-500"
                 }`}
               >
 
-                {product.stock > 0
+                {product.isPreOrder
+                  ? "Pre Order"
+                  : product.stock > 0
                   ? `In Stock: ${product.stock}`
                   : "Out of Stock"}
 
@@ -376,10 +408,10 @@ if (
   id: product.id,
   name: product.name,
 
-  price: selectedPrice,
+  price: product.isPreOrder ? depositPrice : selectedPrice,
 
   originalPrice:
-    product.price,
+    selectedPrice,
 
   quantityPricing:
     product.quantityPricing,
@@ -389,6 +421,15 @@ if (
 
   stock:
     product.stock,
+
+  isPreOrder:
+    product.isPreOrder,
+
+  depositAmount:
+    depositPercent,
+
+  expectedArrival:
+    product.expectedArrival || undefined,
 })
 
                     }
@@ -406,7 +447,7 @@ if (
 
                 {/* Buy Now */}
                 <Button
-                  disabled={product.stock === 0}
+  disabled={product.stock === 0}
                   variant="outline"
                   className="
 px-8
@@ -430,6 +471,7 @@ disabled:opacity-40
 "
                   onClick={() => {
 if (
+  !product.isPreOrder &&
   quantity > product.stock
 ) {
 
@@ -450,10 +492,10 @@ if (
   id: product.id,
   name: product.name,
 
-  price: selectedPrice,
+  price: product.isPreOrder ? depositPrice : selectedPrice,
 
   originalPrice:
-    product.price,
+    selectedPrice,
 
   quantityPricing:
     product.quantityPricing,
@@ -463,6 +505,15 @@ if (
 
   stock:
     product.stock,
+
+  isPreOrder:
+    product.isPreOrder,
+
+  depositAmount:
+    depositPercent,
+
+  expectedArrival:
+    product.expectedArrival || undefined,
 })
                     }
 
@@ -515,17 +566,28 @@ if (
 </p>
 
 <h3 className="text-2xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
-  ₹{product.price}
+  ₹{product.isPreOrder ? depositPrice : selectedPrice}
 </h3>
+
+{product.isPreOrder && (
+  <p className="mt-1 text-xs text-cyan-300">Deposit now: ₹{depositPrice}</p>
+)}
+
+          {product.isPreOrder && (
+            <p className="mt-2 text-xs text-zinc-400">
+              Original price: ₹{selectedPrice} • Remaining later: ₹{remainingPrice}
+            </p>
+          )}
 
           </div>
 
           {/* Add To Cart */}
           <button
-            disabled={product.stock === 0}
+            disabled={!product.isPreOrder && product.stock === 0}
 
             onClick={() => {
 if (
+  !product.isPreOrder &&
   quantity > product.stock
 ) {
 
@@ -546,10 +608,10 @@ if (
   id: product.id,
   name: product.name,
 
-  price: selectedPrice,
+  price: product.isPreOrder ? depositPrice : selectedPrice,
 
   originalPrice:
-    product.price,
+    selectedPrice,
 
   quantityPricing:
     product.quantityPricing,
@@ -559,6 +621,15 @@ if (
 
   stock:
     product.stock,
+
+  isPreOrder:
+    product.isPreOrder,
+
+  depositAmount:
+    depositPercent,
+
+  expectedArrival:
+    product.expectedArrival || undefined,
 })
               }
 

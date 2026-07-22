@@ -26,6 +26,10 @@ export default function CartPage() {
     useCartStore(
       (state) => state.syncStock
     )
+  const syncProduct =
+    useCartStore(
+      (state) => state.syncProduct
+    )
 
   const increaseQuantity =
     useCartStore(
@@ -77,16 +81,23 @@ export default function CartPage() {
 
   }
 
-  return price
+    return price
 
 }
+
+  function getPayablePrice(item: any) {
+    if (!item.isPreOrder) {
+      return getCurrentPrice(item)
+    }
+    return Number(item.price ?? 0)
+  }
 
   useEffect(() => {
 
     async function refreshStock() {
 
       const response = await fetch(
-        "/api/get-products",
+        "/api/get-products?includePreOrder=true",
         {
           cache: "no-store",
         }
@@ -103,6 +114,7 @@ export default function CartPage() {
 cart.forEach((item) => {
 
   if (
+    !item.isPreOrder &&
     !validIds.includes(
       item.id
     )
@@ -117,11 +129,23 @@ cart.forEach((item) => {
 })
       products.forEach(
         (product: any) => {
-
-          syncStock(
-            product.id,
-            product.stock
-          )
+          syncProduct({
+            id: product.id,
+            price: product.isPreOrder
+              ? Math.floor(
+                  (Number(product.price || 0) *
+                    Number(product.depositAmount ?? 50)) / 100
+                )
+              : Number(product.price || 0),
+            originalPrice: Number(product.price || 0),
+            depositAmount: product.depositAmount,
+            expectedArrival: product.expectedArrival || undefined,
+            isPreOrder: product.isPreOrder,
+            stock: product.stock,
+            name: product.name,
+            image: product.images?.[0] || product.image || "",
+            quantityPricing: product.quantityPricing,
+          })
 
         }
       )
@@ -135,13 +159,14 @@ cart.forEach((item) => {
   const totalPrice = cart.reduce(
   (total, item) =>
     total +
-    getCurrentPrice(item) *
+    getPayablePrice(item) *
       item.quantity,
   0
 )
 const hasUnavailableProducts =
   cart.some(
-    (item) => item.stock === 0
+    (item) =>
+      !item.isPreOrder && item.stock === 0
   )
 
   return (
@@ -344,8 +369,17 @@ to-purple-500
 bg-clip-text
 text-transparent
 font-bold mt-2">
-                      ₹{getCurrentPrice(item)}
+                      ₹{Number(item.originalPrice ?? item.price ?? 0)}
                     </p>
+
+                    {item.isPreOrder && (
+                      <div className="mt-3 inline-flex flex-col gap-1 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-cyan-100">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-300">Pre Order</span>
+                        <span className="text-sm">Original price: ₹{Number(item.originalPrice ?? 0)}</span>
+                        <span className="text-sm font-semibold text-cyan-300">Deposit now: ₹{Number(item.price ?? 0)}</span>
+                        <span className="text-sm">Remaining later: ₹{Math.max(0, Number(item.originalPrice ?? 0) - Number(item.price ?? 0))}</span>
+                      </div>
+                    )}
 
                     {item.stock > 0 ? (
 
@@ -385,7 +419,7 @@ font-bold mt-2">
                       Total:
                       {" "}
                       ₹
-{getCurrentPrice(item) *
+{getPayablePrice(item) *
   item.quantity}
 
                     </p>
@@ -395,18 +429,19 @@ font-bold mt-2">
                 </div>
 
                 {/* RIGHT */}
-                <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-shrink-0">
 
                   {/* Quantity Controls */}
                   <div
-  className="
+            className="
   flex
   items-center
   border
   border-[#2B2B3A]
-bg-[#09090B]
+  bg-[#09090B]
   rounded-2xl
   overflow-hidden
+  shadow-inner
   "
 >
 
@@ -414,12 +449,12 @@ bg-[#09090B]
     onClick={() =>
       decreaseQuantity(item.id)
     }
-    className="
-    w-14
-    h-14
-    flex
-    items-center
-    justify-center
+  className="
+  w-12
+  h-12
+  flex
+  items-center
+  justify-center
     hover:bg-[#1E1E2A]
 hover:text-pink-400
     transition
@@ -429,8 +464,8 @@ hover:text-pink-400
   </button>
 
   <div
-    className="
-    w-16
+  className="
+    w-14
     text-center
     font-bold
 text-lg
@@ -447,12 +482,12 @@ text-white
     onClick={() =>
       increaseQuantity(item.id)
     }
-    className="
-    w-14
-    h-14
-    flex
-    items-center
-    justify-center
+  className="
+  w-12
+  h-12
+  flex
+  items-center
+  justify-center
     hover:bg-[#1E1E2A]
 hover:text-pink-400
     transition
@@ -470,8 +505,8 @@ hover:text-pink-400
     removeFromCart(item.id)
   }
   className="
-  w-14
-  h-14
+  w-12
+  h-12
   rounded-2xl
   bg-red-500/10
   text-red-500
@@ -499,7 +534,7 @@ hover:text-pink-400
               <div>
 
                 <p className="text-pink-400">
-                  Total
+                  Total Payable
                 </p>
 
                 <h2 className="text-4xl font-bold mt-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">

@@ -48,6 +48,10 @@ export default function CheckoutPage() {
   const cart = useCartStore(
     (state) => state.cart
   )
+  const syncProduct =
+    useCartStore(
+      (state) => state.syncProduct
+    )
   const increaseQuantity =
   useCartStore(
     (state) => state.increaseQuantity
@@ -65,26 +69,49 @@ const removeFromCart =
 
   const { user } = useUser()
 
+  useEffect(() => {
+    async function refreshCartPrices() {
+      const response = await fetch(
+        "/api/get-products?includePreOrder=true",
+        { cache: "no-store" }
+      )
+
+      if (!response.ok) return
+
+      const products = await response.json()
+      for (const product of products) {
+        syncProduct({
+          id: product.id,
+          price: product.isPreOrder
+            ? Math.floor(
+                (Number(product.price || 0) *
+                  Number(product.depositAmount ?? 50)) / 100
+              )
+            : Number(product.price || 0),
+          originalPrice: Number(product.price || 0),
+          depositAmount: product.depositAmount,
+          expectedArrival: product.expectedArrival || undefined,
+          isPreOrder: product.isPreOrder,
+          stock: product.stock,
+          name: product.name,
+          image: product.images?.[0] || product.image || "",
+          quantityPricing: product.quantityPricing,
+        })
+      }
+    }
+
+    refreshCartPrices()
+  }, [syncProduct])
+
   const total = cart.reduce(
   (sum, item) => {
 
-    const activeTier =
-      item.quantityPricing
-        ?.filter(
-          (tier) =>
-            item.quantity >=
-            Number(tier.quantity)
-        )
-        .sort(
-          (a, b) =>
-            Number(b.quantity) -
-            Number(a.quantity)
-        )[0]
-
     const currentPrice =
-      activeTier
-        ? Number(activeTier.price)
-        : item.originalPrice
+      Number(item.originalPrice ?? 0)
+
+    if (item.isPreOrder) {
+      return sum + Number(item.price ?? 0) * item.quantity
+    }
 
     return (
       sum +
@@ -102,6 +129,10 @@ const itemCount = cart.reduce(
 )
 
 const subtotalForShipping = total
+
+const hasPreOrderItems = cart.some(
+  (item) => item.isPreOrder
+)
 
 const amountNeededForFreeShipping =
   getAmountNeededForFreeShipping(subtotalForShipping)
@@ -420,7 +451,7 @@ useEffect(() => {
   async function loadSuggestions() {
 
     const response =
-      await fetch("/api/get-products")
+      await fetch("/api/get-products?includePreOrder=true")
 
     const data =
       await response.json()
@@ -1338,29 +1369,58 @@ text-transparent
             >
 
               ₹{
-                (
-                  item.quantityPricing
-                    ?.filter(
-                      (tier) =>
-                        item.quantity >=
-                        Number(
-                          tier.quantity
+                item.isPreOrder
+                  ? Number(item.price ?? 0)
+                  : (
+                      item.quantityPricing
+                        ?.filter(
+                          (tier) =>
+                            item.quantity >=
+                            Number(
+                              tier.quantity
+                            )
                         )
+                        .sort(
+                          (a, b) =>
+                            Number(
+                              b.quantity
+                            ) -
+                            Number(
+                              a.quantity
+                            )
+                        )[0]?.price ||
+                      item.originalPrice
                     )
-                    .sort(
-                      (a, b) =>
-                        Number(
-                          b.quantity
-                        ) -
-                        Number(
-                          a.quantity
-                        )
-                    )[0]?.price ||
-                  item.originalPrice
-                )
               }
 
             </p>
+
+            {item.isPreOrder && (() => {
+              const originalLinePrice =
+                Number(item.originalPrice ?? 0)
+              const depositLinePrice = Math.floor(
+                (originalLinePrice *
+                  Number(item.depositAmount ?? 50)) / 100
+              )
+              const remainingLinePrice = Math.max(
+                0,
+                originalLinePrice - depositLinePrice
+              )
+
+              return (
+                <div className="mt-2 text-xs text-cyan-300 space-y-1">
+                  <p>Original price: ₹{originalLinePrice}</p>
+                  <p className="font-semibold text-cyan-300">Deposit now: ₹{Number(item.price ?? depositLinePrice)}</p>
+                  <p>Remaining later: ₹{Math.max(0, originalLinePrice - Number(item.price ?? depositLinePrice))}</p>
+                </div>
+              )
+            })()}
+
+            {!item.isPreOrder && (
+              <p className="mt-2 text-xs text-zinc-400">
+                Original price: ₹{item.originalPrice}
+              </p>
+            )}
 
           </div>
 
@@ -1556,6 +1616,12 @@ hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
     </p>
 
   </div>
+
+  {hasPreOrderItems && (
+    <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-sm text-cyan-100">
+      Your cart has pre order items. You only pay the deposit now and the remaining amount will be collected after arrival.
+    </div>
+  )}
 
   {/* Discount */}
   {discount > 0 && (

@@ -22,6 +22,9 @@ type Product = {
   }[]
 
   badge?: string | null
+  isPreOrder?: boolean
+  depositAmount?: number
+  expectedArrival?: string | null
 }
 export default function EditProductForm({
   product,
@@ -57,6 +60,12 @@ export default function EditProductForm({
     useState(product.stock)
   const [reservedStock, setReservedStock] =
     useState(product.reservedStock || 0)
+  const [isPreOrder, setIsPreOrder] =
+    useState(product.isPreOrder || false)
+  const [depositAmount, setDepositAmount] =
+    useState(product.depositAmount ?? 50)
+  const [expectedArrival, setExpectedArrival] =
+    useState(product.expectedArrival || "")
   
   const [
   quantityPricing,
@@ -146,6 +155,9 @@ async function handleImageUpload(
   category,
   stock,
   reservedStock,
+  isPreOrder,
+  depositAmount: Number(depositAmount || 50),
+  expectedArrival,
 
   quantityPricing,
 
@@ -267,6 +279,51 @@ transition-all
           px-4
           outline-none
           "
+        />
+      </div>
+    </div>
+
+    <div className="grid gap-4 md:grid-cols-3">
+      <label className="flex items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-4">
+        <input
+          type="checkbox"
+          checked={isPreOrder}
+          onChange={(e) =>
+            setIsPreOrder(e.target.checked)
+          }
+        />
+        <span className="text-white font-medium">
+          Mark as preorder
+        </span>
+      </label>
+
+      <div>
+        <label className="mb-2 block text-sm text-zinc-400">
+          Deposit %
+        </label>
+        <input
+          type="number"
+          min={1}
+          max={100}
+          value={depositAmount}
+          onChange={(e) =>
+            setDepositAmount(Number(e.target.value))
+          }
+          className="w-full h-14 rounded-xl bg-zinc-950 border-zinc-700 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30 transition-all px-4 outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm text-zinc-400">
+          Expected Arrival
+        </label>
+        <input
+          type="text"
+          value={expectedArrival}
+          onChange={(e) =>
+            setExpectedArrival(e.target.value)
+          }
+          className="w-full h-14 rounded-xl bg-zinc-950 border-zinc-700 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30 transition-all px-4 outline-none"
         />
       </div>
     </div>

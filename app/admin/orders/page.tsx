@@ -729,6 +729,9 @@ shadow-sm pt-8">
                           product.unitPrice ??
                           product.originalPrice ??
                           0
+                        const isPreOrder = Boolean(
+                          product.isPreOrder
+                        )
 
                         return (
 
@@ -788,6 +791,12 @@ shadow-sm pt-8">
                               {product.quantity}
 
                             </p>
+
+                            {isPreOrder && (
+                              <span className="mt-2 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-100">
+                                Pre Order
+                              </span>
+                            )}
 
                             <p className="text-pink-400">
 

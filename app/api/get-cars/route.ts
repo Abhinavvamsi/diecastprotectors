@@ -8,6 +8,7 @@ export async function GET() {
 
       where: {
         category: "Cars",
+        isPreOrder: false,
       },
 
       include: {

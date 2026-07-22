@@ -248,6 +248,12 @@ text-transparent text-sm uppercase tracking-widest">
                         product.originalPrice ??
                         fallbackProduct?.price ??
                         0
+                      const isPreOrder =
+                        Boolean(product.isPreOrder) ||
+                        Boolean(fallbackProduct?.isPreOrder)
+                      const expectedArrival =
+                        product.expectedArrival ||
+                        fallbackProduct?.expectedArrival
 
                       return (
 
@@ -309,6 +315,15 @@ text-transparent text-sm uppercase tracking-widest">
                         <p className="text-pink-400 text-sm mt-1">
                               Quantity: {product.quantity}
 </p>
+
+                        {isPreOrder && (
+                          <div className="mt-2 inline-flex flex-col rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-100">
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre Order</span>
+                            {expectedArrival && (
+                              <span className="text-xs">Arrives {expectedArrival}</span>
+                            )}
+                          </div>
+                        )}
 
                         <p className="text-pink-400 text-sm mt-1">
   Unit Price: ₹{displayPrice}

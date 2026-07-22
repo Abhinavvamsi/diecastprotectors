@@ -53,6 +53,17 @@ export async function POST(req: Request) {
         expiredCount += 1
 
         for (const item of reservation.items) {
+          const product = await tx.product.findUnique({
+            where: {
+              id: item.productId,
+            },
+            select: {
+              isPreOrder: true,
+            },
+          })
+
+          if (product?.isPreOrder) continue
+
           await tx.product.update({
             where: {
               id: item.productId,

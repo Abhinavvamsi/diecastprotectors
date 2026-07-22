@@ -18,9 +18,14 @@ type ProductCardProps = {
   id: string
   name: string
   price: number
+  originalPrice?: number
   image: string
   description: string
   stock: number
+  isPreOrder?: boolean
+  depositAmount?: number
+  expectedArrival?: string | null
+  remainingPrice?: number
 
   quantityPricing?: any[]
 
@@ -35,9 +40,14 @@ export default function ProductCard({
   id,
   name,
   price,
+  originalPrice,
   image,
   description,
   stock,
+  isPreOrder,
+  depositAmount,
+  expectedArrival,
+  remainingPrice,
 
   quantityPricing,
 
@@ -157,8 +167,14 @@ shadow-lg
 
           )}
 
+          {isPreOrder && (
+            <div className="absolute top-4 left-4 z-20 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+              PRE ORDER
+            </div>
+          )}
+
           {/* Low Stock Badge */}
-          {stock > 0 && stock <= 3 && (
+          {!isPreOrder && stock > 0 && stock <= 3 && (
 
             <div
               className="
@@ -186,7 +202,7 @@ shadow-lg
           )}
 
           {/* Out of Stock */}
-          {stock === 0 && (
+          {!isPreOrder && stock === 0 && (
 
             <div
               className="
@@ -251,6 +267,14 @@ shadow-lg
 
             </p>
 
+            {isPreOrder && (
+              <div className="mt-2 space-y-1 text-sm text-cyan-300">
+                <p>Original price: ₹{originalPrice ?? price}</p>
+                <p>Deposit now: ₹{price}</p>
+                <p>Remaining later: ₹{remainingPrice ?? 0}{expectedArrival ? ` • Arrives ${expectedArrival}` : ""}</p>
+              </div>
+            )}
+
           </div>
 
           {/* Stock */}
@@ -262,7 +286,9 @@ shadow-lg
             }`}
           >
 
-            {stock > 0
+              {isPreOrder
+              ? "Pre Order"
+              : stock > 0
               ? `In Stock: ${stock}`
               : "Out of Stock"}
 
@@ -273,7 +299,7 @@ shadow-lg
 
             {/* Add to Cart */}
             <Button
-              disabled={stock === 0}
+              disabled={!isPreOrder && stock === 0}
 
               className="
 flex-1
@@ -323,6 +349,13 @@ disabled:opacity-40
   image,
 
   stock,
+
+  isPreOrder,
+
+  depositAmount,
+
+  expectedArrival:
+    expectedArrival || undefined,
 })
 
                 toast.success(
@@ -332,7 +365,7 @@ disabled:opacity-40
               }}
             >
 
-              {stock === 0
+              {(!isPreOrder && stock === 0)
                 ? "Out of Stock"
                 : "Add to Cart"}
 
@@ -340,7 +373,7 @@ disabled:opacity-40
 
             {/* Buy Now */}
             <Button
-              disabled={stock === 0}
+              disabled={!isPreOrder && stock === 0}
 
               variant="outline"
 
@@ -406,7 +439,7 @@ disabled:opacity-40
               }}
             >
 
-              {stock === 0
+              {(!isPreOrder && stock === 0)
                 ? "Unavailable"
                 : "Buy Now"}
 

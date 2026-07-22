@@ -16,6 +16,9 @@ type CartItem = {
   }[]
 
   image: string
+  isPreOrder?: boolean
+  depositAmount?: number
+  expectedArrival?: string
 
   quantity: number
 
@@ -24,6 +27,10 @@ type CartItem = {
 
 type CartStore = {
   cart: CartItem[]
+
+  syncProduct: (
+    product: Partial<CartItem> & { id: string }
+  ) => void
 
   syncStock: (
     id: string,
@@ -55,6 +62,19 @@ export const useCartStore =
       (set) => ({
 
         cart: [],
+
+        syncProduct: (product) =>
+          set((state) => ({
+            cart: state.cart.map((item) =>
+              item.id === product.id
+                ? {
+                    ...item,
+                    ...product,
+                    quantity: item.quantity,
+                  }
+                : item
+            ),
+          })),
 
         syncStock: (
           id,
@@ -182,6 +202,18 @@ export const useCartStore =
 
       {
         name: "hw-shield-cart",
+        version: 1,
+        migrate: (persistedState: any) => ({
+          cart: (persistedState?.cart || []).map(
+            (item: any) => ({
+              ...item,
+              isPreOrder:
+                Boolean(item.isPreOrder) ||
+                Boolean(item.depositAmount) ||
+                Boolean(item.expectedArrival),
+            })
+          ),
+        }),
       }
     )
   )

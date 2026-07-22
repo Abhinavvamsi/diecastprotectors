@@ -136,6 +136,15 @@ export async function POST(
             badge:
               body.badge,
 
+            isPreOrder:
+              body.isPreOrder ?? false,
+
+            depositAmount:
+              Number(body.depositAmount ?? 50),
+
+            expectedArrival:
+              body.expectedArrival || null,
+
             stock:
               body.stock,
 

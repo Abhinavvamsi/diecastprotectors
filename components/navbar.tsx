@@ -240,6 +240,16 @@ alt="Shinsei Diecast"
           </Link>
 
           <Link
+            href="/pre-orders"
+            prefetch={true}
+            className="animate-pulse text-pink-400 drop-shadow-[0_0_12px_rgba(236,72,153,0.75)] transition hover:text-white"
+          >
+
+            Pre Orders
+
+          </Link>
+
+          <Link
             href="/track-order"
             prefetch={true}
             className="hover:text-pink-400 transition"
@@ -451,6 +461,15 @@ shadow-[0_0_12px_rgba(236,72,153,0.5)]
           >
 
             Diecast Cars
+
+          </Link>
+
+          <Link
+            href="/pre-orders"
+            className="block text-lg font-medium text-pink-400 animate-pulse"
+          >
+
+            Pre Orders
 
           </Link>
 

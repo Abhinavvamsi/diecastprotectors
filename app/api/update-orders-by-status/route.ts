@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { resend } from "@/lib/resend"
+import { sendWhatsAppOrderMessage } from "@/lib/notifications"
 import { NextResponse } from "next/server"
 
 export async function POST(
@@ -34,9 +35,25 @@ export async function POST(
 
     })
 
-    for (const order of orders) {
+    await Promise.allSettled(
+      orders.map(async (order) => {
+        if (newStatus === "Cancelled") {
+          for (const item of order.products as any[]) {
+            await prisma.product.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                stock: {
+                  increment: item.quantity,
+                },
+              },
+            })
+          }
+        }
 
-      await resend.emails.send({
+        await Promise.allSettled([
+          resend.emails.send({
 
         from:
           "orders@shinseidiecast.com",
@@ -113,9 +130,17 @@ export async function POST(
 
         `,
 
+          }),
+          sendWhatsAppOrderMessage({
+            orderId: order.orderId,
+            customer: order.customer,
+            phone: order.phone,
+            status: newStatus,
+            totalAmount: order.totalAmount,
+          }),
+        ])
       })
-
-    }
+    )
 
     return NextResponse.json({
 

@@ -48,6 +48,7 @@ type Product = {
 
   badge?: string
   brandId?: string
+  isPreOrder?: boolean
 
 brand?: {
   id: string
@@ -128,7 +129,8 @@ const [storeSettings, setStoreSettings] = useState<any>(null)
 
 const data = await productsResponse.json()
 const inStockProducts = data.filter(
-  (product: Product) => product.stock > 0
+  (product: Product) =>
+    product.stock > 0 && !product.isPreOrder
 )
 setAllProducts(inStockProducts)
 setProducts(inStockProducts.slice(0, 9))
