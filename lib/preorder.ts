@@ -61,38 +61,56 @@ export function getOrderItemPricing(
     Boolean(item?.isPreOrder) ||
     Boolean(fallbackProduct?.isPreOrder)
 
-  const originalUnitPrice = Math.max(
+  const snapshotOriginalUnitPrice = Math.max(
     0,
     Number(
       item?.originalPrice ??
-        fallbackProduct?.price ??
         item?.price ??
         item?.unitPrice ??
         0
     )
   )
+  const fallbackOriginalUnitPrice = Math.max(
+    0,
+    Number(fallbackProduct?.price || 0)
+  )
+  const originalUnitPrice = isPreOrder
+    ? Math.max(
+        snapshotOriginalUnitPrice,
+        fallbackOriginalUnitPrice
+      )
+    : snapshotOriginalUnitPrice || fallbackOriginalUnitPrice
 
   const snapshotPayableUnitPrice = Math.max(
     0,
     Number(item?.price ?? item?.unitPrice ?? 0)
   )
-  const depositAmount = Number(
+  const depositAmountSource =
+    fallbackProduct?.depositAmount ??
     item?.depositAmount ??
-      fallbackProduct?.depositAmount ??
-      50
+    50
+  const depositAmount = Number(
+    depositAmountSource
   )
+  const hasResolvedDepositSetting =
+    depositAmountSource !== undefined &&
+    depositAmountSource !== null
+  const payableFromDepositSetting =
+    getProductPayablePrice({
+      ...(fallbackProduct || {}),
+      ...item,
+      price: originalUnitPrice,
+      depositAmount,
+      isPreOrder: true,
+    })
 
   const payableUnitPrice = isPreOrder
-    ? snapshotPayableUnitPrice > 0 &&
+    ? hasResolvedDepositSetting
+      ? payableFromDepositSetting
+      : snapshotPayableUnitPrice > 0 &&
       snapshotPayableUnitPrice < originalUnitPrice
       ? snapshotPayableUnitPrice
-      : getProductPayablePrice({
-          ...(fallbackProduct || {}),
-          ...item,
-          price: originalUnitPrice,
-          depositAmount,
-          isPreOrder: true,
-        })
+      : payableFromDepositSetting
     : snapshotPayableUnitPrice > 0
     ? snapshotPayableUnitPrice
     : originalUnitPrice

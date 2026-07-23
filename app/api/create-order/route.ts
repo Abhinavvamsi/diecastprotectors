@@ -74,6 +74,14 @@ export async function POST(req: Request) {
       reservation.items.every((item) =>
         Boolean(productMap.get(item.productId)?.isPreOrder)
       )
+    const normalizedCouponCode =
+      typeof couponCode === "string" && couponCode.trim()
+        ? couponCode.trim().toUpperCase()
+        : null
+
+    let readyStockSubtotal = 0
+    let readyStockItemCount = 0
+
     const subtotal = reservation.items.reduce((sum, item) => {
       const product = productMap.get(item.productId)
       if (!product) return sum
@@ -85,14 +93,19 @@ export async function POST(req: Request) {
           })
         : currentPrice
 
+      if (!product.isPreOrder) {
+        readyStockSubtotal += payablePrice * item.quantity
+        readyStockItemCount += item.quantity
+      }
+
       return sum + payablePrice * item.quantity
     }, 0)
 
     let discount = 0
 
-    if (couponCode) {
+    if (normalizedCouponCode) {
       const coupon = await prisma.coupon.findUnique({
-        where: { code: couponCode.toUpperCase() },
+        where: { code: normalizedCouponCode },
       })
 
       if (
@@ -112,8 +125,8 @@ export async function POST(req: Request) {
     }
 
     const shippingCharge = calculateShippingCharge({
-      subtotal,
-      itemCount: reservation.items.reduce((sum, item) => sum + item.quantity, 0),
+      subtotal: readyStockSubtotal,
+      itemCount: readyStockItemCount,
       deliveryMethod,
       hasOnlyPreOrderItems,
     })

@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import ProductCard from "@/components/product-card"
-import { getProductPayablePrice, getProductRemainingPrice } from "@/lib/preorder"
 import PreOrdersHeroAnimation from "@/components/preorders-hero-animation"
+import PreOrdersBrowser from "@/components/preorders-browser"
 
 export const dynamic = "force-dynamic"
 
@@ -50,49 +49,7 @@ export default async function PreOrdersPage() {
             </p>
           </div>
         ) : (
-          <div className="rounded-[2rem] border border-cyan-500/15 bg-white/5 p-4 shadow-[0_0_60px_rgba(34,211,238,.08)] backdrop-blur-xl md:p-6">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">
-                  Featured pre-orders
-                </p>
-                <h2 className="mt-2 text-2xl font-bold text-white">
-                  Deposit-first releases with clear balance tracking
-                </h2>
-              </div>
-              <p className="hidden text-sm text-zinc-400 md:block">
-                Every card shows deposit, original price, and remaining amount.
-              </p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-              {products.map((product: any) => (
-                <div
-                  key={product.id}
-                  className="rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))] p-[1px] shadow-[0_0_24px_rgba(236,72,153,.08)] transition-transform duration-300 hover:-translate-y-1"
-                >
-                  <ProductCard
-                    id={product.id}
-                    name={product.name}
-                    price={getProductPayablePrice(product)}
-                    image={product.images?.[0] || ""}
-                    description={product.description}
-                    stock={Math.max(
-                      0,
-                      Number(product.stock || 0) -
-                        Number(product.reservedStock || 0)
-                    )}
-                    badge={product.badge}
-                    quantityPricing={product.quantityPricing}
-                    isPreOrder={product.isPreOrder}
-                    depositAmount={product.depositAmount}
-                    expectedArrival={product.expectedArrival}
-                    originalPrice={product.price}
-                    remainingPrice={getProductRemainingPrice(product)}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          <PreOrdersBrowser products={products as any[]} />
         )}
       </section>
 

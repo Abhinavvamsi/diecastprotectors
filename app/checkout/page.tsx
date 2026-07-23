@@ -99,23 +99,46 @@ const removeFromCart =
     refreshCartPrices()
   }, [syncProduct])
 
-  const total = cart.reduce(
+function getCurrentUnitPrice(item: any) {
+  if (item.isPreOrder) {
+    return Number(item.price ?? 0)
+  }
+
+  let price = Number(item.originalPrice ?? 0)
+
+  if (Array.isArray(item.quantityPricing)) {
+    item.quantityPricing.forEach((tier: any) => {
+      if (!tier?.quantity || !tier?.price) return
+
+      if (item.quantity >= Number(tier.quantity)) {
+        price = Number(tier.price)
+      }
+    })
+  }
+
+  return price
+}
+
+const total = cart.reduce(
   (sum, item) => {
-
-    const currentPrice =
-      Number(item.originalPrice ?? 0)
-
-    if (item.isPreOrder) {
-      return sum + Number(item.price ?? 0) * item.quantity
-    }
-
-    return (
-      sum +
-      currentPrice *
-      item.quantity
-    )
+    return sum + getCurrentUnitPrice(item) * item.quantity
 
   },
+  0
+)
+
+const readyStockItems = cart.filter(
+  (item) => !item.isPreOrder
+)
+
+const readyStockSubtotal = readyStockItems.reduce(
+  (sum, item) =>
+    sum + getCurrentUnitPrice(item) * item.quantity,
+  0
+)
+
+const readyStockItemCount = readyStockItems.reduce(
+  (sum, item) => sum + item.quantity,
   0
 )
 
@@ -124,11 +147,14 @@ const itemCount = cart.reduce(
   0
 )
 
-const subtotalForShipping = total
+const subtotalForShipping = readyStockSubtotal
 
 const hasPreOrderItems = cart.some(
   (item) => item.isPreOrder
 )
+
+const hasReadyStockItems =
+  readyStockItems.length > 0
 
 const hasOnlyPreOrderItems =
   cart.length > 0 &&
@@ -439,13 +465,18 @@ setPickupLocation(
 useEffect(() => {
   setShipping(
     calculateShippingCharge({
-      subtotal: total,
-      itemCount,
+      subtotal: readyStockSubtotal,
+      itemCount: readyStockItemCount,
       deliveryMethod,
       hasOnlyPreOrderItems,
     })
   )
-}, [total, itemCount, deliveryMethod, hasOnlyPreOrderItems])
+}, [
+  readyStockSubtotal,
+  readyStockItemCount,
+  deliveryMethod,
+  hasOnlyPreOrderItems,
+])
 
 useEffect(() => {
 
@@ -1624,8 +1655,8 @@ hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
   {hasPreOrderItems && (
     <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-sm text-cyan-100">
       {hasOnlyPreOrderItems
-        ? "Your cart contains pre-order items only. You will pay the deposit today, and the balance plus any applicable shipping charges will be collected when the products arrive."
-        : "Your cart contains pre-order items. You will pay the deposit today, and the balance will be collected when the products arrive."}
+        ? "Your cart contains pre-order items only. You will pay the deposit today, and shipping for these pre-order items will be collected separately when they arrive."
+        : "Your cart contains both ready-stock and pre-order items. Shipping shown below applies only to ready-stock items. Shipping charges for pre-order items will be collected separately when they arrive."}
     </div>
   )}
 
@@ -1712,7 +1743,7 @@ text-green-400
 
   </div>
 
-  {deliveryMethod !== "pickup" && !hasOnlyPreOrderItems && (
+  {deliveryMethod !== "pickup" && hasReadyStockItems && (
     <div className={`rounded-2xl border p-4 ${
       subtotalForShipping >= 10000
         ? "border-green-500/30 bg-green-500/10"
@@ -1744,8 +1775,8 @@ text-green-400
         subtotalForShipping >= 10000 ? "text-green-300" : "text-zinc-400"
       }`}>
         {subtotalForShipping >= 10000
-          ? "You have unlocked free shipping."
-          : "Add more items to unlock free shipping at ₹10,000."}
+          ? "You have unlocked free shipping for ready-stock items."
+          : "Add more ready-stock items to unlock free shipping at ₹10,000."}
       </div>
     </div>
   )}
@@ -2080,7 +2111,8 @@ setValidating(false)
 
                           body: JSON.stringify({
                             reservationId: activeReservationId,
-                            couponCode,
+                            couponCode:
+                              appliedCouponCode.trim() || null,
                             deliveryMethod,
                           }),
 
@@ -2158,7 +2190,8 @@ description: "Premium Japanese Diecast Collectibles",
                                 quantityPricing: item.quantityPricing || [],
                               })),
                               reservationId: activeReservationId,
-                              couponCode,
+                              couponCode:
+                                appliedCouponCode.trim() || null,
                               deliveryMethod,
                               pickupLocation:
                                 deliveryMethod === "pickup"
@@ -2231,7 +2264,7 @@ color:"#EC4899"
 },
 
                     }
-if (couponCode) {
+if (appliedCouponCode.trim()) {
 
   const couponResponse =
     await fetch(
@@ -2247,7 +2280,7 @@ if (couponCode) {
 
         body: JSON.stringify({
 
-          code: couponCode,
+          code: appliedCouponCode,
 
           userId: user!.id,
 

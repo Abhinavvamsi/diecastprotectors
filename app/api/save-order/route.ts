@@ -187,40 +187,11 @@ if (!signatureIsValid) {
         }
       }
 
-      const orderedItems = reservation.items.map((item) => {
-        const bodyItem = bodyProductMap.get(item.productId) || {}
-
-        return {
-          id: item.productId,
-          quantity: item.quantity,
-          price:
-            bodyItem.price ??
-            bodyItem.unitPrice ??
-            bodyItem.originalPrice ??
-            0,
-          unitPrice:
-            bodyItem.unitPrice ??
-            bodyItem.price ??
-            bodyItem.originalPrice ??
-            0,
-          originalPrice:
-            bodyItem.originalPrice ??
-            bodyItem.unitPrice ??
-            bodyItem.price ??
-            0,
-          image: bodyItem.image || bodyItem.images?.[0] || null,
-          images:
-            bodyItem.images ||
-            (bodyItem.image ? [bodyItem.image] : []),
-          isPreOrder: Boolean(bodyItem.isPreOrder),
-          depositAmount: Number(bodyItem.depositAmount ?? 50),
-          expectedArrival: bodyItem.expectedArrival || null,
-          name: bodyItem.name || item.productId,
-        }
-      })
+      let orderedItems: any[] = []
 
       if (reservation.status !== "COMPLETED") {
-        await tx.reservation.updateMany({
+        const completedReservation =
+          await tx.reservation.updateMany({
           where: {
             id: reservation.id,
             status: {
@@ -231,9 +202,59 @@ if (!signatureIsValid) {
             status: "COMPLETED",
           },
         })
+
+        if (!completedReservation.count) {
+          const savedOrder =
+            await tx.order.findFirst({
+              where: {
+                reservationId,
+              },
+              select: {
+                orderId: true,
+              },
+            })
+
+          if (savedOrder) {
+            orderId = savedOrder.orderId
+
+            return {
+              orderId: savedOrder.orderId,
+              alreadySaved: true,
+            }
+          }
+
+          throw new Error(
+            "Your order is already being processed"
+          )
+        }
+      } else {
+        const savedOrder =
+          await tx.order.findFirst({
+            where: {
+              reservationId,
+            },
+            select: {
+              orderId: true,
+            },
+          })
+
+        if (savedOrder) {
+          orderId = savedOrder.orderId
+
+          return {
+            orderId: savedOrder.orderId,
+            alreadySaved: true,
+          }
+        }
+
+        throw new Error(
+          "Your order is already being processed"
+        )
       }
 
       let subtotal = 0
+      let readyStockSubtotal = 0
+      let readyStockItemCount = 0
       const productLookup = new Map<string, any>()
 
       // Check stock first
@@ -274,9 +295,55 @@ if (!signatureIsValid) {
         subtotal +=
           payablePrice * item.quantity
 
-      }
+        if (!product.isPreOrder) {
+          readyStockSubtotal +=
+            payablePrice * item.quantity
+          readyStockItemCount += item.quantity
+        }
 
-      // Reduce stock
+	      }
+	
+	      orderedItems = reservation.items.map((item) => {
+	        const bodyItem = bodyProductMap.get(item.productId) || {}
+	        const product = productLookup.get(item.productId)
+	        const originalUnitPrice = getTierPrice(
+	          product,
+	          item.quantity
+	        )
+	        const payableUnitPrice = product.isPreOrder
+	          ? getProductPayablePrice({
+	              ...product,
+	              price: originalUnitPrice,
+	            })
+	          : originalUnitPrice
+	        const productImages = Array.isArray(product.images)
+	          ? product.images
+	          : []
+	        const images =
+	          bodyItem.images ||
+	          productImages ||
+	          (bodyItem.image ? [bodyItem.image] : [])
+
+	        return {
+	          id: item.productId,
+	          quantity: item.quantity,
+	          price: payableUnitPrice,
+	          unitPrice: payableUnitPrice,
+	          originalPrice: originalUnitPrice,
+	          image:
+	            bodyItem.image ||
+	            productImages[0] ||
+	            null,
+	          images,
+	          isPreOrder: Boolean(product.isPreOrder),
+	          depositAmount: Number(product.depositAmount ?? 50),
+	          expectedArrival:
+	            product.expectedArrival || null,
+	          name: product.name || bodyItem.name || item.productId,
+	        }
+	      })
+
+	      // Reduce stock
 
       for (const item of reservation.items) {
         const product = productLookup.get(item.productId)
@@ -376,11 +443,8 @@ if (!signatureIsValid) {
       )
 
       const shippingCharge = calculateShippingCharge({
-        subtotal,
-        itemCount: reservation.items.reduce(
-          (sum: number, item: any) => sum + item.quantity,
-          0
-        ),
+        subtotal: readyStockSubtotal,
+        itemCount: readyStockItemCount,
         deliveryMethod: body.deliveryMethod,
         hasOnlyPreOrderItems,
       })
@@ -469,6 +533,15 @@ if (!signatureIsValid) {
 
     }
   )
+
+    if ("alreadySaved" in order && order.alreadySaved) {
+      return NextResponse.json({
+        success: true,
+        alreadySaved: true,
+        orderId,
+      })
+    }
+
     if (body.couponCode) {
       const coupon =
         await prisma.coupon.findUnique({

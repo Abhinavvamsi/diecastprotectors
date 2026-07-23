@@ -72,14 +72,32 @@ export default async function OrdersPage() {
       })
     : []
 
-  const productMap = new Map(
-    products.map((product) => [
-      product.id,
-      product,
-    ])
-  )
+	  const productMap = new Map(
+	    products.map((product) => [
+	      product.id,
+	      product,
+	    ])
+	  )
 
-  return (
+  const uniqueOrders = Array.from(
+    orders
+      .reduce((orderMap, order) => {
+        const duplicateKey =
+          order.reservationId ||
+          order.paymentId ||
+          order.orderId ||
+          order.id
+
+        if (!orderMap.has(duplicateKey)) {
+          orderMap.set(duplicateKey, order)
+        }
+
+        return orderMap
+      }, new Map<string, typeof orders[number]>())
+      .values()
+  )
+	
+	  return (
 
     <main className="min-h-screen bg-[#09090B] text-white">
 
@@ -132,7 +150,7 @@ hover:text-white
         </div>
 
         {/* Empty State */}
-        {orders.length === 0 && (
+	        {uniqueOrders.length === 0 && (
 
           <div className="bg-zinc-900 border border-zinc-800 shadow-xl rounded-3xl p-12 text-center">
 
@@ -155,7 +173,7 @@ hover:text-white
         {/* Orders */}
         <div className="space-y-8">
 
-          {orders.map((order) => (
+	          {uniqueOrders.map((order) => (
 
             <div
               key={order.id}

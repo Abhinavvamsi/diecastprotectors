@@ -100,11 +100,29 @@ where: {
       createdAt: "desc",
     },
 
-  })
+	  })
 
+  const uniqueOrders = Array.from(
+    orders
+      .reduce((orderMap, order: any) => {
+        const duplicateKey =
+          order.reservationId ||
+          order.paymentId ||
+          order.orderId ||
+          order.id
+
+        if (!orderMap.has(duplicateKey)) {
+          orderMap.set(duplicateKey, order)
+        }
+
+        return orderMap
+      }, new Map<string, any>())
+      .values()
+  )
+	
   const allProductIds = Array.from(
     new Set(
-      orders.flatMap((order: any) =>
+      uniqueOrders.flatMap((order: any) =>
         (order.products as any[]).map(
           (product) => product.id
         )
@@ -135,13 +153,13 @@ where: {
       return Boolean(item.isPreOrder) || Boolean(fallbackProduct?.isPreOrder)
     })
 
-  const productFilteredOrders = productId
-    ? orders.filter((order: any) =>
-        (order.products as any[]).some(
-          (item) => item.id === productId
-        )
-      )
-    : orders
+	  const productFilteredOrders = productId
+	    ? uniqueOrders.filter((order: any) =>
+	        (order.products as any[]).some(
+	          (item) => item.id === productId
+	        )
+	      )
+	    : uniqueOrders
 
   const filteredOrders =
     normalizedPreorderFilter === "Pre-Orders"
@@ -821,11 +839,17 @@ text-purple-400
                           ),
                         }
                       })
-                      const itemCount = orderItems.reduce(
-                        (sum, item) =>
-                          sum + Number(item.quantity || 0),
-                        0
-                      )
+                      const readyStockItemCount =
+                        itemBreakdowns.reduce(
+                          (sum, { item, pricing }) =>
+                            pricing.isPreOrder
+                              ? sum
+                              : sum +
+                                Number(
+                                  item.quantity || 0
+                                ),
+                          0
+                        )
                       const hasOnlyPreOrderItems =
                         orderItems.length > 0 &&
                         orderItems.every((item) => {
@@ -836,11 +860,25 @@ text-purple-400
                             Boolean(fallbackProduct?.isPreOrder)
                           )
                         })
+                      const itemsSubtotal = itemBreakdowns.reduce(
+                        (sum, { pricing }) =>
+                          sum + pricing.lineOriginalPrice,
+                        0
+                      )
                       const payableSubtotal = itemBreakdowns.reduce(
                         (sum, { pricing }) =>
                           sum + pricing.linePayablePrice,
                         0
                       )
+                      const readyStockPayableSubtotal =
+                        itemBreakdowns.reduce(
+                          (sum, { pricing }) =>
+                            pricing.isPreOrder
+                              ? sum
+                              : sum +
+                                pricing.linePayablePrice,
+                          0
+                        )
                       const remainingLaterTotal =
                         itemBreakdowns.reduce(
                           (sum, { pricing }) =>
@@ -849,32 +887,39 @@ text-purple-400
                         )
                       const shippingCharge =
                         calculateShippingCharge({
-                          subtotal: payableSubtotal,
-                          itemCount,
+                          subtotal:
+                            readyStockPayableSubtotal,
+                          itemCount:
+                            readyStockItemCount,
                           deliveryMethod: order.deliveryMethod,
                           hasOnlyPreOrderItems,
                         })
                       const couponDiscount = Math.max(
                         0,
-                        payableSubtotal +
+                        itemsSubtotal +
                           shippingCharge -
+                          remainingLaterTotal -
                           Number(order.totalAmount || 0)
                       )
+                      const showCouponDiscount =
+                        couponDiscount > 0
 
                       return (
                         <div className="mt-4 space-y-2 text-sm text-zinc-200">
                           <div className="flex items-center justify-between">
                             <span className="text-zinc-400">Items Payable Now</span>
-                            <span>₹{payableSubtotal}</span>
+                            <span>₹{itemsSubtotal}</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-zinc-400">Shipping</span>
                             <span>₹{shippingCharge}</span>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-zinc-400">Coupon Discount</span>
-                            <span>-₹{couponDiscount}</span>
-                          </div>
+                          {showCouponDiscount && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-zinc-400">Coupon Discount</span>
+                              <span>-₹{couponDiscount}</span>
+                            </div>
+                          )}
                           <div className="flex items-center justify-between border-t border-cyan-500/20 pt-2 font-semibold text-cyan-100">
                             <span>Total Paid</span>
                             <span>₹{order.totalAmount}</span>
