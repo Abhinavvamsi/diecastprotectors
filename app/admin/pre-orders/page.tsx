@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import AdminNav from "@/components/admin-nav"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/admin"
@@ -61,22 +62,39 @@ export default async function AdminPreOrdersPage() {
                       Number(product.reservedStock || 0)
                   )
 
-                  return (
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold">{product.name}</h2>
-                    <p className="mt-2 text-zinc-400">
-                      Deposit: {Number(product.depositAmount || 50)}% • Remaining: ₹
+	                  return (
+	                <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+	                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+	                    <div className="relative h-28 w-28 overflow-hidden rounded-2xl border border-zinc-700 bg-black/40 shadow-[0_0_24px_rgba(34,211,238,.08)]">
+	                      {product.images?.[0] ? (
+	                        <Image
+	                          src={product.images[0]}
+	                          alt={product.name}
+	                          fill
+	                          sizes="112px"
+	                          className="object-contain p-2"
+	                        />
+	                      ) : (
+	                        <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-[0.2em] text-zinc-500">
+	                          No Image
+	                        </div>
+	                      )}
+	                    </div>
+	                  <div>
+	                    <h2 className="text-2xl font-bold">{product.name}</h2>
+	                    <p className="mt-2 text-zinc-400">
+	                      Deposit: {Number(product.depositAmount || 50)}% • Remaining: ₹
                       {Math.max(0, Number(product.price || 0) - Math.floor(Number(product.price || 0) * Number(product.depositAmount || 50) / 100))}
                     </p>
                     <p className="mt-1 text-zinc-400">
                       Expected arrival: {product.expectedArrival || "Not set"}
                     </p>
-                    <p className="mt-1 text-zinc-400">
-                      Available stock: {availableStock} • Reserved: {Number(product.reservedStock || 0)} • Total: {Number(product.stock || 0)}
-                    </p>
-                  </div>
-                  {availableStock <= 0 && (
+	                    <p className="mt-1 text-zinc-400">
+	                      Available stock: {availableStock} • Reserved: {Number(product.reservedStock || 0)} • Total: {Number(product.stock || 0)}
+	                    </p>
+	                  </div>
+	                  </div>
+	                  {availableStock <= 0 && (
                     <span className="inline-flex self-start rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-red-300 md:self-center">
                       Sold Out
                     </span>

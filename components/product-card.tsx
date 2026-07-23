@@ -342,10 +342,10 @@ disabled:opacity-40
   id,
   name,
 
-  price,
+	  price,
 
-  originalPrice:
-    price,
+	  originalPrice:
+	    originalPrice ?? price,
 
   quantityPricing:
     quantityPricing,
@@ -421,18 +421,25 @@ disabled:opacity-40
   id,
   name,
 
-  price,
+	  price,
 
-  originalPrice:
-    price,
+	  originalPrice:
+	    originalPrice ?? price,
 
   quantityPricing:
     quantityPricing,
 
-  image,
+	  image,
 
-  stock,
-})
+	  stock,
+
+	  isPreOrder,
+
+	  depositAmount,
+
+	  expectedArrival:
+	    expectedArrival || undefined,
+	})
 
                 toast.success(
                   "Redirecting to checkout 🚀"

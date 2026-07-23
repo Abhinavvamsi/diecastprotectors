@@ -42,6 +42,23 @@ async function isMaintenanceEnabled(request: NextRequest) {
   }
 }
 
+async function isAdminRequest(request: NextRequest) {
+  try {
+    const response = await fetchWithTimeout(
+      new URL("/api/admin/me", request.url),
+      request,
+      1500
+    )
+
+    if (!response.ok) return false
+
+    const adminStatus = await response.json()
+    return Boolean(adminStatus?.isAdmin)
+  } catch {
+    return false
+  }
+}
+
 export default clerkMiddleware(async (_auth, request) => {
   const pathname = request.nextUrl.pathname
 
@@ -69,6 +86,10 @@ export default clerkMiddleware(async (_auth, request) => {
   const maintenanceEnabled = await isMaintenanceEnabled(request)
 
   if (!maintenanceEnabled) {
+    return NextResponse.next()
+  }
+
+  if (await isAdminRequest(request)) {
     return NextResponse.next()
   }
 
