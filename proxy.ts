@@ -62,15 +62,12 @@ async function isAdminRequest(request: NextRequest) {
 export default clerkMiddleware(async (_auth, request) => {
   const pathname = request.nextUrl.pathname
 
-  const isAdminPath =
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/api/admin") ||
-    pathname.startsWith("/api/add-product") ||
-    pathname.startsWith("/api/update-product") ||
-    pathname.startsWith("/api/delete-product") ||
-    pathname.startsWith("/api/delete-products") ||
-    pathname.startsWith("/api/upload-image") ||
-    pathname.startsWith("/api/update-order-status")
+  const isMaintenanceProbePath =
+    request.method === "GET" &&
+    (
+      pathname === "/api/admin/me" ||
+      pathname === "/api/admin/settings"
+    )
 
   if (
     pathname.startsWith("/_next") ||
@@ -78,7 +75,7 @@ export default clerkMiddleware(async (_auth, request) => {
     pathname.startsWith("/sign-in") ||
     pathname.startsWith("/sign-up") ||
     pathname.startsWith("/maintenance") ||
-    isAdminPath
+    isMaintenanceProbePath
   ) {
     return NextResponse.next()
   }

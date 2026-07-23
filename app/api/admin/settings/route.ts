@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { requireAdmin } from "@/lib/admin"
 import { NextResponse } from "next/server"
 
 export async function GET() {
@@ -11,7 +12,7 @@ export async function GET() {
     {
       headers: {
         "Cache-Control":
-          "public, s-maxage=60, stale-while-revalidate=120",
+          "no-store, max-age=0",
       },
     }
   )
@@ -21,6 +22,7 @@ export async function GET() {
 export async function POST(
   req: Request
 ) {
+  await requireAdmin()
 
   const body =
     await req.json()
