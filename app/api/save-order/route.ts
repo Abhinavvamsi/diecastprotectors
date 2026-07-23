@@ -23,6 +23,27 @@ function getTierPrice(product: any, quantity: number) {
   return activeTier ? Number(activeTier.price) : Number(product.price || 0)
 }
 
+async function createUniqueOrderId(tx: any) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const orderId = `HWS-${Date.now() + attempt}`
+    const existingOrder =
+      await tx.order.findUnique({
+        where: {
+          orderId,
+        },
+        select: {
+          id: true,
+        },
+      })
+
+    if (!existingOrder) {
+      return orderId
+    }
+  }
+
+  throw new Error("Unable to generate order ID")
+}
+
 export async function POST(
   req: Request
 ) {
@@ -98,8 +119,7 @@ if (!signatureIsValid) {
       )
     }
 
-    const orderId =
-      `HWS-${Date.now()}`
+    let orderId = ""
 
     const order =
   await prisma.$transaction(
@@ -126,6 +146,8 @@ if (!signatureIsValid) {
         })
 
       if (savedOrder) {
+        orderId = savedOrder.orderId
+
         return {
           orderId: savedOrder.orderId,
           alreadySaved: true,
@@ -180,6 +202,11 @@ if (!signatureIsValid) {
             bodyItem.unitPrice ??
             bodyItem.price ??
             bodyItem.originalPrice ??
+            0,
+          originalPrice:
+            bodyItem.originalPrice ??
+            bodyItem.unitPrice ??
+            bodyItem.price ??
             0,
           image: bodyItem.image || bodyItem.images?.[0] || null,
           images:
@@ -292,6 +319,62 @@ if (!signatureIsValid) {
           Boolean(productLookup.get(item.productId)?.isPreOrder)
         )
 
+      const preorderItems = orderedItems.filter(
+        (item) => item.isPreOrder
+      )
+
+      const preorderTotals = preorderItems.reduce(
+        (
+          totals: {
+            depositPaid: number
+            originalPrice: number
+            remainingBalance: number
+            expectedArrival: string
+          },
+          item: any
+        ) => {
+          const quantity = Math.max(
+            0,
+            Number(item.quantity || 0)
+          )
+          const originalUnitPrice = Math.max(
+            0,
+            Number(
+              item.originalPrice ??
+                item.unitPrice ??
+                item.price ??
+                0
+            )
+          )
+          const payableUnitPrice = Math.max(
+            0,
+            Number(item.price ?? item.unitPrice ?? 0)
+          )
+
+          totals.originalPrice +=
+            originalUnitPrice * quantity
+          totals.depositPaid +=
+            payableUnitPrice * quantity
+          totals.remainingBalance +=
+            Math.max(
+              0,
+              originalUnitPrice - payableUnitPrice
+            ) * quantity
+
+          if (!totals.expectedArrival && item.expectedArrival) {
+            totals.expectedArrival = item.expectedArrival
+          }
+
+          return totals
+        },
+        {
+          depositPaid: 0,
+          originalPrice: 0,
+          remainingBalance: 0,
+          expectedArrival: "",
+        }
+      )
+
       const shippingCharge = calculateShippingCharge({
         subtotal,
         itemCount: reservation.items.reduce(
@@ -331,6 +414,8 @@ if (!signatureIsValid) {
         0,
         subtotal + shippingCharge - discount
       )
+
+      orderId = await createUniqueOrderId(tx)
 
       return await tx.order.create({
 
@@ -412,6 +497,68 @@ if (!signatureIsValid) {
       }
     }
 
+    const notificationProducts = Array.isArray(body.products)
+      ? body.products
+      : []
+    const hasOnlyPreOrderNotificationItems =
+      notificationProducts.length > 0 &&
+      notificationProducts.every((item: any) =>
+        Boolean(item.isPreOrder)
+      )
+    const preorderTotals = notificationProducts
+      .filter((item: any) => Boolean(item.isPreOrder))
+      .reduce(
+        (
+          totals: {
+            depositPaid: number
+            originalPrice: number
+            remainingBalance: number
+            expectedArrival: string
+          },
+          item: any
+        ) => {
+          const quantity = Math.max(
+            0,
+            Number(item.quantity || 0)
+          )
+          const originalUnitPrice = Math.max(
+            0,
+            Number(
+              item.originalPrice ??
+                item.unitPrice ??
+                item.price ??
+                0
+            )
+          )
+          const payableUnitPrice = Math.max(
+            0,
+            Number(item.price ?? item.unitPrice ?? 0)
+          )
+
+          totals.originalPrice +=
+            originalUnitPrice * quantity
+          totals.depositPaid +=
+            payableUnitPrice * quantity
+          totals.remainingBalance +=
+            Math.max(
+              0,
+              originalUnitPrice - payableUnitPrice
+            ) * quantity
+
+          if (!totals.expectedArrival && item.expectedArrival) {
+            totals.expectedArrival = item.expectedArrival
+          }
+
+          return totals
+        },
+        {
+          depositPaid: 0,
+          originalPrice: 0,
+          remainingBalance: 0,
+          expectedArrival: "",
+        }
+      )
+
     const sendWithTimeout = async (
       payload: Parameters<
         typeof resend.emails.send
@@ -429,11 +576,11 @@ if (!signatureIsValid) {
       ])
     }
 
-    // Send notifications after the order is already saved.
-    await Promise.allSettled([
-      sendWithTimeout({
-        from:
-          "orders@shinseidiecast.com",
+      // Send notifications after the order is already saved.
+      await Promise.allSettled([
+        sendWithTimeout({
+          from:
+            "orders@shinseidiecast.com",
         to:
           body.email,
         subject:
@@ -510,13 +657,37 @@ if (!signatureIsValid) {
 
         `,
       }),
-      sendWhatsAppOrderMessage({
-        orderId,
-        customer: body.customer,
-        phone: body.phone,
-        status: "Confirmed",
-        totalAmount: body.totalAmount,
-      }),
+      sendWhatsAppOrderMessage(
+        hasOnlyPreOrderNotificationItems
+          ? {
+              orderId,
+              customer: body.customer,
+              phone: body.phone,
+              status: "Confirmed",
+              templateName:
+                "preorder_deposit_confirmation",
+              depositPaid:
+                preorderTotals.depositPaid,
+              originalPrice:
+                preorderTotals.originalPrice,
+              remainingBalance:
+                preorderTotals.remainingBalance,
+              expectedArrival:
+                preorderTotals.expectedArrival ||
+                "To be announced",
+            }
+          : {
+              orderId,
+              customer: body.customer,
+              phone: body.phone,
+              status: "Confirmed",
+              templateName: "order_confirmation",
+              totalAmount:
+                "totalAmount" in order
+                  ? order.totalAmount
+                  : Number(body.totalAmount || 0),
+            }
+      ),
       sendWithTimeout({
         from:
           "orders@shinseidiecast.com",
@@ -619,30 +790,25 @@ if (!signatureIsValid) {
 
         </ul>
 
-      </div>
+        </div>
 
         `,
-      }),
-      sendWhatsAppOrderMessage({
-        orderId,
-        customer: body.customer,
-        phone: body.phone,
-        status: "Confirmed",
-        totalAmount:
-          "totalAmount" in order
-            ? order.totalAmount
-            : Number(body.totalAmount || 0),
       }),
     ]).then((results) => {
       results.forEach((result, index) => {
         if (result.status === "rejected") {
+          const reason =
+            result.reason instanceof Error
+              ? result.reason.message
+              : result.reason
+
           console.error(
             index === 0
               ? "Customer email failed:"
               : index === 1
               ? "WhatsApp notification failed:"
               : "Admin email failed:",
-            result.reason
+            reason
           )
         }
       })

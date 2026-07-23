@@ -571,11 +571,11 @@ focus:ring-pink-500/30
 
           </div>
 
-          {/* Pre Order */}
+          {/* Pre-Order */}
           <div className="space-y-3">
 
             <label className="text-sm text-zinc-400 uppercase tracking-wider">
-              Pre Order
+              Pre-Order
             </label>
 
             <div className="grid gap-4 md:grid-cols-3">

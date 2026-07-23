@@ -177,10 +177,10 @@ text-transparent uppercase tracking-widest text-sm font-semibold">
 
 {product.isPreOrder && (
   <div className="mt-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-cyan-100">
-    <p className="font-semibold">Pre Order</p>
+    <p className="font-semibold">Pre-Order</p>
     <p className="mt-1 text-sm">Original price: ₹{selectedPrice}</p>
-    <p className="mt-1 text-sm">Deposit now: ₹{depositPrice}</p>
-    <p className="text-sm">Remaining later: ₹{remainingPrice}</p>
+    <p className="mt-1 text-sm">Deposit today: ₹{depositPrice}</p>
+    <p className="text-sm">Balance due on arrival: ₹{remainingPrice}</p>
     {product.expectedArrival && (
       <p className="text-sm">Expected arrival: {product.expectedArrival}</p>
     )}
@@ -203,7 +203,7 @@ text-transparent uppercase tracking-widest text-sm font-semibold">
               >
 
                 {product.isPreOrder
-                  ? "Pre Order"
+                  ? "Pre-Order"
                   : product.stock > 0
                   ? `In Stock: ${product.stock}`
                   : "Out of Stock"}
@@ -567,12 +567,12 @@ if (
 </h3>
 
 {product.isPreOrder && (
-  <p className="mt-1 text-xs text-cyan-300">Deposit now: ₹{depositPrice}</p>
+  <p className="mt-1 text-xs text-cyan-300">Deposit today: ₹{depositPrice}</p>
 )}
 
           {product.isPreOrder && (
             <p className="mt-2 text-xs text-zinc-400">
-              Original price: ₹{selectedPrice} • Remaining later: ₹{remainingPrice}
+              Original price: ₹{selectedPrice} • Balance due on arrival: ₹{remainingPrice}
             </p>
           )}
 

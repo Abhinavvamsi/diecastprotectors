@@ -1414,8 +1414,8 @@ text-transparent
               return (
                 <div className="mt-2 text-xs text-cyan-300 space-y-1">
                   <p>Original price: ₹{originalLinePrice}</p>
-                  <p className="font-semibold text-cyan-300">Deposit now: ₹{depositLinePrice}</p>
-                  <p>Remaining later: ₹{remainingLinePrice}</p>
+                  <p className="font-semibold text-cyan-300">Deposit today: ₹{depositLinePrice}</p>
+                  <p>Balance due on arrival: ₹{remainingLinePrice}</p>
                 </div>
               )
             })()}
@@ -1624,8 +1624,8 @@ hover:shadow-[0_0_30px_rgba(236,72,153,.35)]
   {hasPreOrderItems && (
     <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-sm text-cyan-100">
       {hasOnlyPreOrderItems
-        ? "Your cart has only pre order items. You only pay the deposit now and the remaining amount plus shipping charges will be collected after arrival."
-        : "Your cart has pre order items. You only pay the deposit now and the remaining amount will be collected after arrival."}
+        ? "Your cart contains pre-order items only. You will pay the deposit today, and the balance plus any applicable shipping charges will be collected when the products arrive."
+        : "Your cart contains pre-order items. You will pay the deposit today, and the balance will be collected when the products arrive."}
     </div>
   )}
 
@@ -2334,7 +2334,7 @@ if (couponCode) {
 
               {reservationExpiresAt && (
                 <div className="mt-4 rounded-xl border border-pink-500/20 bg-pink-500/10 px-4 py-3 text-sm text-pink-200">
-                  Reservation held until{" "}
+                  Pre-order held until{" "}
                   <span className="font-semibold">
                     {formatIstTime(
                       reservationExpiresAt
@@ -2381,7 +2381,7 @@ text-transparent
     "
   >
 
-    🎉 Join the Shinsei Diecast Community
+    Join the Shinsei Diecast Community
 
   </h3>
 
@@ -2394,13 +2394,13 @@ text-transparent
 
     Stay updated with:
     <br />
-    ✅ New Arrivals
+    ✅ New arrivals
     <br />
-    ✅ New Product Launches
+    ✅ Upcoming releases
     <br />
-    ✅ Exclusive Discounts
+    ✅ Exclusive offers
     <br />
-    ✅ Diecast Collector Updates
+    ✅ Collector updates
 
   </p>
 
@@ -2421,7 +2421,7 @@ text-transparent
     "
   >
 
-    🚀 Join WhatsApp Group
+    Join WhatsApp Community
 
   </a>
 

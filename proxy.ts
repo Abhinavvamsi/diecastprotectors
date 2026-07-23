@@ -42,32 +42,26 @@ async function isMaintenanceEnabled(request: NextRequest) {
   }
 }
 
-async function isAdmin(request: NextRequest) {
-  try {
-    const response = await fetchWithTimeout(
-      new URL("/api/admin/me", request.url),
-      request,
-      1500
-    )
-
-    if (!response.ok) return false
-
-    const data = await response.json()
-    return Boolean(data?.isAdmin)
-  } catch {
-    return false
-  }
-}
-
 export default clerkMiddleware(async (_auth, request) => {
   const pathname = request.nextUrl.pathname
+
+  const isAdminPath =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/api/admin") ||
+    pathname.startsWith("/api/add-product") ||
+    pathname.startsWith("/api/update-product") ||
+    pathname.startsWith("/api/delete-product") ||
+    pathname.startsWith("/api/delete-products") ||
+    pathname.startsWith("/api/upload-image") ||
+    pathname.startsWith("/api/update-order-status")
 
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
-    pathname.startsWith("/api/admin/settings") ||
-    pathname.startsWith("/api/admin/me") ||
-    pathname.startsWith("/maintenance")
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/maintenance") ||
+    isAdminPath
   ) {
     return NextResponse.next()
   }
@@ -75,12 +69,6 @@ export default clerkMiddleware(async (_auth, request) => {
   const maintenanceEnabled = await isMaintenanceEnabled(request)
 
   if (!maintenanceEnabled) {
-    return NextResponse.next()
-  }
-
-  const admin = await isAdmin(request)
-
-  if (admin) {
     return NextResponse.next()
   }
 

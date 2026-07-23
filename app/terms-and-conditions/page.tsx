@@ -6,44 +6,26 @@ export default function TermsPage() {
 
       <div className="max-w-4xl mx-auto">
 
-        <h1 className="text-5xl font-bold mb-10">
-
-          Terms & Conditions
-
+        <h1 className="text-5xl font-bold mb-6">
+          Terms of Service
         </h1>
 
-        <div className="space-y-6 text-zinc-300 leading-relaxed text-lg">
-
+        <div className="space-y-5 text-zinc-300 leading-relaxed text-lg">
           <p>
-
-            By placing an order on this website, you agree to all store policies.
-
+            By placing an order on this website, you acknowledge that you have reviewed and agreed to our store policies.
           </p>
-
           <p>
-
-            Product availability and pricing may change without prior notice.
-
+            Product availability, pricing, and expected arrival timelines may change without prior notice.
           </p>
-
           <p>
-
-            We reserve the right to cancel or refuse any order at our discretion.
-
+            We reserve the right to cancel or refuse any order in cases of stock mismatch, payment issues, fraud prevention, or policy violations.
           </p>
-
           <p>
-
-            Customers are responsible for providing accurate shipping information.
-
+            Customers are responsible for entering accurate contact and shipping information to avoid delivery delays.
           </p>
-
           <p>
-
-            Unauthorized use of website content or images is prohibited.
-
+            All content, images, and branding on this website remain the property of Shinsei Diecast and may not be used without permission.
           </p>
-
         </div>
 
       </div>

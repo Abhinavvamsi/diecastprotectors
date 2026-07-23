@@ -42,7 +42,7 @@ export const metadata = {
 
   keywords: [
     "Hot Wheels",
-    "Diecast Cars",
+    "Collectible Cars",
     "Protectors",
     "Hot Wheels Protectors",
     "Mini GT",

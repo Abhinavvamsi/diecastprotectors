@@ -6,38 +6,23 @@ export default function PrivacyPolicyPage() {
 
       <div className="max-w-4xl mx-auto">
 
-        <h1 className="text-5xl font-bold mb-10">
-
-          Privacy Policy
-
+        <h1 className="text-5xl font-bold mb-6">
+          Privacy Notice
         </h1>
 
-        <div className="space-y-6 text-zinc-300 leading-relaxed text-lg">
-
+        <div className="space-y-5 text-zinc-300 leading-relaxed text-lg">
           <p>
-
-            We collect customer information such as name, email, phone number, and shipping address for order processing purposes only.
-
+            We collect only the information required to process your order, including your name, contact details, and shipping address.
           </p>
-
           <p>
-
-            Your personal data is never sold or shared with third parties except shipping and payment providers.
-
+            Your personal information is used exclusively for order fulfilment, customer support, and essential service updates.
           </p>
-
           <p>
-
-            Payments are securely processed through Razorpay.
-
+            We do not sell or trade customer data. Information is shared only with trusted payment and shipping partners when necessary to complete your order.
           </p>
-
           <p>
-
-            By using this website, you consent to our privacy practices.
-
+            Payments are processed securely through our payment provider. By using this website, you agree to the practices described in this notice.
           </p>
-
         </div>
 
       </div>

@@ -138,7 +138,7 @@ text-transparent
               "
             >
 
-              🎉 Join The Shinsei Diecast Community
+              Join the Shinsei Diecast Community
 
             </h3>
 
@@ -151,19 +151,19 @@ text-transparent
             >
 
               <p>
-                ✅ Latest Diecast Arrivals
+                ✅ Latest arrivals
               </p>
 
               <p>
-                ✅ New Product Launches
+                ✅ New product launches
               </p>
 
               <p>
-                ✅ Exclusive Discounts
+                ✅ Exclusive offers
               </p>
 
               <p>
-                ✅ Diecast Collector Updates
+                ✅ Collector updates
               </p>
 
             </div>
@@ -193,7 +193,7 @@ duration-300
               "
             >
 
-              🚀 Join WhatsApp Group
+              Join WhatsApp Community
 
             </a>
 

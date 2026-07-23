@@ -2,6 +2,9 @@ import Link from "next/link"
 import Image from "next/image"
 export default function Footer() {
 
+  const whatsappGroupUrl =
+    "https://chat.whatsapp.com/LXeocqm0ctA0ohmQSNfP0t?s=cl&p=a&ilr=1&amv=2"
+
   return (
 
     <footer className="border-t border-[#2B2B3A] bg-[#09090B] text-white mt-20">
@@ -66,14 +69,14 @@ export default function Footer() {
   href="/cars"
   className="text-gray-400 hover:text-pink-400 transition-colors duration-300"
 >
-  Diecast Cars
+  Browse Inventory
 </Link>
 
               <Link
   href="/orders"
   className="text-gray-400 hover:text-pink-400 transition-colors duration-300"
 >
-  My Orders
+  Order History
 </Link>
 
             </div>
@@ -96,28 +99,28 @@ export default function Footer() {
   className="hover:text-pink-400 transition-colors duration-300"
 >
 
-                Shipping Policy
+              Shipping & Dispatch Policy
 
               </Link>
 
               <Link href="/refund-policy"
               className="hover:text-pink-400 transition-colors duration-300">
 
-                Refund Policy
+                Returns & Refunds
 
               </Link>
 
               <Link href="/privacy-policy"
               className="hover:text-pink-400 transition-colors duration-300">
 
-                Privacy Policy
+                Privacy Notice
 
               </Link>
 
               <Link href="/terms-and-conditions"
               className="hover:text-pink-400 transition-colors duration-300">
 
-                Terms & Conditions
+                Terms of Service
 
               </Link>
 
@@ -136,11 +139,17 @@ export default function Footer() {
 
           </p>
 
-          <p>
-
-            Inspired by JDM Culture • Built for Collectors 🚗
-
-          </p>
+          <div className="flex flex-col items-center md:items-end gap-3">
+            <p>Inspired by JDM culture • Built for collectors</p>
+            <a
+              href={whatsappGroupUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-xl bg-green-500 px-5 py-3 font-semibold text-black transition-all duration-300 hover:scale-105 hover:bg-green-400"
+            >
+              Join WhatsApp Community
+            </a>
+          </div>
 
         </div>
 

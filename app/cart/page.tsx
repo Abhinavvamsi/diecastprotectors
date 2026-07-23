@@ -386,10 +386,10 @@ font-bold mt-2">
 
                     {item.isPreOrder && (
                       <div className="mt-3 inline-flex flex-col gap-1 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-cyan-100">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-300">Pre Order</span>
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-300">Pre-Order</span>
                         <span className="text-sm">Original price: ₹{lineOriginalPrice}</span>
-                        <span className="text-sm font-semibold text-cyan-300">Deposit now: ₹{lineDepositPrice}</span>
-                        <span className="text-sm">Remaining later: ₹{lineRemainingPrice}</span>
+                        <span className="text-sm font-semibold text-cyan-300">Deposit today: ₹{lineDepositPrice}</span>
+                        <span className="text-sm">Balance due on arrival: ₹{lineRemainingPrice}</span>
                       </div>
                     )}
 

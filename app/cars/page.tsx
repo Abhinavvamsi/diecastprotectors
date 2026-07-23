@@ -229,7 +229,7 @@ if (loading) {
 
         <p className="text-center text-lg text-gray-400">
 
-          Loading Diecast Cars...
+          Loading our collection...
 
         </p>
 

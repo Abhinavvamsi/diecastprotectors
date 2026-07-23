@@ -274,8 +274,8 @@ shadow-lg
             {isPreOrder && (
               <div className="mt-2 space-y-1 text-sm text-cyan-300">
                 <p>Original price: ₹{originalPrice ?? price}</p>
-                <p>Deposit now: ₹{price}</p>
-                <p>Remaining later: ₹{remainingPrice ?? 0}{expectedArrival ? ` • Arrives ${expectedArrival}` : ""}</p>
+                <p>Deposit today: ₹{price}</p>
+                <p>Balance due on arrival: ₹{remainingPrice ?? 0}{expectedArrival ? ` • Arrives ${expectedArrival}` : ""}</p>
               </div>
             )}
 
@@ -291,7 +291,7 @@ shadow-lg
           >
 
               {isPreOrder
-              ? "Pre Order"
+              ? "Pre-Order"
               : Number(stock || 0) > 0
               ? `In Stock: ${stock}`
               : "Out of Stock"}

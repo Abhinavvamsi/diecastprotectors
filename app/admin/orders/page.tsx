@@ -31,6 +31,10 @@ export default async function OrdersPage({
   productId = "",
   preorderFilter = "All",
 } = await searchParams
+  const normalizedPreorderFilter =
+    preorderFilter === "Pre Order"
+      ? "Pre-Orders"
+      : preorderFilter
 
   const orders =
   await prisma.order.findMany({
@@ -140,9 +144,9 @@ where: {
     : orders
 
   const filteredOrders =
-    preorderFilter === "Pre Order"
+    normalizedPreorderFilter === "Pre-Orders"
       ? productFilteredOrders.filter(orderHasPreOrderItem)
-      : preorderFilter === "Regular"
+      : normalizedPreorderFilter === "Regular"
       ? productFilteredOrders.filter(
           (order: any) => !orderHasPreOrderItem(order)
         )
@@ -452,7 +456,7 @@ shadow-2xl
     {[
       { name: "All", count: productFilteredOrders.length },
       {
-        name: "Pre Order",
+        name: "Pre-Orders",
         count: productFilteredOrders.filter(orderHasPreOrderItem).length,
       },
       {
@@ -468,7 +472,7 @@ shadow-2xl
         className={`
           px-5 py-2 rounded-full border transition-all flex items-center gap-2
           ${
-            preorderFilter === item.name
+            normalizedPreorderFilter === item.name
               ? "bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 border-transparent text-white"
               : "border-zinc-700 text-zinc-400 hover:border-cyan-500 hover:text-cyan-400"
           }
@@ -877,7 +881,7 @@ text-purple-400
                           </div>
                           {remainingLaterTotal > 0 && (
                             <div className="flex items-center justify-between text-cyan-200/80">
-                              <span>Pre-order Balance Later</span>
+                              <span>Balance Due on Arrival</span>
                               <span>₹{remainingLaterTotal}</span>
                             </div>
                           )}
@@ -996,7 +1000,7 @@ shadow-sm pt-8">
 
                             {isPreOrder && (
                               <span className="mt-2 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-100">
-                                Pre Order
+                                Pre-Order
                               </span>
                             )}
 
@@ -1008,10 +1012,10 @@ shadow-sm pt-8">
 
                             {isPreOrder ? (
                               <div className="mt-2 inline-flex flex-col rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-100">
-                                <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre Order</span>
+                                <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre-Order</span>
                                 <span className="text-xs mt-1">Original amount: ₹{pricing.lineOriginalPrice}</span>
                                 <span className="text-xs">Deposit paid: ₹{pricing.linePayablePrice}</span>
-                                <span className="text-xs">Remaining to pay: ₹{pricing.lineRemainingPrice}</span>
+                                <span className="text-xs">Balance due on arrival: ₹{pricing.lineRemainingPrice}</span>
                               </div>
                             ) : (
                               <p className="text-pink-400">

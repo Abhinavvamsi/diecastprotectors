@@ -6,50 +6,26 @@ export default function ShippingPolicyPage() {
 
       <div className="max-w-4xl mx-auto">
 
-        <h1 className="text-5xl font-bold mb-10">
-
-          Shipping Policy
-
+        <h1 className="text-5xl font-bold mb-6">
+          Shipping & Dispatch Policy
         </h1>
 
-        <div className="space-y-6 text-zinc-300 leading-relaxed text-lg">
-
+        <div className="space-y-5 text-zinc-300 leading-relaxed text-lg">
           <p>
-
-            Orders are processed within 1–3 business days after payment confirmation.
-
+            Orders are typically dispatched within 1–3 business days after payment confirmation and product availability verification.
           </p>
-
           <p>
-
-            Shipping charges are calculated based on product quantity and destination.
-
+            Shipping charges are calculated at checkout based on the delivery method, cart composition, and destination.
           </p>
-
           <p>
-
-            Tracking details will be shared once the order is shipped.
-
+            Tracking details are shared once the shipment has been handed over to the courier partner.
           </p>
-
           <p>
-
-            Delivery timelines may vary depending on courier service and location.
-
+            Delivery timelines vary by location, courier performance, and external conditions beyond our control.
           </p>
-
           <p>
-
-            We are not responsible for delays caused by courier partners, natural disasters, or unforeseen circumstances.
-
+            We are not responsible for delays, rerouting, or service interruptions caused by courier partners or unforeseen events.
           </p>
-
-          <p>
-
-            Damage during transit and lost shipments are not covered.
-
-          </p>
-
         </div>
 
       </div>

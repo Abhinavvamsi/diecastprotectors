@@ -175,7 +175,7 @@ export default function SettingsPage() {
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
                 <p className="text-sm uppercase tracking-wider text-zinc-400">
-                  Super Deals Section
+                  Featured Picks Section
                 </p>
                 <p className="mt-1 text-sm text-zinc-500">
                   Pick up to {MAX_SUPER_DEALS} products for the homepage. Out-of-stock picks are replaced automatically.

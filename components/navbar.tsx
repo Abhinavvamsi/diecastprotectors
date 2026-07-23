@@ -123,39 +123,47 @@ useEffect(() => {
 
   async function checkAdmin() {
 
-  try {
+    try {
 
-    const response =
-      await fetch("/api/admin/me")
+      const response =
+        await fetch("/api/admin/me")
 
-    const data =
-      await response.json()
+      const data =
+        await response.json()
 
-    setIsAdmin(data.isAdmin)
+      setIsAdmin(data.isAdmin)
 
-    setRole(
-      data.role ?? ""
-    )
+      setRole(
+        data.role ?? ""
+      )
 
-    localStorage.setItem(
-      "is-admin",
-      String(data.isAdmin)
-    )
+      localStorage.setItem(
+        "is-admin",
+        String(data.isAdmin)
+      )
 
-    localStorage.setItem(
-      "admin-role",
-      data.role ?? ""
-    )
+      localStorage.setItem(
+        "admin-role",
+        data.role ?? ""
+      )
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error(error)
+      console.error(error)
+
+    }
 
   }
 
-}
+  const timer = setTimeout(
+    () => {
+      checkAdmin()
+    },
+    0
+  )
 
-  checkAdmin()
+  return () =>
+    clearTimeout(timer)
 
 }, [user])
   /* Cart animation */
@@ -235,7 +243,7 @@ alt="Shinsei Diecast"
             className="hover:text-pink-400 transition"
           >
 
-            Diecast Cars
+            Browse Inventory
 
           </Link>
 
@@ -245,7 +253,7 @@ alt="Shinsei Diecast"
             className="animate-pulse text-pink-400 drop-shadow-[0_0_12px_rgba(236,72,153,0.75)] transition hover:text-white"
           >
 
-            Pre Orders
+            Pre-Orders
 
           </Link>
 
@@ -265,7 +273,7 @@ alt="Shinsei Diecast"
             className="hover:text-pink-400 transition"
           >
 
-            My Orders
+            Order History
 
           </Link>
 
@@ -460,7 +468,7 @@ shadow-[0_0_12px_rgba(236,72,153,0.5)]
             className="block text-lg font-medium text-white"
           >
 
-            Diecast Cars
+            Browse Inventory
 
           </Link>
 
@@ -469,7 +477,7 @@ shadow-[0_0_12px_rgba(236,72,153,0.5)]
             className="block text-lg font-medium text-pink-400 animate-pulse"
           >
 
-            Pre Orders
+            Pre-Orders
 
           </Link>
 
@@ -487,7 +495,7 @@ shadow-[0_0_12px_rgba(236,72,153,0.5)]
             className="block text-lg font-medium text-white"
           >
 
-            My Orders
+            Order History
 
           </Link>
 

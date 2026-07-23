@@ -31,10 +31,10 @@ export default function SuperDealsSection({
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="uppercase tracking-[0.3em] text-sm bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
-            Curated Picks
+            Curated Highlights
           </p>
           <h2 className="text-4xl md:text-5xl font-bold mt-2 bg-gradient-to-r from-white via-pink-100 to-purple-100 bg-clip-text text-transparent">
-            Super Deals
+            Featured Picks
           </h2>
         </div>
 
@@ -70,7 +70,7 @@ export default function SuperDealsSection({
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#09090B]/90 via-transparent to-transparent" />
                   <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-xs font-bold uppercase tracking-wider text-white">
-                    Super Deal
+                    Featured Pick
                   </div>
                   <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur text-xs font-semibold text-pink-300 border border-pink-500/20">
                     {product.stock > 0 ? `${product.stock} Left` : "Auto-Replaced"}
@@ -98,7 +98,7 @@ export default function SuperDealsSection({
                       </p>
                     </div>
                     <span className="rounded-full border border-pink-500/30 bg-pink-500/10 px-4 py-2 text-xs font-semibold text-pink-300">
-                      View Deal
+                      View Product
                     </span>
                   </div>
                 </div>

@@ -6,38 +6,23 @@ export default function RefundPolicyPage() {
 
       <div className="max-w-4xl mx-auto">
 
-        <h1 className="text-5xl font-bold mb-10">
-
-          Refund Policy
-
+        <h1 className="text-5xl font-bold mb-6">
+          Returns & Refunds
         </h1>
 
-        <div className="space-y-6 text-zinc-300 leading-relaxed text-lg">
-
+        <div className="space-y-5 text-zinc-300 leading-relaxed text-lg">
           <p>
-
-            All sales are final.
-
+            Due to the collectible nature of our products, all sales are considered final once an order has been confirmed.
           </p>
-
           <p>
-
-            Once an order is placed, cancellations are not accepted.
-
+            Order cancellations are only possible before processing begins. Once packed or dispatched, cancellations are no longer available.
           </p>
-
           <p>
-
-            Refunds are not available for products damaged during transit.
-
+            Refunds are not provided for parcels delayed, damaged, or lost in transit where the courier partner is responsible.
           </p>
-
           <p>
-
-            Refunds are not available for lost shipments caused by courier issues.
-
+            If you receive an incorrect item, please contact us promptly so we can review the issue and guide you on the next steps.
           </p>
-
         </div>
 
       </div>

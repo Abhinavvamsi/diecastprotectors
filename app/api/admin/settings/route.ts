@@ -30,7 +30,7 @@ export async function POST(
 
   if (existing) {
 
-      const updated =
+    const updated =
         await prisma.storeSettings.update({
 
         where: {
@@ -61,9 +61,15 @@ export async function POST(
 
         })
 
-    return NextResponse.json(
-      updated
-    )
+    const response = NextResponse.json(updated)
+    response.cookies.set("maintenance-mode", String(Boolean(updated.maintenanceMode)), {
+      path: "/",
+      sameSite: "lax",
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+    })
+
+    return response
 
   }
 
@@ -94,8 +100,14 @@ export async function POST(
 
     })
 
-  return NextResponse.json(
-    created
-  )
+  const response = NextResponse.json(created)
+  response.cookies.set("maintenance-mode", String(Boolean(created.maintenanceMode)), {
+    path: "/",
+    sameSite: "lax",
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+  })
+
+  return response
 
 }

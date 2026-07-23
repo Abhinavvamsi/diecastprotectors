@@ -246,16 +246,33 @@ useEffect(() => {
   }, [brands])
 
   useEffect(() => {
-    if (loading) return
+    const warmRoutes = () => {
+      router.prefetch("/pre-orders")
+      router.prefetch("/cars")
 
-    brandRouteIds.forEach((brandId) => {
-      router.prefetch(`/brands/${brandId}`)
-    })
+      brandRouteIds.forEach((brandId) => {
+        router.prefetch(`/brands/${brandId}`)
+      })
 
-    superDealProducts.forEach((product) => {
-      router.prefetch(`/products/${product.id}`)
-    })
-  }, [loading, router, brandRouteIds, superDealProducts])
+      superDealProducts.forEach((product) => {
+        router.prefetch(`/products/${product.id}`)
+      })
+    }
+
+    if (
+      typeof window !== "undefined" &&
+      "requestIdleCallback" in window
+    ) {
+      const id = window.requestIdleCallback(warmRoutes, {
+        timeout: 1800,
+      })
+
+      return () => window.cancelIdleCallback?.(id)
+    }
+
+    const timer = setTimeout(warmRoutes, 0)
+    return () => clearTimeout(timer)
+  }, [router, brandRouteIds, superDealProducts])
 
   const filteredProducts =
   products.filter((product) => {
@@ -340,12 +357,12 @@ useEffect(() => {
   <div className="grid gap-4 sm:grid-cols-2">
     <Link href="/cars" prefetch>
       <Button className="w-full rounded-2xl bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600 px-6 py-7 text-lg font-semibold text-white shadow-[0_0_30px_rgba(236,72,153,.28)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_42px_rgba(236,72,153,.45)]">
-        Diecast Cars
+        Browse Inventory
       </Button>
     </Link>
     <Link href="/pre-orders" prefetch>
       <Button className="w-full rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-6 py-7 text-lg font-semibold text-cyan-100 shadow-[0_0_30px_rgba(34,211,238,.14)] transition-all duration-300 hover:scale-[1.02] hover:border-cyan-300 hover:bg-cyan-500/15 hover:shadow-[0_0_42px_rgba(34,211,238,.28)]">
-        Pre Orders
+        Pre-Orders
       </Button>
     </Link>
   </div>

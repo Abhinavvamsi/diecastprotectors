@@ -98,7 +98,7 @@ export default async function OrdersPage() {
 
             <h1 className="text-5xl font-bold">
 
-              My Orders
+              Order History
 
             </h1>
 
@@ -327,10 +327,10 @@ text-transparent text-sm uppercase tracking-widest">
 
                         {isPreOrder && (
                           <div className="mt-2 inline-flex flex-col rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-100">
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre Order</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre-Order</span>
                             <span className="text-xs mt-1">Original amount: ₹{lineOriginalPrice}</span>
                             <span className="text-xs">Deposit paid: ₹{lineDepositPrice}</span>
-                            <span className="text-xs">Remaining to pay: ₹{lineRemainingPrice}</span>
+                            <span className="text-xs">Balance due on arrival: ₹{lineRemainingPrice}</span>
                             {expectedArrival && (
                               <span className="text-xs mt-1">Arrives {expectedArrival}</span>
                             )}
@@ -338,7 +338,7 @@ text-transparent text-sm uppercase tracking-widest">
                         )}
 
                         <p className="text-pink-400 text-sm mt-1">
-  {isPreOrder ? "Deposit paid" : "Unit Price"}: ₹{isPreOrder ? lineDepositPrice : displayPrice}
+  {isPreOrder ? "Deposit paid" : "Unit price"}: ₹{isPreOrder ? lineDepositPrice : displayPrice}
 </p>
 
                       </div>

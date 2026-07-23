@@ -38,7 +38,7 @@ export default function AdminNav() {
 
     {
       href: "/admin/pre-orders",
-      label: "Pre Orders",
+      label: "Pre-Orders",
     },
 
     {

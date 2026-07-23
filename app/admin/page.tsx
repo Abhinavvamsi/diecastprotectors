@@ -216,10 +216,10 @@ hover:shadow-[0_0_30px_rgba(34,211,238,.20)]
 
             <div>
               <h2 className="text-3xl font-bold">
-                Pre Orders
+                Pre-Orders
               </h2>
               <p className="text-zinc-400 mt-4 leading-relaxed">
-                Manage preorder items, deposits and arrival details.
+                Manage pre-order items, deposits and arrival details.
               </p>
             </div>
           </div>
