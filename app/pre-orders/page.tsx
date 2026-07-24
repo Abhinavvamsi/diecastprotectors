@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
+import Link from "next/link"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
-import PreOrdersHeroAnimation from "@/components/preorders-hero-animation"
 import PreOrdersBrowser from "@/components/preorders-browser"
 
 export const dynamic = "force-dynamic"
@@ -36,7 +36,18 @@ export default async function PreOrdersPage() {
           <p className="mt-5 max-w-2xl text-zinc-400 text-lg">
             Reserve now with a deposit, and complete the balance when the product arrives.
           </p>
-          <PreOrdersHeroAnimation />
+
+          <div className="mt-8">
+            <p className="mb-3 text-xs uppercase tracking-[0.35em] text-cyan-300">
+              Quick Access
+            </p>
+            <Link
+              href="/cars"
+              className="inline-flex h-12 items-center rounded-full border border-cyan-400/40 bg-cyan-500/10 px-6 text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,.12)] transition-all duration-300 hover:border-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_24px_rgba(34,211,238,.18)] animate-pulse"
+            >
+              Explore Available Stock
+            </Link>
+          </div>
         </div>
       </section>
 

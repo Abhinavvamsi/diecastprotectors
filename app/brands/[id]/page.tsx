@@ -29,6 +29,10 @@ export default async function BrandPage({
 
         products: {
 
+          where: {
+            isPreOrder: false,
+          },
+
           orderBy: {
             createdAt: "desc",
           },

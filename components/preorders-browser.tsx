@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Search } from "lucide-react"
 import ProductCard from "@/components/product-card"
 import { getProductPayablePrice, getProductRemainingPrice } from "@/lib/preorder"
@@ -23,24 +23,42 @@ type PreOrderProduct = {
   }
 }
 
-const priceFilters = [
-  "All Prices",
-  "Under ₹1000",
-  "₹1000 - ₹1999",
-  "₹2000 - ₹2999",
-  "₹3000+",
-]
-
 export default function PreOrdersBrowser({
   products,
 }: {
   products: PreOrderProduct[]
 }) {
+  const SEARCH_KEY = "preorders-search"
+  const BRAND_KEY = "preorders-brand"
+  const STOCK_KEY = "preorders-stock"
+  const SORT_KEY = "preorders-sort"
+
   const [search, setSearch] = useState("")
   const [selectedBrand, setSelectedBrand] = useState("All")
-  const [selectedPriceFilter, setSelectedPriceFilter] = useState("All Prices")
   const [stockFilter, setStockFilter] = useState("All")
   const [sortBy, setSortBy] = useState("Newest")
+  const [prefsReady, setPrefsReady] = useState(false)
+
+  useEffect(() => {
+    const savedSearch = sessionStorage.getItem(SEARCH_KEY)
+    const savedBrand = sessionStorage.getItem(BRAND_KEY)
+    const savedStock = sessionStorage.getItem(STOCK_KEY)
+    const savedSort = sessionStorage.getItem(SORT_KEY)
+
+    if (savedSearch !== null) setSearch(savedSearch)
+    if (savedBrand !== null) setSelectedBrand(savedBrand)
+    if (savedStock !== null) setStockFilter(savedStock)
+    if (savedSort !== null) setSortBy(savedSort)
+    setPrefsReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!prefsReady) return
+    sessionStorage.setItem(SEARCH_KEY, search)
+    sessionStorage.setItem(BRAND_KEY, selectedBrand)
+    sessionStorage.setItem(STOCK_KEY, stockFilter)
+    sessionStorage.setItem(SORT_KEY, sortBy)
+  }, [prefsReady, search, selectedBrand, stockFilter, sortBy])
 
   const brandFilters = useMemo(
     () => [
@@ -76,17 +94,6 @@ export default function PreOrdersBrowser({
             ? true
             : product.brand?.name === selectedBrand
 
-        const matchesPrice =
-          selectedPriceFilter === "All Prices"
-            ? true
-            : selectedPriceFilter === "Under ₹1000"
-            ? product.price < 1000
-            : selectedPriceFilter === "₹1000 - ₹1999"
-            ? product.price >= 1000 && product.price <= 1999
-            : selectedPriceFilter === "₹2000 - ₹2999"
-            ? product.price >= 2000 && product.price <= 2999
-            : product.price >= 3000
-
         const matchesStock =
           stockFilter === "All"
             ? true
@@ -97,7 +104,6 @@ export default function PreOrdersBrowser({
         return (
           matchesSearch &&
           matchesBrand &&
-          matchesPrice &&
           matchesStock
         )
       })
@@ -114,7 +120,7 @@ export default function PreOrdersBrowser({
 
         return 0
       })
-  }, [products, search, selectedBrand, selectedPriceFilter, stockFilter, sortBy])
+  }, [products, search, selectedBrand, stockFilter, sortBy])
 
   return (
     <div className="rounded-[2rem] border border-cyan-500/15 bg-white/5 p-4 shadow-[0_0_60px_rgba(34,211,238,.08)] backdrop-blur-xl md:p-6">
@@ -159,25 +165,6 @@ export default function PreOrdersBrowser({
               }`}
             >
               {brand}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <p className="mb-3 text-sm font-medium text-cyan-300">Price</p>
-        <div className="flex flex-wrap gap-3">
-          {priceFilters.map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setSelectedPriceFilter(filter)}
-              className={`rounded-full border px-5 py-2.5 transition-all duration-300 ${
-                selectedPriceFilter === filter
-                  ? "border-transparent bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
-                  : "border-[#2B2B3A] text-gray-300 hover:border-cyan-400"
-              }`}
-            >
-              {filter}
             </button>
           ))}
         </div>

@@ -108,6 +108,33 @@ const [storeSettings, setStoreSettings] = useState<any>(null)
   const [selectedBrand,
   setSelectedBrand
 ] = useState("All")
+  const [prefsReady, setPrefsReady] = useState(false)
+  const HOME_SEARCH_KEY = "home-search"
+  const HOME_CATEGORY_KEY = "home-category"
+  const HOME_BRAND_KEY = "home-brand"
+  const HOME_STOCK_KEY = "home-stock"
+
+  useEffect(() => {
+    const savedSearch = sessionStorage.getItem(HOME_SEARCH_KEY)
+    const savedCategory = sessionStorage.getItem(HOME_CATEGORY_KEY)
+    const savedBrand = sessionStorage.getItem(HOME_BRAND_KEY)
+    const savedStock = sessionStorage.getItem(HOME_STOCK_KEY)
+
+    if (savedSearch !== null) setSearch(savedSearch)
+    if (savedCategory !== null) setSelectedCategory(savedCategory)
+    if (savedBrand !== null) setSelectedBrand(savedBrand)
+    if (savedStock !== null) setStockFilter(savedStock)
+    setPrefsReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!prefsReady) return
+
+    sessionStorage.setItem(HOME_SEARCH_KEY, search)
+    sessionStorage.setItem(HOME_CATEGORY_KEY, selectedCategory)
+    sessionStorage.setItem(HOME_BRAND_KEY, selectedBrand)
+    sessionStorage.setItem(HOME_STOCK_KEY, stockFilter)
+  }, [prefsReady, search, selectedCategory, selectedBrand, stockFilter])
 
   useEffect(() => {
 
@@ -115,16 +142,16 @@ const [storeSettings, setStoreSettings] = useState<any>(null)
 
       try {
 
-    const [
+const [
   productsResponse,
   brandsResponse,
   bannersResponse,
   settingsResponse,
 ] = await Promise.all([
-  fetch("/api/get-products"),
-  fetch("/api/admin/brands"),
-  fetch("/api/banners"),
-  fetch("/api/admin/settings"),
+  fetch("/api/get-products", { cache: "no-store" }),
+  fetch("/api/admin/brands", { cache: "no-store" }),
+  fetch("/api/banners", { cache: "no-store" }),
+  fetch("/api/admin/settings", { cache: "no-store" }),
 ])
 
 const data = await productsResponse.json()
@@ -362,7 +389,7 @@ useEffect(() => {
     </Link>
     <Link href="/pre-orders" prefetch>
       <Button className="w-full rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-6 py-7 text-lg font-semibold text-cyan-100 shadow-[0_0_30px_rgba(34,211,238,.14)] transition-all duration-300 hover:scale-[1.02] hover:border-cyan-300 hover:bg-cyan-500/15 hover:shadow-[0_0_42px_rgba(34,211,238,.28)]">
-        Pre-Orders
+        Explore Pre-Orders
       </Button>
     </Link>
   </div>

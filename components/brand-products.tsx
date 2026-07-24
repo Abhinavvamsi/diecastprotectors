@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Search } from "lucide-react"
 import ProductCard from "@/components/product-card"
 
@@ -14,6 +14,7 @@ type Product = {
   reservedStock?: number
   quantityPricing?: any[]
   badge?: string
+  isPreOrder?: boolean
   brand?: {
     name?: string
   }
@@ -24,9 +25,32 @@ export default function BrandProducts({
 }: {
   products: Product[]
 }) {
+  const SEARCH_KEY = "brand-search"
+  const STOCK_KEY = "brand-stock"
+  const SORT_KEY = "brand-sort"
+
   const [search, setSearch] = useState("")
   const [stockFilter, setStockFilter] = useState("All")
   const [sortBy, setSortBy] = useState("Newest")
+  const [prefsReady, setPrefsReady] = useState(false)
+
+  useEffect(() => {
+    const savedSearch = sessionStorage.getItem(SEARCH_KEY)
+    const savedStock = sessionStorage.getItem(STOCK_KEY)
+    const savedSort = sessionStorage.getItem(SORT_KEY)
+
+    if (savedSearch !== null) setSearch(savedSearch)
+    if (savedStock !== null) setStockFilter(savedStock)
+    if (savedSort !== null) setSortBy(savedSort)
+    setPrefsReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!prefsReady) return
+    sessionStorage.setItem(SEARCH_KEY, search)
+    sessionStorage.setItem(STOCK_KEY, stockFilter)
+    sessionStorage.setItem(SORT_KEY, sortBy)
+  }, [prefsReady, search, stockFilter, sortBy])
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -37,6 +61,8 @@ export default function BrandProducts({
         const matchesSearch =
           !term ||
           product.name.toLowerCase().includes(term)
+        const matchesPreOrder =
+          !product.isPreOrder
         const matchesStock =
           stockFilter === "All"
             ? true
@@ -44,7 +70,7 @@ export default function BrandProducts({
             ? availableStock > 0
             : availableStock === 0
 
-        return matchesSearch && matchesStock
+        return matchesSearch && matchesPreOrder && matchesStock
       })
       .sort((a, b) => {
         const stockA = Math.max(0, a.stock - (a.reservedStock || 0))

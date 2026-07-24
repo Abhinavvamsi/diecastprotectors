@@ -1,26 +1,67 @@
 import Link from "next/link"
-import Image from "next/image"
 import AdminNav from "@/components/admin-nav"
+import AdminLiveRefresh from "@/components/admin-live-refresh"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/admin"
+import AdminPreOrdersList from "@/components/admin-preorders-list"
 
 export const dynamic = "force-dynamic"
 
 export default async function AdminPreOrdersPage() {
   await requireAdmin()
 
-  const products = await prisma.product.findMany({
-    where: {
-      isPreOrder: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })
+  const [products, preorderOrders] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        isPreOrder: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+    prisma.order.findMany({
+      where: {
+        status: {
+          not: "Cancelled",
+        },
+      },
+      select: {
+        products: true,
+      },
+    }),
+  ])
+
+  const soldStock = preorderOrders.reduce((total, order) => {
+    const items = Array.isArray(order.products) ? order.products : []
+    return (
+      total +
+      items.reduce((itemTotal: number, item: any) => {
+        return item?.isPreOrder
+          ? itemTotal + Number(item?.quantity || 0)
+          : itemTotal
+      }, 0)
+    )
+  }, 0)
+
+  const currentStock = products.reduce(
+    (total, product) => total + Number(product.stock || 0),
+    0
+  )
+  const reservedStock = products.reduce(
+    (total, product) => total + Number(product.reservedStock || 0),
+    0
+  )
+
+  const preorderTotals = {
+    totalStock: currentStock + soldStock,
+    stockSold: soldStock,
+    availableStock: Math.max(0, currentStock - reservedStock),
+  }
 
   return (
     <main className="min-h-screen bg-[#09090B] p-8 text-white">
       <div className="mx-auto max-w-7xl">
+        <AdminLiveRefresh />
         <AdminNav />
 
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -41,85 +82,56 @@ export default async function AdminPreOrdersPage() {
           </Link>
         </div>
 
-        <div className="grid gap-6">
-          {products.length === 0 ? (
-            <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-12 text-center">
-              <h2 className="text-2xl font-bold">No Pre-Order Products</h2>
-              <p className="mt-3 text-zinc-400">
-                Mark a product as a pre-order item from the add/edit product screens.
+        <div className="mb-10 rounded-[2rem] border border-cyan-500/15 bg-white/5 p-5 shadow-[0_0_60px_rgba(34,211,238,.08)] backdrop-blur-xl md:p-6">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">
+                Pre-Order Dashboard
+              </p>
+              <h2 className="mt-2 text-2xl font-bold text-white">
+                Live inventory snapshot
+              </h2>
+              <p className="mt-2 text-sm text-zinc-400">
+                Track pre-order quantity, reserved units, and stock available for new orders.
               </p>
             </div>
-          ) : (
-            products.map((product: any) => (
-              <div
-                key={product.id}
-                className="rounded-3xl border border-zinc-800 bg-zinc-900 p-6"
-              >
-                {(() => {
-                  const availableStock = Math.max(
-                    0,
-                    Number(product.stock || 0) -
-                      Number(product.reservedStock || 0)
-                  )
+            <p className="text-sm text-zinc-400">
+              Updated from your current catalog.
+            </p>
+          </div>
 
-	                  return (
-	                <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-	                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-	                    <div className="relative h-28 w-28 overflow-hidden rounded-2xl border border-zinc-700 bg-black/40 shadow-[0_0_24px_rgba(34,211,238,.08)]">
-	                      {product.images?.[0] ? (
-	                        <Image
-	                          src={product.images[0]}
-	                          alt={product.name}
-	                          fill
-	                          sizes="112px"
-	                          className="object-contain p-2"
-	                        />
-	                      ) : (
-	                        <div className="flex h-full w-full items-center justify-center text-xs uppercase tracking-[0.2em] text-zinc-500">
-	                          No Image
-	                        </div>
-	                      )}
-	                    </div>
-	                  <div>
-	                    <h2 className="text-2xl font-bold">{product.name}</h2>
-	                    <p className="mt-2 text-zinc-400">
-	                      Deposit: {Number(product.depositAmount || 50)}% • Remaining: ₹
-                      {Math.max(0, Number(product.price || 0) - Math.floor(Number(product.price || 0) * Number(product.depositAmount || 50) / 100))}
-                    </p>
-                    <p className="mt-1 text-zinc-400">
-                      Expected arrival: {product.expectedArrival || "Not set"}
-                    </p>
-	                    <p className="mt-1 text-zinc-400">
-	                      Available stock: {availableStock} • Reserved: {Number(product.reservedStock || 0)} • Total: {Number(product.stock || 0)}
-	                    </p>
-	                  </div>
-	                  </div>
-	                  {availableStock <= 0 && (
-                    <span className="inline-flex self-start rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-red-300 md:self-center">
-                      Sold Out
-                    </span>
-                  )}
-                  <div className="flex flex-wrap gap-3">
-                    <Link
-                      href={`/admin/orders?productId=${product.id}`}
-                      className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-3 font-semibold text-cyan-100 transition hover:scale-105 hover:border-cyan-400"
-                    >
-                      View Orders
-                    </Link>
-                    <Link
-                      href={`/admin/products/${product.id}/edit`}
-                      className="rounded-2xl bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600 px-5 py-3 font-semibold text-white transition hover:scale-105"
-                    >
-                      Edit
-                    </Link>
-                  </div>
-                </div>
-                  )
-                })()}
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              {
+                label: "Total Stock",
+                value: preorderTotals.totalStock,
+              },
+              {
+                label: "Stock Sold",
+                value: preorderTotals.stockSold,
+              },
+              {
+                label: "Available Stock",
+                value: preorderTotals.availableStock,
+              },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="relative overflow-hidden rounded-2xl border border-cyan-500/15 bg-[#111118] p-5 shadow-[0_0_20px_rgba(34,211,238,.08)] transition-transform duration-300 hover:-translate-y-0.5"
+              >
+                <div className="pointer-events-none absolute right-4 top-4 h-12 w-12 rounded-full bg-cyan-400/10 blur-xl animate-pulse" />
+                <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
+                  {stat.label}
+                </p>
+                <p className="mt-4 text-4xl font-black text-white">
+                  {stat.value}
+                </p>
               </div>
-            ))
-          )}
+            ))}
+          </div>
         </div>
+
+        <AdminPreOrdersList products={products as any[]} />
       </div>
     </main>
   )

@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from "react"
+import Link from "next/link"
 import { Search } from "lucide-react"
 import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
@@ -43,6 +44,11 @@ export default function CarsPage() {
 
   const hasRestoredScrollPosition =
     useRef(false)
+  const [prefsReady, setPrefsReady] = useState(false)
+  const CARS_SEARCH_KEY = "cars-search"
+  const CARS_BRAND_KEY = "cars-brand"
+  const CARS_STOCK_KEY = "cars-stock"
+  const CARS_SORT_KEY = "cars-sort"
 
   const [products, setProducts] =
     useState<Product[]>([])
@@ -65,6 +71,29 @@ const [stockFilter,
 const [sortBy,
   setSortBy
 ] = useState("Newest")
+
+  useEffect(() => {
+    const savedSearch = sessionStorage.getItem(CARS_SEARCH_KEY)
+    const savedBrand = sessionStorage.getItem(CARS_BRAND_KEY)
+    const savedStock = sessionStorage.getItem(CARS_STOCK_KEY)
+    const savedSort = sessionStorage.getItem(CARS_SORT_KEY)
+
+    if (savedSearch !== null) setSearch(savedSearch)
+    if (savedBrand !== null) setSelectedBrand(savedBrand)
+    if (savedStock !== null) setStockFilter(savedStock)
+    if (savedSort !== null) setSortBy(savedSort)
+    setPrefsReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!prefsReady) return
+
+    sessionStorage.setItem(CARS_SEARCH_KEY, search)
+    sessionStorage.setItem(CARS_BRAND_KEY, selectedBrand)
+    sessionStorage.setItem(CARS_STOCK_KEY, stockFilter)
+    sessionStorage.setItem(CARS_SORT_KEY, sortBy)
+  }, [prefsReady, search, selectedBrand, stockFilter, sortBy])
+
   useEffect(() => {
 
  async function fetchData() {
@@ -376,6 +405,18 @@ to-purple-600
               collectibles curated
               for enthusiasts.
             </p>
+
+            <div className="mt-8">
+              <p className="mb-3 text-xs uppercase tracking-[0.35em] text-pink-300">
+                Quick Access
+              </p>
+              <Link
+                href="/pre-orders"
+                className="inline-flex h-12 items-center rounded-full border border-pink-500/40 bg-pink-500/10 px-6 text-sm font-semibold uppercase tracking-[0.2em] text-pink-200 shadow-[0_0_18px_rgba(236,72,153,.12)] transition-all duration-300 hover:border-pink-400 hover:bg-pink-500/20 hover:shadow-[0_0_24px_rgba(236,72,153,.18)] animate-pulse"
+              >
+                Explore Pre-Orders
+              </Link>
+            </div>
 
           </div>
 <div className="my-16">

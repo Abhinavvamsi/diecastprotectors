@@ -13,6 +13,9 @@ export default function AdminProductsList({
   products: any[]
   brands: any[]
 }) {
+  const SEARCH_KEY = "admin-products-search"
+  const BRAND_KEY = "admin-products-brand"
+  const STOCK_KEY = "admin-products-stock"
 
   const [items, setItems] =
     useState(products)
@@ -28,10 +31,29 @@ const [deletingId, setDeletingId] =
   useState("")
   const [showDeleteConfirm, setShowDeleteConfirm] =
     useState(false)
+  const [prefsReady, setPrefsReady] = useState(false)
 
   useEffect(() => {
     setItems(products)
   }, [products])
+
+  useEffect(() => {
+    const savedSearch = sessionStorage.getItem(SEARCH_KEY)
+    const savedBrand = sessionStorage.getItem(BRAND_KEY)
+    const savedStock = sessionStorage.getItem(STOCK_KEY)
+
+    if (savedSearch !== null) setSearch(savedSearch)
+    if (savedBrand !== null) setSelectedBrand(savedBrand)
+    if (savedStock !== null) setStockFilter(savedStock)
+    setPrefsReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!prefsReady) return
+    sessionStorage.setItem(SEARCH_KEY, search)
+    sessionStorage.setItem(BRAND_KEY, selectedBrand)
+    sessionStorage.setItem(STOCK_KEY, stockFilter)
+  }, [prefsReady, search, selectedBrand, stockFilter])
 
   const normalizedSearch =
     search.trim().toLowerCase()
@@ -50,6 +72,8 @@ const [deletingId, setDeletingId] =
           ? availableStock > 0
           : stockFilter === "Reserved"
           ? Number(product.reservedStock || 0) > 0
+          : stockFilter === "Pre Order"
+          ? Boolean(product.isPreOrder)
           : availableStock === 0
 
       const matchesSearch =
@@ -86,7 +110,7 @@ const [deletingId, setDeletingId] =
       <div className="mb-10 flex flex-col gap-4">
 
         <div className="flex flex-wrap gap-3">
-          {["All", "In Stock", "Reserved", "Out of Stock"].map((filter) => (
+          {["All", "In Stock", "Reserved", "Pre Order", "Out of Stock"].map((filter) => (
             <button
               key={filter}
               type="button"

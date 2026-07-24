@@ -28,6 +28,21 @@ export default function SettingsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [search, setSearch] = useState("")
   const [stockFilter, setStockFilter] = useState("All")
+  const [prefsReady, setPrefsReady] = useState(false)
+  const SEARCH_KEY = "admin-settings-search"
+  const STOCK_KEY = "admin-settings-stock"
+
+  const activeSuperDealProductIds = useMemo(() => {
+    if (products.length === 0) return []
+
+    return superDealProductIds.filter((productId) => {
+      const product = products.find((item) => item.id === productId)
+      if (!product) return false
+
+      const availableStock = Math.max(0, product.stock - (product.reservedStock || 0))
+      return availableStock > 0
+    })
+  }, [products, superDealProductIds])
 
   async function loadSettings() {
     const [settingsResponse, productsResponse] = await Promise.all([
@@ -59,7 +74,7 @@ export default function SettingsPage() {
         pickupEnabled,
         pickupLocation,
         maintenanceMode,
-        superDealProductIds,
+        superDealProductIds: activeSuperDealProductIds,
       }),
     })
 
@@ -71,8 +86,27 @@ export default function SettingsPage() {
   }
 
   useEffect(() => {
+    const savedSearch = sessionStorage.getItem(SEARCH_KEY)
+    const savedStock = sessionStorage.getItem(STOCK_KEY)
+    if (savedSearch !== null) setSearch(savedSearch)
+    if (savedStock !== null) setStockFilter(savedStock)
+    setPrefsReady(true)
     loadSettings()
   }, [])
+
+  useEffect(() => {
+    if (!prefsReady) return
+    sessionStorage.setItem(SEARCH_KEY, search)
+    sessionStorage.setItem(STOCK_KEY, stockFilter)
+  }, [prefsReady, search, stockFilter])
+
+  useEffect(() => {
+    if (products.length === 0) return
+
+    if (activeSuperDealProductIds.length !== superDealProductIds.length) {
+      setSuperDealProductIds(activeSuperDealProductIds)
+    }
+  }, [activeSuperDealProductIds, products.length, superDealProductIds.length])
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase()
@@ -193,6 +227,59 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            {activeSuperDealProductIds.length > 0 && (
+              <div className="mt-6 rounded-2xl border border-pink-500/20 bg-pink-500/5 p-4">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-sm uppercase tracking-wider text-pink-400">
+                      Selected Featured Picks
+                    </p>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      These are the products that will show on the homepage Super Deals section.
+                    </p>
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    {activeSuperDealProductIds.length}/{MAX_SUPER_DEALS} selected
+                  </p>
+                </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {activeSuperDealProductIds.map((productId) => {
+                    const selectedProduct = products.find((product) => product.id === productId)
+                    if (!selectedProduct) return null
+                    const availableStock = Math.max(0, selectedProduct.stock - (selectedProduct.reservedStock || 0))
+
+                    return (
+                      <div
+                        key={productId}
+                        className="flex items-center gap-4 rounded-2xl border border-zinc-700 bg-[#111118] p-3"
+                      >
+                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-zinc-700 bg-black/40">
+                          <Image
+                            src={selectedProduct.images?.[0] || "/logo.png"}
+                            alt={selectedProduct.name}
+                            fill
+                            className="object-contain p-2"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs uppercase tracking-[0.25em] text-pink-400">
+                            Pick {activeSuperDealProductIds.indexOf(productId) + 1}
+                          </p>
+                          <h3 className="mt-1 truncate text-sm font-semibold text-white">
+                            {selectedProduct.name}
+                          </h3>
+                          <p className="mt-1 text-xs text-zinc-400">
+                            ₹{selectedProduct.price} • {availableStock > 0 ? "In stock" : "Out of stock"}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="mt-4">
               <p className="text-pink-400 text-sm font-medium mb-3">Filter</p>
               <div className="flex flex-wrap gap-3">
@@ -218,9 +305,9 @@ export default function SettingsPage() {
 
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[560px] overflow-y-auto pr-1">
               {filteredProducts.map((product) => {
-                const selected = superDealProductIds.includes(product.id)
+                const selected = activeSuperDealProductIds.includes(product.id)
                 const availableStock = Math.max(0, product.stock - (product.reservedStock || 0))
-                const selectedCount = superDealProductIds.length
+                const selectedCount = activeSuperDealProductIds.length
 
                 return (
                   <button
@@ -228,11 +315,23 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => {
                       setSuperDealProductIds((current) => {
+                        const currentActiveCount = current.filter((productId) => {
+                          const selectedProduct = products.find((item) => item.id === productId)
+                          if (!selectedProduct) return false
+
+                          const selectedAvailableStock = Math.max(
+                            0,
+                            selectedProduct.stock - (selectedProduct.reservedStock || 0),
+                          )
+
+                          return selectedAvailableStock > 0
+                        }).length
+
                         if (current.includes(product.id)) {
                           return current.filter((id) => id !== product.id)
                         }
 
-                        if (current.length >= MAX_SUPER_DEALS) {
+                        if (currentActiveCount >= MAX_SUPER_DEALS) {
                           toast.error(`You can select only ${MAX_SUPER_DEALS} products`)
                           return current
                         }
