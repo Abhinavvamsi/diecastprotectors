@@ -131,6 +131,7 @@ duration-300
 
         <Link
           href="/admin/add-product"
+          prefetch
           className="
           group
          bg-zinc-900
@@ -194,6 +195,7 @@ text-white
 
         <Link
           href="/admin/pre-orders"
+          prefetch
           className="
           group
      bg-zinc-900
@@ -229,6 +231,7 @@ hover:shadow-[0_0_30px_rgba(34,211,238,.20)]
 
         <Link
           href="/admin/orders"
+          prefetch
           className="
           group
      bg-zinc-900
@@ -293,6 +296,7 @@ text-white
 
         <Link
           href="/admin/products"
+          prefetch
           className="
           group
           bg-zinc-900
@@ -356,6 +360,7 @@ text-white
 {/* Brand Management */}
 <Link
   href="/admin/brands"
+  prefetch
   className="
   group
   bg-zinc-900
@@ -432,6 +437,7 @@ text-white
 
 <Link
   href="/admin/banners"
+  prefetch
   className="
   group
   bg-zinc-900
@@ -499,6 +505,7 @@ text-white
 
         <Link
           href="/admin/coupons"
+          prefetch
           className="
           group
          bg-zinc-900
@@ -564,6 +571,7 @@ text-white
 
         <Link
           href="/admin/settings"
+          prefetch
           className="
           group
           bg-zinc-900
@@ -628,6 +636,7 @@ text-white
 
   <Link
     href="/admin/admins"
+    prefetch
     className="
     group
     bg-zinc-900
@@ -685,6 +694,7 @@ text-white
 
   <Link
     href="/admin/bulk-import"
+    prefetch
     className="
     group
     bg-zinc-900

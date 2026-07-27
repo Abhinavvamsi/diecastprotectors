@@ -2,6 +2,7 @@ import BulkStatusButton from "@/components/bulk-status-button"
 import Image from "next/image"
 import Link from "next/link"
 import AdminNav from "@/components/admin-nav"
+import AdminOrdersSearch from "@/components/admin-orders-search"
 export const dynamic = "force-dynamic"
 
 import { prisma } from "@/lib/prisma"
@@ -58,43 +59,13 @@ export default async function OrdersPage({
       status: true,
     },
     
-where: {
-
-  ...(search
-    ? {
-        OR: [
-
-          {
-            orderId: {
-              contains: search,
-              mode: "insensitive",
-            },
-          },
-
-          {
-            customer: {
-              contains: search,
-              mode: "insensitive",
-            },
-          },
-
-          {
-            phone: {
-              contains: search,
-            },
-          },
-
-        ],
-      }
-    : {}),
-
-  ...(status !== "All"
-    ? {
-        status,
-      }
-    : {}),
-
-},
+    where: {
+      ...(status !== "All"
+        ? {
+            status,
+          }
+        : {}),
+    },
 
     orderBy: {
       createdAt: "desc",
@@ -153,6 +124,8 @@ where: {
       return Boolean(item.isPreOrder) || Boolean(fallbackProduct?.isPreOrder)
     })
 
+  const normalizedSearch = search.trim().toLowerCase()
+
 	  const productFilteredOrders = productId
 	    ? uniqueOrders.filter((order: any) =>
 	        (order.products as any[]).some(
@@ -161,14 +134,42 @@ where: {
 	      )
 	    : uniqueOrders
 
+  const searchFilteredOrders = normalizedSearch
+    ? productFilteredOrders.filter((order: any) => {
+        const productNames = (order.products as any[])
+          .map((item) => {
+            const fallbackProduct = productMap.get(item.id)
+            return (
+              item.name ||
+              item.model ||
+              item.productName ||
+              fallbackProduct?.name ||
+              ""
+            )
+          })
+          .join(" ")
+
+        return [
+          order.orderId,
+          order.customer,
+          order.phone,
+          productNames,
+        ].some((value) =>
+          String(value || "")
+            .toLowerCase()
+            .includes(normalizedSearch)
+        )
+      })
+    : productFilteredOrders
+
   const filteredOrders =
     normalizedPreorderFilter === "Pre-Orders"
-      ? productFilteredOrders.filter(orderHasPreOrderItem)
+      ? searchFilteredOrders.filter(orderHasPreOrderItem)
       : normalizedPreorderFilter === "Regular"
-      ? productFilteredOrders.filter(
+      ? searchFilteredOrders.filter(
           (order: any) => !orderHasPreOrderItem(order)
         )
-      : productFilteredOrders
+      : searchFilteredOrders
 const [
   pendingCount,
   packedCount,
@@ -558,28 +559,7 @@ shadow-2xl
   value={preorderFilter}
 />
 
-<input
-  type="text"
-  name="search"
-  defaultValue={search}
-  placeholder="Search Order ID, Customer Name, Phone Number"
-  className="
-  w-full
-  h-14
-  rounded-2xl
-  bg-zinc-900
-border-zinc-700
-text-white
-placeholder:text-zinc-500
-focus:border-pink-500
-focus:ring-pink-500/30
-  border
-  px-5
-  outline-none
-  focus:ring-2
-  transition-all
-  "
-/>
+<AdminOrdersSearch initialSearch={search} />
 
 </form>
 
@@ -793,7 +773,7 @@ text-purple-400
 
       ${
         order.status === "Confirmed"
-          ? "bg-yellow-500/15 border-yellow-500/30 text-yellow-400"
+          ? "bg-green-500/15 border-green-500/30 text-green-400"
 
           : order.status === "Packed"
           ? "bg-blue-500/15 border-blue-500/30 text-blue-400"

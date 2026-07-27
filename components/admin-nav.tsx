@@ -98,10 +98,11 @@ export default function AdminNav() {
 
         return (
 
-          <Link
-            key={link.href}
-            href={link.href}
-          >
+            <Link
+              key={link.href}
+              href={link.href}
+              prefetch
+            >
 
             <button
               className={`
