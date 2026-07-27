@@ -853,12 +853,15 @@ text-purple-400
                                 pricing.linePayablePrice,
                           0
                         )
-                      const remainingLaterTotal =
-                        itemBreakdowns.reduce(
-                          (sum, { pricing }) =>
-                            sum + pricing.lineRemainingPrice,
-                          0
-                        )
+	                      const remainingLaterTotal =
+	                        itemBreakdowns.reduce(
+	                          (sum, { item, pricing }) =>
+	                            item.preOrderBalancePaid
+	                              ? sum
+	                              : sum +
+	                                pricing.lineRemainingPrice,
+	                          0
+	                        )
                       const shippingCharge =
                         calculateShippingCharge({
                           subtotal:
@@ -1035,6 +1038,12 @@ shadow-sm pt-8">
                                 <span className="text-xs mt-1">Original amount: ₹{pricing.lineOriginalPrice}</span>
                                 <span className="text-xs">Deposit paid: ₹{pricing.linePayablePrice}</span>
                                 <span className="text-xs">Balance due on arrival: ₹{pricing.lineRemainingPrice}</span>
+                                {product.preOrderArrived && !product.preOrderBalancePaid && (
+                                  <span className="text-xs mt-1 text-green-300">Arrived - waiting for balance payment</span>
+                                )}
+                                {product.preOrderBalancePaid && (
+                                  <span className="text-xs mt-1 text-green-300">Balance paid</span>
+                                )}
                               </div>
                             ) : (
                               <p className="text-pink-400">

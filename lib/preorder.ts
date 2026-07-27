@@ -86,8 +86,8 @@ export function getOrderItemPricing(
     Number(item?.price ?? item?.unitPrice ?? 0)
   )
   const depositAmountSource =
-    fallbackProduct?.depositAmount ??
     item?.depositAmount ??
+    fallbackProduct?.depositAmount ??
     50
   const depositAmount = Number(
     depositAmountSource

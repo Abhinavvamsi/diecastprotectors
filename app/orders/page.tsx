@@ -14,6 +14,7 @@ import {
 import { redirect }
 from "next/navigation"
 import { getOrderItemPricing } from "@/lib/preorder"
+import PayPreOrderBalanceButton from "@/components/pay-preorder-balance-button"
 
 function formatOrderTime(
   value: Date
@@ -173,7 +174,34 @@ hover:text-white
         {/* Orders */}
         <div className="space-y-8">
 
-	          {uniqueOrders.map((order) => (
+	          {uniqueOrders.map((order) => {
+              const orderProducts = order.products as any[]
+              const arrivedUnpaidBalance =
+                orderProducts.reduce((total, item) => {
+                  const pricing = getOrderItemPricing(item)
+
+                  if (
+                    !pricing.isPreOrder ||
+                    !item.preOrderArrived ||
+                    item.preOrderBalancePaid
+                  ) {
+                    return total
+                  }
+
+                  return total + pricing.lineRemainingPrice
+                }, 0)
+              const waitingForArrivalCount =
+                orderProducts.filter((item) => {
+                  const pricing = getOrderItemPricing(item)
+
+                  return (
+                    pricing.isPreOrder &&
+                    !item.preOrderArrived &&
+                    !item.preOrderBalancePaid
+                  )
+                }).length
+
+              return (
 
             <div
               key={order.id}
@@ -251,7 +279,7 @@ text-transparent text-sm uppercase tracking-widest">
                 {/* PRODUCTS */}
                 <div className="space-y-4">
 
-                  {(order.products as any[])
+	                  {orderProducts
                     .map((product, index) => {
                       const fallbackProduct =
                         productMap.get(product.id)
@@ -346,12 +374,18 @@ text-transparent text-sm uppercase tracking-widest">
                         {isPreOrder && (
                           <div className="mt-2 inline-flex flex-col rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-100">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre-Order</span>
-                            <span className="text-xs mt-1">Original amount: ₹{lineOriginalPrice}</span>
-                            <span className="text-xs">Deposit paid: ₹{lineDepositPrice}</span>
-                            <span className="text-xs">Balance due on arrival: ₹{lineRemainingPrice}</span>
-                            {expectedArrival && (
-                              <span className="text-xs mt-1">Arrives {expectedArrival}</span>
-                            )}
+	                            <span className="text-xs mt-1">Original amount: ₹{lineOriginalPrice}</span>
+	                            <span className="text-xs">Deposit paid: ₹{lineDepositPrice}</span>
+	                            <span className="text-xs">Balance due on arrival: ₹{lineRemainingPrice}</span>
+	                            {product.preOrderArrived && !product.preOrderBalancePaid && (
+	                              <span className="text-xs mt-1 text-green-300">Arrived - payment ready</span>
+	                            )}
+	                            {product.preOrderBalancePaid && (
+	                              <span className="text-xs mt-1 text-green-300">Balance paid</span>
+	                            )}
+	                            {expectedArrival && (
+	                              <span className="text-xs mt-1">Arrives {expectedArrival}</span>
+	                            )}
                           </div>
                         )}
 
@@ -442,15 +476,50 @@ duration-300
 
                     </Button>
 
-                  </Link>
+	                  </Link>
 
-                </div>
+                    {arrivedUnpaidBalance > 0 ? (
+                      <PayPreOrderBalanceButton
+                        orderId={order.id}
+                        amount={arrivedUnpaidBalance}
+                      />
+                    ) : waitingForArrivalCount > 0 ? (
+                      <button
+                        type="button"
+                        disabled
+                        className="
+                        mt-4
+                        inline-flex
+                        max-w-xs
+                        items-center
+                        justify-center
+                        rounded-full
+                        border
+                        border-cyan-500/25
+                        bg-cyan-500/10
+                        px-5
+                        py-3
+                        text-center
+                        text-xs
+                        font-bold
+                        uppercase
+                        tracking-wider
+                        text-cyan-200/80
+                        opacity-70
+                        "
+                      >
+                        Pay remaining balance will enable after stock arrives
+                      </button>
+                    ) : null}
+
+	                </div>
 
               </div>
 
             </div>
 
-          ))}
+              )
+            })}
 
         </div>
 

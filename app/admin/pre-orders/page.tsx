@@ -57,6 +57,31 @@ export default async function AdminPreOrdersPage() {
     stockSold: soldStock,
     availableStock: Math.max(0, currentStock - reservedStock),
   }
+  const arrivedOrderCounts = new Map<string, number>()
+
+  preorderOrders.forEach((order) => {
+    const items = Array.isArray(order.products)
+      ? order.products
+      : []
+    const arrivedProductIds = new Set<string>()
+
+    items.forEach((item: any) => {
+      if (item?.isPreOrder && item?.preOrderArrived && item?.id) {
+        arrivedProductIds.add(item.id)
+      }
+    })
+
+    arrivedProductIds.forEach((productId) => {
+      arrivedOrderCounts.set(
+        productId,
+        (arrivedOrderCounts.get(productId) || 0) + 1
+      )
+    })
+  })
+  const productsWithArrivalState = products.map((product) => ({
+    ...product,
+    arrivedOrderCount: arrivedOrderCounts.get(product.id) || 0,
+  }))
 
   return (
     <main className="min-h-screen bg-[#09090B] p-8 text-white">
@@ -131,7 +156,7 @@ export default async function AdminPreOrdersPage() {
           </div>
         </div>
 
-        <AdminPreOrdersList products={products as any[]} />
+        <AdminPreOrdersList products={productsWithArrivalState as any[]} />
       </div>
     </main>
   )

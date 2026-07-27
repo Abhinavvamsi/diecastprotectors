@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
 import { Search } from "lucide-react"
+import PreOrderProductArrivalButton from "@/components/preorder-product-arrival-button"
 
 type PreOrderProduct = {
   id: string
@@ -14,6 +15,7 @@ type PreOrderProduct = {
   reservedStock?: number
   depositAmount?: number
   expectedArrival?: string | null
+  arrivedOrderCount?: number
   brand?: {
     name?: string
   }
@@ -135,6 +137,10 @@ export default function AdminPreOrdersList({
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">
+                    <PreOrderProductArrivalButton
+                      productId={product.id}
+                      arrivedCount={product.arrivedOrderCount || 0}
+                    />
                     <Link
                       href={`/admin/orders?productId=${product.id}`}
                       className="rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-3 font-semibold text-cyan-100 transition hover:scale-105 hover:border-cyan-400"
