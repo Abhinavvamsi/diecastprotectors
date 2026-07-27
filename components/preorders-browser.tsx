@@ -20,6 +20,7 @@ type PreOrderProduct = {
   expectedArrival?: string | null
   brand?: {
     name?: string
+    logo?: string
   }
 }
 
@@ -62,15 +63,19 @@ export default function PreOrdersBrowser({
 
   const brandFilters = useMemo(
     () => [
-      "All",
+      { name: "All", logo: "" },
       ...Array.from(
-        new Set(
+        new Map(
           products
-            .map((product) => product.brand?.name)
-            .filter(
-              (brand): brand is string => Boolean(brand)
-            )
-        )
+            .filter((product) => Boolean(product.brand?.name))
+            .map((product): [string, { name: string; logo: string }] => [
+              product.brand!.name as string,
+              {
+                name: product.brand!.name as string,
+                logo: product.brand?.logo || "",
+              },
+            ])
+        ).values()
       ),
     ],
     [products]
@@ -156,15 +161,28 @@ export default function PreOrdersBrowser({
         <div className="flex flex-wrap gap-3">
           {brandFilters.map((brand) => (
             <button
-              key={brand}
-              onClick={() => setSelectedBrand(brand)}
-              className={`rounded-full border px-5 py-2.5 transition-all duration-300 ${
-                selectedBrand === brand
+              key={brand.name}
+              onClick={() => setSelectedBrand(brand.name)}
+              className={`flex min-w-[7rem] items-center justify-center gap-2 rounded-full border px-5 py-2.5 transition-all duration-300 ${
+                selectedBrand === brand.name
                   ? "border-transparent bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                   : "border-[#2B2B3A] text-gray-300 hover:border-cyan-400"
               }`}
             >
-              {brand}
+              {brand.name === "All" ? (
+                <span>{brand.name}</span>
+              ) : (
+                <>
+                  {brand.logo ? (
+                    <img
+                      src={brand.logo}
+                      alt={brand.name}
+                      className="h-6 w-6 rounded-full object-contain"
+                    />
+                  ) : null}
+                  <span>{brand.name}</span>
+                </>
+              )}
             </button>
           ))}
         </div>

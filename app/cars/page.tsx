@@ -227,22 +227,22 @@ useEffect(() => {
 
 }, [loading])
 
-const brandFilters: string[] = [
+const brandFilters = [
 
-  "All",
+  { name: "All", logo: "" },
 
-  ...new Set(
-
-    products
-      .map(
-        (product) =>
-          product.brand?.name
-      )
-      .filter(
-        (brand): brand is string =>
-          Boolean(brand)
-      )
-
+  ...Array.from(
+    new Map(
+      products
+        .filter((product) => Boolean(product.brand?.name))
+        .map((product) => [
+          product.brand!.name,
+          {
+            name: product.brand!.name,
+            logo: product.brand?.logo || "",
+          },
+        ])
+    ).values()
   ),
 
 ]
@@ -516,27 +516,44 @@ to-purple-600
     {brandFilters.map((brand) => (
 
       <button
-        key={brand}
+        key={brand.name}
         onClick={() =>
-          setSelectedBrand(brand)
+          setSelectedBrand(brand.name)
         }
         className={`
           px-5
           py-2.5
           rounded-full
           border
+          min-w-[7rem]
           transition-all
           duration-300
-
+          flex
+          items-center
+          justify-center
+          gap-2
+        
           ${
-            selectedBrand === brand
+            selectedBrand === brand.name
 ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent"
 : "border-[#2B2B3A] text-gray-300 hover:border-pink-500"
           }
         `}
       >
-
-        {brand}
+        {brand.name === "All" ? (
+          <span>{brand.name}</span>
+        ) : (
+          <>
+            {brand.logo ? (
+              <img
+                src={brand.logo}
+                alt={brand.name}
+                className="h-6 w-6 rounded-full object-contain"
+              />
+            ) : null}
+            <span>{brand.name}</span>
+          </>
+        )}
 
       </button>
 

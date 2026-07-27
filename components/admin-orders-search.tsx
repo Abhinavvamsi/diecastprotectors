@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 
 type AdminOrdersSearchProps = {
   initialSearch: string
@@ -10,39 +9,52 @@ type AdminOrdersSearchProps = {
 export default function AdminOrdersSearch({
   initialSearch,
 }: AdminOrdersSearchProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
   const [value, setValue] = useState(initialSearch)
 
   useEffect(() => {
     setValue(initialSearch)
   }, [initialSearch])
 
-  const nextQuery = useMemo(() => {
-    return (search: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-
-      if (search.trim()) {
-        params.set("search", search.trim())
-      } else {
-        params.delete("search")
-      }
-
-      return params.toString()
-    }
-  }, [searchParams])
-
   useEffect(() => {
     const timeout = window.setTimeout(() => {
-      const query = nextQuery(value)
-      router.replace(query ? `${pathname}?${query}` : pathname, {
-        scroll: false,
+      const term = value.trim().toLowerCase()
+      const orderCards = document.querySelectorAll<HTMLElement>(
+        "[data-admin-order-card]"
+      )
+      let visibleCount = 0
+
+      orderCards.forEach((card) => {
+        const searchIndex = card.dataset.orderSearch || ""
+        const shouldShow = !term || searchIndex.includes(term)
+        card.style.display = shouldShow ? "" : "none"
+        if (shouldShow) visibleCount += 1
       })
-    }, 180)
+
+      const emptyState = document.querySelector<HTMLElement>(
+        "[data-admin-orders-empty]"
+      )
+      if (emptyState) {
+        emptyState.style.display = visibleCount === 0 ? "" : "none"
+      }
+    }, 120)
 
     return () => window.clearTimeout(timeout)
-  }, [pathname, router, nextQuery, value])
+  }, [value])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (value.trim()) {
+      params.set("search", value.trim())
+    } else {
+      params.delete("search")
+    }
+
+    const next = params.toString()
+    const url = next
+      ? `${window.location.pathname}?${next}`
+      : window.location.pathname
+    window.history.replaceState({}, "", url)
+  }, [value])
 
   return (
     <input

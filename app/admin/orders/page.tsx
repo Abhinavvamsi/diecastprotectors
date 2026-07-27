@@ -134,42 +134,14 @@ export default async function OrdersPage({
 	      )
 	    : uniqueOrders
 
-  const searchFilteredOrders = normalizedSearch
-    ? productFilteredOrders.filter((order: any) => {
-        const productNames = (order.products as any[])
-          .map((item) => {
-            const fallbackProduct = productMap.get(item.id)
-            return (
-              item.name ||
-              item.model ||
-              item.productName ||
-              fallbackProduct?.name ||
-              ""
-            )
-          })
-          .join(" ")
-
-        return [
-          order.orderId,
-          order.customer,
-          order.phone,
-          productNames,
-        ].some((value) =>
-          String(value || "")
-            .toLowerCase()
-            .includes(normalizedSearch)
-        )
-      })
-    : productFilteredOrders
-
   const filteredOrders =
     normalizedPreorderFilter === "Pre-Orders"
-      ? searchFilteredOrders.filter(orderHasPreOrderItem)
+      ? productFilteredOrders.filter(orderHasPreOrderItem)
       : normalizedPreorderFilter === "Regular"
-      ? searchFilteredOrders.filter(
+      ? productFilteredOrders.filter(
           (order: any) => !orderHasPreOrderItem(order)
         )
-      : searchFilteredOrders
+      : productFilteredOrders
 const [
   pendingCount,
   packedCount,
@@ -563,27 +535,27 @@ shadow-2xl
 
 </form>
 
-{filteredOrders.length === 0 && (
+<div
+  data-admin-orders-empty
+  style={{
+    display: filteredOrders.length === 0 ? "" : "none",
+  }}
+  className="
+  bg-zinc-900
+	border-zinc-800
+  border
+  shadow-sm
+  rounded-3xl
+  p-10
+  text-center
+  "
+>
 
-  <div
-    className="
-    bg-zinc-900
-border-zinc-800
-    border
-    shadow-sm
-    rounded-3xl
-    p-10
-    text-center
-    "
-  >
+  <p className="text-zinc-400">
+    No orders found
+  </p>
 
-    <p className="text-zinc-400">
-      No orders found
-    </p>
-
-  </div>
-
-)}
+</div>
 
 <div className="space-y-8">
 
@@ -591,10 +563,32 @@ border-zinc-800
 
     <div
       key={order.id}
+      data-admin-order-card
+      data-order-search={[
+        order.orderId,
+        order.customer,
+        order.email,
+        order.phone,
+        order.address,
+        order.city,
+        order.pincode,
+        ...(order.products as any[]).flatMap((item) => {
+          const fallbackProduct = productMap.get(item.id)
+          return [
+            item.name,
+            item.model,
+            item.productName,
+            fallbackProduct?.name,
+          ]
+        }),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()}
       className="
       bg-zinc-900
-border-zinc-800
-shadow-2xl
+	border-zinc-800
+	shadow-2xl
       border
       rounded-3xl
       p-8
