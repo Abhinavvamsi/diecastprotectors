@@ -15,6 +15,8 @@ import { redirect }
 from "next/navigation"
 import { getOrderItemPricing } from "@/lib/preorder"
 import PayPreOrderBalanceButton from "@/components/pay-preorder-balance-button"
+import PayPreOrderShippingButton from "@/components/pay-preorder-shipping-button"
+import { getPreOrderShippingBatch } from "@/lib/preorder-shipping"
 
 function formatOrderTime(
   value: Date
@@ -29,7 +31,13 @@ function formatOrderTime(
   ).format(value)
 }
 
-export default async function OrdersPage() {
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    filter?: string | string[] | undefined
+  }>
+}) {
 
   const user =
     await currentUser()
@@ -97,6 +105,83 @@ export default async function OrdersPage() {
       }, new Map<string, typeof orders[number]>())
       .values()
   )
+
+  const params = searchParams
+    ? await searchParams
+    : {}
+  const activeFilter =
+    typeof params.filter === "string"
+      ? params.filter
+      : "all"
+
+  const orderPaymentStatus = new Map<
+    string,
+    {
+      paymentDue: number
+      shippingDue: number
+      waitingForArrival: number
+    }
+  >()
+
+  for (const order of uniqueOrders) {
+    const orderProducts = order.products as any[]
+    const paymentDue =
+      orderProducts.reduce((total, item) => {
+        const pricing = getOrderItemPricing(item)
+
+        if (
+          !pricing.isPreOrder ||
+          !item.preOrderArrived ||
+          item.preOrderBalancePaid
+        ) {
+          return total
+        }
+
+        return total + pricing.lineRemainingPrice
+      }, 0)
+    const shippingBatch = getPreOrderShippingBatch(
+      orderProducts,
+      order.deliveryMethod
+    )
+    const waitingForArrival =
+      orderProducts.filter((item) => {
+        const pricing = getOrderItemPricing(item)
+
+        return (
+          pricing.isPreOrder &&
+          !item.preOrderArrived &&
+          !item.preOrderBalancePaid
+        )
+      }).length
+
+    orderPaymentStatus.set(order.id, {
+      paymentDue,
+      shippingDue: shippingBatch.shippingAmount,
+      waitingForArrival,
+    })
+  }
+
+  const paymentDueCount =
+    uniqueOrders.filter((order) => {
+      const status = orderPaymentStatus.get(order.id)
+
+      return Boolean(
+        status &&
+          (status.paymentDue > 0 || status.shippingDue > 0)
+      )
+    }).length
+
+  const filteredOrders =
+    activeFilter === "payment-due"
+      ? uniqueOrders.filter((order) => {
+          const status = orderPaymentStatus.get(order.id)
+
+          return Boolean(
+            status &&
+              (status.paymentDue > 0 || status.shippingDue > 0)
+          )
+        })
+      : uniqueOrders
 	
 	  return (
 
@@ -171,35 +256,89 @@ hover:text-white
 
         )}
 
+        {uniqueOrders.length > 0 && (
+          <div className="mb-8 space-y-5">
+            {paymentDueCount > 0 && (
+              <div className="
+                animate-pulse
+                rounded-3xl
+                border
+                border-orange-400/40
+                bg-orange-500/10
+                p-5
+                shadow-[0_0_35px_rgba(251,146,60,.18)]
+              ">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+                  Payment Action Required
+                </p>
+                <p className="mt-2 text-zinc-200">
+                  {paymentDueCount} order{paymentDueCount === 1 ? "" : "s"} need balance or shipping payment before dispatch.
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-3">
+              {[
+                {
+                  label: "All Orders",
+                  href: "/orders",
+                  active: activeFilter === "all",
+                  count: uniqueOrders.length,
+                },
+                {
+                  label: "Payment Due",
+                  href: "/orders?filter=payment-due",
+                  active: activeFilter === "payment-due",
+                  count: paymentDueCount,
+                  blink: paymentDueCount > 0,
+                },
+              ].map((filter) => (
+                <Link
+                  key={filter.href}
+                  href={filter.href}
+                  className={`
+                    rounded-full
+                    border
+                    px-5
+                    py-3
+                    text-sm
+                    font-bold
+                    uppercase
+                    tracking-wider
+                    transition-all
+                    duration-300
+                    ${
+                      filter.active
+                        ? "border-pink-500 bg-pink-500 text-white shadow-[0_0_25px_rgba(236,72,153,.35)]"
+                        : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-pink-500/60 hover:text-white"
+                    }
+                    ${filter.blink ? "animate-pulse" : ""}
+                  `}
+                >
+                  {filter.label} ({filter.count})
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Orders */}
         <div className="space-y-8">
 
-	          {uniqueOrders.map((order) => {
+	          {filteredOrders.map((order) => {
               const orderProducts = order.products as any[]
+              const status =
+                orderPaymentStatus.get(order.id) || {
+                  paymentDue: 0,
+                  shippingDue: 0,
+                  waitingForArrival: 0,
+                }
               const arrivedUnpaidBalance =
-                orderProducts.reduce((total, item) => {
-                  const pricing = getOrderItemPricing(item)
-
-                  if (
-                    !pricing.isPreOrder ||
-                    !item.preOrderArrived ||
-                    item.preOrderBalancePaid
-                  ) {
-                    return total
-                  }
-
-                  return total + pricing.lineRemainingPrice
-                }, 0)
+                status.paymentDue
               const waitingForArrivalCount =
-                orderProducts.filter((item) => {
-                  const pricing = getOrderItemPricing(item)
-
-                  return (
-                    pricing.isPreOrder &&
-                    !item.preOrderArrived &&
-                    !item.preOrderBalancePaid
-                  )
-                }).length
+                status.waitingForArrival
+              const arrivedUnpaidShipping =
+                status.shippingDue
 
               return (
 
@@ -376,13 +515,23 @@ text-transparent text-sm uppercase tracking-widest">
                             <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre-Order</span>
 	                            <span className="text-xs mt-1">Original amount: ₹{lineOriginalPrice}</span>
 	                            <span className="text-xs">Deposit paid: ₹{lineDepositPrice}</span>
-	                            <span className="text-xs">Balance due on arrival: ₹{lineRemainingPrice}</span>
-	                            {product.preOrderArrived && !product.preOrderBalancePaid && (
-	                              <span className="text-xs mt-1 text-green-300">Arrived - payment ready</span>
-	                            )}
-	                            {product.preOrderBalancePaid && (
-	                              <span className="text-xs mt-1 text-green-300">Balance paid</span>
-	                            )}
+		                            <span
+		                              className={`text-xs font-semibold ${
+		                                product.preOrderBalancePaid
+		                                  ? "text-green-300"
+		                                  : "text-orange-300"
+		                              }`}
+		                            >
+		                              {product.preOrderBalancePaid
+		                                ? `Balance paid: ₹${lineRemainingPrice}`
+		                                : `Balance still due: ₹${lineRemainingPrice}`}
+		                            </span>
+		                            {product.preOrderArrived && !product.preOrderBalancePaid && (
+		                              <span className="text-xs mt-1 text-green-300">Arrived - payment ready</span>
+		                            )}
+		                            {product.preOrderShippingPaid && (
+		                              <span className="text-xs mt-1 text-green-300">Shipping paid</span>
+		                            )}
 	                            {expectedArrival && (
 	                              <span className="text-xs mt-1">Arrives {expectedArrival}</span>
 	                            )}
@@ -452,16 +601,28 @@ text-transparent
 
                   </div>
 
-                  <Link
-                    href={`/track-order`}
-                  >
+	                  <div className="
+	                    mt-8
+	                    flex
+	                    w-full
+	                    max-w-sm
+	                    flex-col
+	                    gap-4
+	                    sm:items-stretch
+	                  ">
 
-                    <Button
-                      className="
-                      mt-8
-                      rounded-xl
-                     bg-gradient-to-r
-from-pink-500
+	                  <Link
+		                    href={`/track-order?orderId=${encodeURIComponent(order.orderId)}`}
+	                    className="w-full"
+	                  >
+
+	                    <Button
+	                      className="
+	                      w-full
+	                      min-h-14
+	                      rounded-xl
+	                     bg-gradient-to-r
+	from-pink-500
 via-fuchsia-500
 to-purple-600
 text-white
@@ -476,9 +637,9 @@ duration-300
 
                     </Button>
 
-	                  </Link>
+		                  </Link>
 
-                    {arrivedUnpaidBalance > 0 ? (
+	                    {arrivedUnpaidBalance > 0 ? (
                       <PayPreOrderBalanceButton
                         orderId={order.id}
                         amount={arrivedUnpaidBalance}
@@ -488,9 +649,9 @@ duration-300
                         type="button"
                         disabled
                         className="
-                        mt-4
-                        inline-flex
-                        max-w-xs
+	                        inline-flex
+	                        w-full
+	                        min-h-14
                         items-center
                         justify-center
                         rounded-full
@@ -512,7 +673,16 @@ duration-300
                       </button>
                     ) : null}
 
-	                </div>
+	                    {arrivedUnpaidShipping > 0 ? (
+	                      <PayPreOrderShippingButton
+	                        orderId={order.id}
+	                        amount={arrivedUnpaidShipping}
+	                      />
+	                    ) : null}
+
+	                  </div>
+
+		                </div>
 
               </div>
 

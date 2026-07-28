@@ -49,6 +49,7 @@ model Product {
   isPreOrder      Boolean  @default(false)
   depositAmount   Int      @default(50)
   expectedArrival String?
+  preOrderDeadline String?
 
   brandId         String?
   brand           Brand? @relation(fields: [brandId], references: [id])

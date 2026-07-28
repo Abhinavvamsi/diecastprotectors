@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import Navbar from "@/components/navbar"
 import { motion } from "framer-motion"
@@ -36,14 +36,19 @@ export default function TrackOrderPage() {
     setLoading
   ] = useState(false)
 
-  async function handleTrackOrder() {
+  async function handleTrackOrder(
+    requestedOrderId = orderId
+  ) {
+    const cleanOrderId = requestedOrderId.trim()
+
+    if (!cleanOrderId) return
 
     try {
 
       setLoading(true)
 
       const response = await fetch(
-        `/api/track-order?orderId=${orderId}`
+        `/api/track-order?orderId=${encodeURIComponent(cleanOrderId)}`
       )
 
       if (!response.ok) {
@@ -74,6 +79,16 @@ export default function TrackOrderPage() {
     }
 
   }
+
+  useEffect(() => {
+    const orderIdFromUrl =
+      new URLSearchParams(window.location.search).get("orderId") || ""
+
+    if (!orderIdFromUrl) return
+
+    setOrderId(orderIdFromUrl)
+    handleTrackOrder(orderIdFromUrl)
+  }, [])
 
   return (
 
@@ -132,11 +147,16 @@ export default function TrackOrderPage() {
             type="text"
             placeholder="Enter Order ID"
             value={orderId}
-            onChange={(e) =>
-              setOrderId(
-                e.target.value
-              )
-            }
+	            onChange={(e) =>
+	              setOrderId(
+	                e.target.value
+	              )
+	            }
+	            onKeyDown={(e) => {
+	              if (e.key === "Enter") {
+	                handleTrackOrder()
+	              }
+	            }}
             className="
 w-full
 h-14
@@ -156,9 +176,9 @@ transition
           />
 
           <button
-            onClick={
-              handleTrackOrder
-            }
+	            onClick={() =>
+	              handleTrackOrder()
+	            }
             disabled={
               loading ||
               !orderId

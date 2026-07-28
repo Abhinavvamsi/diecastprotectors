@@ -28,6 +28,57 @@ export function getProductRemainingPrice(product: any) {
   return getDepositSetting(product).unitRemainingPrice
 }
 
+export function getIndiaDateKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date)
+
+  const values = Object.fromEntries(
+    parts.map((part) => [part.type, part.value])
+  )
+
+  return `${values.year}-${values.month}-${values.day}`
+}
+
+export function isPreOrderDeadlineActive(
+  product: any,
+  todayKey = getIndiaDateKey()
+) {
+  if (!product?.isPreOrder) return true
+
+  const deadline = String(
+    product.preOrderDeadline || ""
+  ).trim()
+
+  if (!deadline) return true
+
+  return deadline.slice(0, 10) >= todayKey
+}
+
+export function formatIndianDisplayDate(
+  value?: string | Date | null
+) {
+  if (!value) return ""
+
+  const rawValue =
+    value instanceof Date
+      ? value.toISOString()
+      : String(value).trim()
+
+  if (!rawValue) return ""
+
+  const normalized = rawValue.slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+    return rawValue
+  }
+
+  const [year, month, day] = normalized.split("-")
+  return `${day}-${month}-${year}`
+}
+
 export function getProductPayableLinePrice(
   product: any,
   quantity = 1

@@ -3,10 +3,13 @@ import Link from "next/link"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import PreOrdersBrowser from "@/components/preorders-browser"
+import { getIndiaDateKey } from "@/lib/preorder"
 
 export const dynamic = "force-dynamic"
 
 export default async function PreOrdersPage() {
+  const todayKey = getIndiaDateKey()
+
   const products = await prisma.product.findMany({
     where: {
       isPreOrder: true,
@@ -18,6 +21,12 @@ export default async function PreOrdersPage() {
       createdAt: "desc",
     },
   })
+
+  const activeProducts = products.filter(
+    (product) =>
+      !product.preOrderDeadline ||
+      product.preOrderDeadline >= todayKey
+  )
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-white">
@@ -52,7 +61,7 @@ export default async function PreOrdersPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pb-20">
-        {products.length === 0 ? (
+        {activeProducts.length === 0 ? (
           <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-12 text-center">
             <h2 className="text-3xl font-bold">No Pre-Orders Yet</h2>
             <p className="mt-3 text-zinc-400">
@@ -60,7 +69,7 @@ export default async function PreOrdersPage() {
             </p>
           </div>
         ) : (
-          <PreOrdersBrowser products={products as any[]} />
+          <PreOrdersBrowser products={activeProducts as any[]} />
         )}
       </section>
 

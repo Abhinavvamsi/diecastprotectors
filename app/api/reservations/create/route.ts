@@ -2,6 +2,10 @@ import { NextResponse } from "next/server"
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
+import {
+  getIndiaDateKey,
+  isPreOrderDeadlineActive,
+} from "@/lib/preorder"
 
 export async function POST(req: Request) {
   try {
@@ -42,15 +46,16 @@ export async function POST(req: Request) {
     const sortedItems = [...normalizedItems].sort((a: any, b: any) =>
       a.productId.localeCompare(b.productId)
     )
-    const productIds = sortedItems.map((item: any) => item.productId)
+	    const productIds = sortedItems.map((item: any) => item.productId)
+	    const todayKey = getIndiaDateKey()
 
     const reservation =
       await prisma.$transaction(async (tx) => {
 
         const products =
-          await tx.$queryRaw<any[]>`
-            SELECT id, stock, "reservedStock", name, "isPreOrder"
-            FROM "Product"
+	          await tx.$queryRaw<any[]>`
+	            SELECT id, stock, "reservedStock", name, "isPreOrder", "preOrderDeadline"
+	            FROM "Product"
             WHERE id IN (${Prisma.join(productIds)})
             FOR UPDATE
           `
@@ -77,12 +82,24 @@ export async function POST(req: Request) {
           const available =
             product.stock - product.reservedStock
 
-          if (available < item.quantity) {
-            throw new Error(
-              `${product.name} is sold out`
-            )
-          }
-        }
+	          if (available < item.quantity) {
+	            throw new Error(
+	              `${product.name} is sold out`
+	            )
+	          }
+
+	          if (
+	            product.isPreOrder &&
+	            !isPreOrderDeadlineActive(
+	              product,
+	              todayKey
+	            )
+	          ) {
+	            throw new Error(
+	              `${product.name} pre-order deadline has ended`
+	            )
+	          }
+	        }
 
         // Reserve stock
         for (const item of sortedItems) {

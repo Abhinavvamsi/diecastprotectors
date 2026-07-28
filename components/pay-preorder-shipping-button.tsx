@@ -25,14 +25,12 @@ function loadRazorpayScript() {
   })
 }
 
-export default function PayPreOrderBalanceButton({
+export default function PayPreOrderShippingButton({
   orderId,
   amount,
-  disabled = false,
 }: {
   orderId: string
   amount: number
-  disabled?: boolean
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -48,7 +46,7 @@ export default function PayPreOrderBalanceButton({
       }
 
       const response = await fetch(
-        "/api/preorder-balance/create",
+        "/api/preorder-shipping/create",
         {
           method: "POST",
           headers: {
@@ -59,25 +57,32 @@ export default function PayPreOrderBalanceButton({
           }),
         }
       )
-      const balanceOrder = await response.json()
+      const shippingOrder = await response.json()
 
       if (!response.ok) {
         throw new Error(
-          balanceOrder.error ||
-            "Unable to start balance payment"
+          shippingOrder.error ||
+            "Unable to start shipping payment"
         )
+      }
+
+      if (shippingOrder.freeShipping) {
+        toast.success("Pre-order shipping is free for this batch")
+        router.refresh()
+        setLoading(false)
+        return
       }
 
       const razorpay = new window.Razorpay({
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: balanceOrder.amount,
-        currency: balanceOrder.currency,
+        amount: shippingOrder.amount,
+        currency: shippingOrder.currency,
         name: "Shinsei Diecast",
-        description: "Pre-order balance payment",
-        order_id: balanceOrder.id,
+        description: "Pre-order shipping payment",
+        order_id: shippingOrder.id,
         handler: async (paymentResponse: any) => {
           const verifyResponse = await fetch(
-            "/api/preorder-balance/verify",
+            "/api/preorder-shipping/verify",
             {
               method: "POST",
               headers: {
@@ -99,11 +104,11 @@ export default function PayPreOrderBalanceButton({
           if (!verifyResponse.ok) {
             throw new Error(
               verifyData.error ||
-                "Balance payment verification failed"
+                "Shipping payment verification failed"
             )
           }
 
-          toast.success("Pre-order balance paid successfully")
+          toast.success("Pre-order shipping paid successfully")
           router.refresh()
           setLoading(false)
         },
@@ -113,12 +118,12 @@ export default function PayPreOrderBalanceButton({
           },
         },
         theme: {
-          color: "#EC4899",
+          color: "#06B6D4",
         },
       })
 
       razorpay.on("payment.failed", () => {
-        toast.error("Balance payment failed")
+        toast.error("Shipping payment failed")
         setLoading(false)
       })
 
@@ -127,7 +132,7 @@ export default function PayPreOrderBalanceButton({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Unable to pay balance"
+          : "Unable to pay shipping"
       )
       setLoading(false)
     }
@@ -136,7 +141,7 @@ export default function PayPreOrderBalanceButton({
   return (
     <button
       type="button"
-      disabled={disabled || loading || amount <= 0}
+      disabled={loading || amount <= 0}
       onClick={handlePayment}
       className="
       inline-flex
@@ -145,17 +150,17 @@ export default function PayPreOrderBalanceButton({
       items-center
       justify-center
       rounded-full
-      bg-gradient-to-r
-      from-cyan-400
-      to-blue-500
+      border
+      border-cyan-400/40
+      bg-cyan-500/10
       px-5
       py-3
       text-sm
       font-bold
       uppercase
       tracking-wider
-      text-white
-      shadow-[0_0_24px_rgba(34,211,238,0.35)]
+      text-cyan-100
+      shadow-[0_0_24px_rgba(34,211,238,0.22)]
       transition-all
       hover:scale-105
       disabled:cursor-not-allowed
@@ -163,7 +168,7 @@ export default function PayPreOrderBalanceButton({
       disabled:hover:scale-100
       "
     >
-      {loading ? "Opening Payment..." : `Pay Balance ₹${amount}`}
+      {loading ? "Opening Payment..." : `Pay Shipping ₹${amount}`}
     </button>
   )
 }

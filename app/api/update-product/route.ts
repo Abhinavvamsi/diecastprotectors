@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/admin"
+import { getIndiaDateKey } from "@/lib/preorder"
 
 export async function POST(
   req: Request
@@ -35,6 +36,20 @@ export async function POST(
 
     const body =
       await req.json()
+
+    if (
+      body.preOrderDeadline &&
+      body.preOrderDeadline < getIndiaDateKey()
+    ) {
+      return NextResponse.json(
+        {
+          error: "Pre-order deadline cannot be in the past",
+        },
+        {
+          status: 400,
+        }
+      )
+    }
 
     const desiredReservedStock = Math.max(
       0,
@@ -110,7 +125,7 @@ export async function POST(
           }
         }
 
-        return await tx.product.update({
+        const updatedProduct = await tx.product.update({
 
           where: {
             id,
@@ -144,7 +159,7 @@ export async function POST(
 
             expectedArrival:
               body.expectedArrival || null,
-
+		
             stock:
               body.stock,
 
@@ -161,6 +176,14 @@ export async function POST(
           },
 
         })
+
+        await tx.$executeRaw`
+          UPDATE "Product"
+          SET "preOrderDeadline" = ${body.preOrderDeadline || null}
+          WHERE id = ${id}
+        `
+
+        return updatedProduct
       })
 
     return NextResponse.json(

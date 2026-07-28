@@ -16,11 +16,12 @@ type CartItem = {
   }[]
 
   image: string
-  isPreOrder?: boolean
-  depositAmount?: number
-  expectedArrival?: string
+	  isPreOrder?: boolean
+	  depositAmount?: number
+	  expectedArrival?: string
+	  preOrderDeadline?: string
 
-  quantity: number
+	  quantity: number
 
   stock: number
 }

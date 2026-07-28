@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { formatIndianDisplayDate } from "@/lib/preorder"
 import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
 import { Search } from "lucide-react"
@@ -14,8 +15,9 @@ type PreOrderProduct = {
   stock: number
   reservedStock?: number
   depositAmount?: number
-  expectedArrival?: string | null
-  arrivedOrderCount?: number
+	  expectedArrival?: string | null
+	  preOrderDeadline?: string | null
+	  arrivedOrderCount?: number
   brand?: {
     name?: string
   }
@@ -129,11 +131,16 @@ export default function AdminPreOrdersList({
                       <p className="mt-1 text-zinc-400">
                         Available stock: {availableStock} • Reserved: {Number(product.reservedStock || 0)} • Total: {Number(product.stock || 0)}
                       </p>
-                      {product.expectedArrival && (
-                        <p className="mt-1 text-zinc-400">
-                          Expected arrival: {product.expectedArrival}
-                        </p>
-                      )}
+	                      {product.expectedArrival && (
+	                        <p className="mt-1 text-zinc-400">
+	                          Expected arrival: {product.expectedArrival}
+	                        </p>
+	                      )}
+	                      {product.preOrderDeadline && (
+	                        <p className="mt-1 text-orange-300">
+	                          Accepting until: {formatIndianDisplayDate(product.preOrderDeadline)}
+	                        </p>
+	                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-3">

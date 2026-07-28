@@ -3,7 +3,11 @@ import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { calculateShippingCharge } from "@/lib/shipping"
-import { getProductPayablePrice } from "@/lib/preorder"
+import {
+  getIndiaDateKey,
+  getProductPayablePrice,
+  isPreOrderDeadlineActive,
+} from "@/lib/preorder"
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -68,7 +72,26 @@ export async function POST(req: Request) {
       where: { id: { in: productIds } },
     })
 
-    const productMap = new Map(products.map((product) => [product.id, product]))
+	    const productMap = new Map(products.map((product) => [product.id, product]))
+	    const todayKey = getIndiaDateKey()
+	
+	    for (const item of reservation.items) {
+	      const product = productMap.get(item.productId)
+	
+	      if (
+	        product?.isPreOrder &&
+	        !isPreOrderDeadlineActive(product, todayKey)
+	      ) {
+	        return NextResponse.json(
+	          {
+	            error: `${product.name} pre-order deadline has ended`,
+	          },
+	          {
+	            status: 400,
+	          }
+	        )
+	      }
+	    }
     const hasOnlyPreOrderItems =
       reservation.items.length > 0 &&
       reservation.items.every((item) =>

@@ -23,9 +23,10 @@ type Product = {
 
   badge?: string | null
   isPreOrder?: boolean
-  depositAmount?: number
-  expectedArrival?: string | null
-}
+	  depositAmount?: number
+	  expectedArrival?: string | null
+	  preOrderDeadline?: string | null
+	}
 export default function EditProductForm({
   product,
 }: {
@@ -64,8 +65,18 @@ export default function EditProductForm({
     useState(product.isPreOrder || false)
   const [depositAmount, setDepositAmount] =
     useState(product.depositAmount ?? 50)
-  const [expectedArrival, setExpectedArrival] =
-    useState(product.expectedArrival || "")
+	  const [expectedArrival, setExpectedArrival] =
+	    useState(product.expectedArrival || "")
+	  const [preOrderDeadline, setPreOrderDeadline] =
+	    useState(product.preOrderDeadline || "")
+
+	  const todayDate =
+	    new Date().toLocaleDateString(
+	      "en-CA",
+	      {
+	        timeZone: "Asia/Kolkata",
+	      }
+	    )
   
   const [
   quantityPricing,
@@ -156,10 +167,11 @@ async function handleImageUpload(
   stock,
   reservedStock,
   isPreOrder,
-  depositAmount: Number(depositAmount || 50),
-  expectedArrival,
-
-  quantityPricing,
+	  depositAmount: Number(depositAmount || 50),
+	  expectedArrival,
+	  preOrderDeadline,
+	
+	  quantityPricing,
 
 }),
 
@@ -315,9 +327,9 @@ transition-all
         </p>
       </div>
 
-      <div>
-        <label className="mb-2 block text-sm text-zinc-400">
-          Expected Arrival
+	      <div>
+	        <label className="mb-2 block text-sm text-zinc-400">
+	          Expected Arrival
         </label>
         <input
           type="text"
@@ -325,10 +337,28 @@ transition-all
           onChange={(e) =>
             setExpectedArrival(e.target.value)
           }
-          className="w-full h-14 rounded-xl bg-zinc-950 border-zinc-700 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30 transition-all px-4 outline-none"
-        />
-      </div>
-    </div>
+	          className="w-full h-14 rounded-xl bg-zinc-950 border-zinc-700 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30 transition-all px-4 outline-none"
+	        />
+	      </div>
+
+	      <div>
+	        <label className="mb-2 block text-sm text-zinc-400">
+	          Accepting Pre-Orders Until
+	        </label>
+	        <input
+	          type="date"
+	          min={todayDate}
+	          value={preOrderDeadline}
+	          onChange={(e) =>
+	            setPreOrderDeadline(e.target.value)
+	          }
+	          className="w-full h-14 rounded-xl bg-zinc-950 border-zinc-700 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30 transition-all px-4 outline-none [color-scheme:dark]"
+	        />
+	        <p className="mt-2 text-xs text-zinc-500">
+	          Optional. Public pre-order listings hide this item after this date.
+	        </p>
+	      </div>
+	    </div>
 
     {/* Description */}
     <textarea

@@ -16,8 +16,9 @@ type PreOrderProduct = {
   quantityPricing?: any[]
   badge?: string
   isPreOrder?: boolean
-  depositAmount?: number
-  expectedArrival?: string | null
+	  depositAmount?: number
+	  expectedArrival?: string | null
+	  preOrderDeadline?: string | null
   brand?: {
     name?: string
     logo?: string
@@ -240,7 +241,7 @@ export default function PreOrdersBrowser({
               key={product.id}
               className="rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))] p-[1px] shadow-[0_0_24px_rgba(34,211,238,.08)] transition-transform duration-300 hover:-translate-y-1"
             >
-              <ProductCard
+	                <ProductCard
                 id={product.id}
                 name={product.name}
                 price={getProductPayablePrice(product)}
@@ -255,8 +256,9 @@ export default function PreOrdersBrowser({
                 quantityPricing={product.quantityPricing}
                 isPreOrder={product.isPreOrder}
                 depositAmount={product.depositAmount}
-                expectedArrival={product.expectedArrival}
-                originalPrice={product.price}
+	                expectedArrival={product.expectedArrival}
+	                preOrderDeadline={product.preOrderDeadline}
+	                originalPrice={product.price}
                 remainingPrice={getProductRemainingPrice(product)}
               />
             </div>

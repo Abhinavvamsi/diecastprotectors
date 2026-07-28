@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 
 import ProductDetails from "@/components/product-details"
+import { isPreOrderDeadlineActive } from "@/lib/preorder"
 
 type ProductPageProps = {
 
@@ -27,11 +28,20 @@ export default async function ProductPage({
 
     })
 
-  if (!product) {
+	  if (!product) {
 
     notFound()
 
-  }
+	  }
+
+	  if (
+	    product.isPreOrder &&
+	    !isPreOrderDeadlineActive(product)
+	  ) {
+	
+	    notFound()
+	
+	  }
 
   const availableProduct = {
     ...product,

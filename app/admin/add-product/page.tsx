@@ -48,6 +48,17 @@ export default function AddProductPage() {
   const [expectedArrival, setExpectedArrival] =
     useState("")
 
+  const [preOrderDeadline, setPreOrderDeadline] =
+    useState("")
+
+  const todayDate =
+    new Date().toLocaleDateString(
+      "en-CA",
+      {
+        timeZone: "Asia/Kolkata",
+      }
+    )
+
   
   const [brandId, setBrandId] =
   useState("")
@@ -191,9 +202,11 @@ export default function AddProductPage() {
     depositAmount || 50
   ),
 
-  expectedArrival,
+	  expectedArrival,
 
-  brandId,
+	  preOrderDeadline,
+	
+	  brandId,
 
   stock: Number(stock),
 
@@ -607,16 +620,31 @@ focus:ring-pink-500/30
                 Enter 1-100 for percentage deposit. Enter any value above 100 for a fixed rupee deposit, like ₹600 or ₹1000.
               </p>
 
-              <input
-                type="text"
-                placeholder="Expected arrival"
-                value={expectedArrival}
+	              <input
+	                type="text"
+	                placeholder="Expected arrival"
+	                value={expectedArrival}
                 onChange={(e) =>
                   setExpectedArrival(e.target.value)
                 }
-                className="w-full h-14 rounded-2xl bg-zinc-950 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-pink-500 focus:ring-pink-500/30 px-5 outline-none focus:ring-2 transition-all"
-              />
-            </div>
+	                className="w-full h-14 rounded-2xl bg-zinc-950 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-pink-500 focus:ring-pink-500/30 px-5 outline-none focus:ring-2 transition-all"
+	              />
+
+	              <input
+	                type="date"
+	                placeholder="Pre-order accepting until"
+	                min={todayDate}
+	                value={preOrderDeadline}
+	                onChange={(e) =>
+	                  setPreOrderDeadline(e.target.value)
+	                }
+	                className="w-full h-14 rounded-2xl bg-zinc-950 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-pink-500 focus:ring-pink-500/30 px-5 outline-none focus:ring-2 transition-all [color-scheme:dark]"
+	              />
+
+	              <p className="md:col-span-3 -mt-2 text-xs text-zinc-500">
+	                Optional deadline. The pre-order stays visible through this date and hides automatically after it.
+	              </p>
+	            </div>
           </div>
 
 <div className="space-y-3">

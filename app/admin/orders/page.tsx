@@ -12,6 +12,10 @@ import OrderStatusSelect from "@/components/order-status-select"
 import { requireAdmin } from "@/lib/admin"
 import { calculateShippingCharge } from "@/lib/shipping"
 import { getOrderItemPricing } from "@/lib/preorder"
+import {
+  getPreOrderShippingBatch,
+  getPreOrderShippingPaidTotal,
+} from "@/lib/preorder-shipping"
 
 export default async function OrdersPage({
   searchParams,
@@ -21,6 +25,7 @@ export default async function OrdersPage({
   status?: string
   productId?: string
   preorderFilter?: string
+  preorderPaymentFilter?: string
 }>
 }) {
 
@@ -31,6 +36,7 @@ export default async function OrdersPage({
   status = "All",
   productId = "",
   preorderFilter = "All",
+  preorderPaymentFilter = "All",
 } = await searchParams
   const normalizedPreorderFilter =
     preorderFilter === "Pre Order"
@@ -124,6 +130,42 @@ export default async function OrdersPage({
       return Boolean(item.isPreOrder) || Boolean(fallbackProduct?.isPreOrder)
     })
 
+  const getPreOrderPaymentState = (order: any) => {
+    const orderItems = order.products as any[]
+    const preOrderItems = orderItems
+      .map((item) => ({
+        item,
+        pricing: getOrderItemPricing(
+          item,
+          productMap.get(item.id)
+        ),
+      }))
+      .filter(({ pricing }) => pricing.isPreOrder)
+    const shippingBatch = getPreOrderShippingBatch(
+      orderItems,
+      order.deliveryMethod
+    )
+    const hasPreOrderItems = preOrderItems.length > 0
+    const hasBalanceDue = preOrderItems.some(
+      ({ item, pricing }) =>
+        pricing.lineRemainingPrice > 0 &&
+        !item.preOrderBalancePaid
+    )
+    const hasShippingDue =
+      shippingBatch.items.length > 0 &&
+      shippingBatch.shippingAmount > 0
+
+    return {
+      hasPreOrderItems,
+      hasBalanceDue,
+      hasShippingDue,
+      isFullyPaid:
+        hasPreOrderItems &&
+        !hasBalanceDue &&
+        !hasShippingDue,
+    }
+  }
+
   const normalizedSearch = search.trim().toLowerCase()
 
 	  const productFilteredOrders = productId
@@ -134,7 +176,7 @@ export default async function OrdersPage({
 	      )
 	    : uniqueOrders
 
-  const filteredOrders =
+  const typeFilteredOrders =
     normalizedPreorderFilter === "Pre-Orders"
       ? productFilteredOrders.filter(orderHasPreOrderItem)
       : normalizedPreorderFilter === "Regular"
@@ -142,6 +184,23 @@ export default async function OrdersPage({
           (order: any) => !orderHasPreOrderItem(order)
         )
       : productFilteredOrders
+  const filteredOrders =
+    preorderPaymentFilter === "Shipping Due"
+      ? typeFilteredOrders.filter(
+          (order: any) =>
+            getPreOrderPaymentState(order).hasShippingDue
+        )
+      : preorderPaymentFilter === "Balance Due"
+      ? typeFilteredOrders.filter(
+          (order: any) =>
+            getPreOrderPaymentState(order).hasBalanceDue
+        )
+      : preorderPaymentFilter === "Pre-Order Fully Paid"
+      ? typeFilteredOrders.filter(
+          (order: any) =>
+            getPreOrderPaymentState(order).isFullyPaid
+        )
+      : typeFilteredOrders
 const [
   pendingCount,
   packedCount,
@@ -415,7 +474,7 @@ shadow-2xl
 
   <Link
   key={item.name}
-  href={`?search=${search}&status=${item.name}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}`}
+	  href={`?search=${search}&status=${item.name}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}`}
   className={`
     px-5
     py-2
@@ -459,7 +518,7 @@ shadow-2xl
     ].map((item) => (
       <Link
         key={item.name}
-        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}&preorderFilter=${item.name}`}
+	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}&preorderFilter=${item.name}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}`}
         className={`
           px-5 py-2 rounded-full border transition-all flex items-center gap-2
           ${
@@ -473,9 +532,56 @@ shadow-2xl
       </Link>
     ))}
   </div>
-</div>
+	</div>
 
-  <form
+	<div className="mb-6">
+	  <div className="mb-3 text-sm uppercase tracking-[0.25em] text-zinc-500">
+	    Pre-Order Payment
+	  </div>
+	  <div className="flex flex-wrap gap-3">
+	    {[
+	      { name: "All", count: typeFilteredOrders.length },
+	      {
+	        name: "Balance Due",
+	        count: typeFilteredOrders.filter(
+	          (order: any) =>
+	            getPreOrderPaymentState(order).hasBalanceDue
+	        ).length,
+	      },
+	      {
+	        name: "Shipping Due",
+	        count: typeFilteredOrders.filter(
+	          (order: any) =>
+	            getPreOrderPaymentState(order).hasShippingDue
+	        ).length,
+	      },
+	      {
+	        name: "Pre-Order Fully Paid",
+	        count: typeFilteredOrders.filter(
+	          (order: any) =>
+	            getPreOrderPaymentState(order).isFullyPaid
+	        ).length,
+	      },
+	    ].map((item) => (
+	      <Link
+	        key={item.name}
+	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}&preorderPaymentFilter=${item.name}`}
+	        className={`
+	          px-5 py-2 rounded-full border transition-all flex items-center gap-2
+	          ${
+	            preorderPaymentFilter === item.name
+	              ? "bg-gradient-to-r from-emerald-500 via-cyan-500 to-sky-600 border-transparent text-white"
+	              : "border-zinc-700 text-zinc-400 hover:border-emerald-500 hover:text-emerald-300"
+	          }
+	        `}
+	      >
+	        {item.name} ({item.count})
+	      </Link>
+	    ))}
+	  </div>
+	</div>
+	
+	  <form
   className="mb-10"
   method="GET"
   
@@ -525,11 +631,17 @@ shadow-2xl
   value={productId}
 />
 
-<input
-  type="hidden"
-  name="preorderFilter"
-  value={preorderFilter}
-/>
+	<input
+	  type="hidden"
+	  name="preorderFilter"
+	  value={preorderFilter}
+	/>
+
+	<input
+	  type="hidden"
+	  name="preorderPaymentFilter"
+	  value={preorderPaymentFilter}
+	/>
 
 <AdminOrdersSearch initialSearch={search} />
 
@@ -862,16 +974,27 @@ text-purple-400
 	                                pricing.lineRemainingPrice,
 	                          0
 	                        )
-                      const shippingCharge =
-                        calculateShippingCharge({
+	                      const shippingCharge =
+	                        calculateShippingCharge({
                           subtotal:
                             readyStockPayableSubtotal,
                           itemCount:
                             readyStockItemCount,
                           deliveryMethod: order.deliveryMethod,
-                          hasOnlyPreOrderItems,
-                        })
-                      const couponDiscount = Math.max(
+	                          hasOnlyPreOrderItems,
+	                        })
+                      const preOrderShippingBatch =
+                        getPreOrderShippingBatch(
+                          orderItems,
+                          order.deliveryMethod
+                        )
+                      const preOrderShippingDue =
+                        preOrderShippingBatch.shippingAmount
+                      const preOrderShippingPaid =
+                        getPreOrderShippingPaidTotal(
+                          orderItems
+                        )
+	                      const couponDiscount = Math.max(
                         0,
                         itemsSubtotal +
                           shippingCharge -
@@ -891,6 +1014,18 @@ text-purple-400
                             <span className="text-zinc-400">Shipping</span>
                             <span>₹{shippingCharge}</span>
                           </div>
+                          {preOrderShippingPaid > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-zinc-400">Pre-Order Shipping Paid</span>
+                              <span>₹{preOrderShippingPaid}</span>
+                            </div>
+                          )}
+                          {preOrderShippingDue > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-zinc-400">Pre-Order Shipping Due</span>
+                              <span>₹{preOrderShippingDue}</span>
+                            </div>
+                          )}
                           {showCouponDiscount && (
                             <div className="flex items-center justify-between">
                               <span className="text-zinc-400">Coupon Discount</span>
@@ -1043,6 +1178,12 @@ shadow-sm pt-8">
                                 )}
                                 {product.preOrderBalancePaid && (
                                   <span className="text-xs mt-1 text-green-300">Balance paid</span>
+                                )}
+                                {product.preOrderShippingPaid && (
+                                  <span className="text-xs mt-1 text-green-300">Shipping paid</span>
+                                )}
+                                {product.preOrderArrived && !product.preOrderShippingPaid && (
+                                  <span className="text-xs mt-1 text-orange-300">Shipping not paid</span>
                                 )}
                               </div>
                             ) : (

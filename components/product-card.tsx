@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
 
 import { toast } from "sonner"
+import { formatIndianDisplayDate } from "@/lib/preorder"
 
 type ProductCardProps = {
   id: string
@@ -23,9 +24,10 @@ type ProductCardProps = {
   description: string
   stock: number
   isPreOrder?: boolean
-  depositAmount?: number
-  expectedArrival?: string | null
-  remainingPrice?: number
+	  depositAmount?: number
+	  expectedArrival?: string | null
+	  preOrderDeadline?: string | null
+	  remainingPrice?: number
 
   quantityPricing?: any[]
 
@@ -45,9 +47,10 @@ export default function ProductCard({
   description,
   stock,
   isPreOrder,
-  depositAmount,
-  expectedArrival,
-  remainingPrice,
+	  depositAmount,
+	  expectedArrival,
+	  preOrderDeadline,
+	  remainingPrice,
 
   quantityPricing,
 
@@ -273,10 +276,13 @@ shadow-lg
 
             {isPreOrder && (
               <div className="mt-2 space-y-1 text-sm text-cyan-300">
-                <p>Original price: ₹{originalPrice ?? price}</p>
-                <p>Deposit today: ₹{price}</p>
-                <p>Balance due on arrival: ₹{remainingPrice ?? 0}{expectedArrival ? ` • Arrives ${expectedArrival}` : ""}</p>
-              </div>
+	                <p>Original price: ₹{originalPrice ?? price}</p>
+	                <p>Deposit today: ₹{price}</p>
+	                <p>Balance due on arrival: ₹{remainingPrice ?? 0}{expectedArrival ? ` • Arrives ${expectedArrival}` : ""}</p>
+	                {preOrderDeadline && (
+	                  <p className="text-orange-300">Accepting orders until {formatIndianDisplayDate(preOrderDeadline)}</p>
+	                )}
+	              </div>
             )}
 
           </div>
@@ -360,6 +366,9 @@ disabled:opacity-40
 
   expectedArrival:
     expectedArrival || undefined,
+
+  preOrderDeadline:
+    preOrderDeadline || undefined,
 })
 
                 toast.success(
@@ -439,6 +448,9 @@ disabled:opacity-40
 
 	  expectedArrival:
 	    expectedArrival || undefined,
+
+	  preOrderDeadline:
+	    preOrderDeadline || undefined,
 	})
 
                 toast.success(

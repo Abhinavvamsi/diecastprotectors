@@ -9,6 +9,7 @@ import Image from "next/image"
 import Navbar from "@/components/navbar"
 
 import { Button } from "@/components/ui/button"
+import { formatIndianDisplayDate } from "@/lib/preorder"
 
 import { useCartStore } from "@/store/cart-store"
 
@@ -181,11 +182,14 @@ text-transparent uppercase tracking-widest text-sm font-semibold">
     <p className="mt-1 text-sm">Original price: ₹{selectedPrice}</p>
     <p className="mt-1 text-sm">Deposit today: ₹{depositPrice}</p>
     <p className="text-sm">Balance due on arrival: ₹{remainingPrice}</p>
-    {product.expectedArrival && (
-      <p className="text-sm">Expected arrival: {product.expectedArrival}</p>
-    )}
-  </div>
-)}
+	    {product.expectedArrival && (
+	      <p className="text-sm">Expected arrival: {product.expectedArrival}</p>
+	    )}
+	    {product.preOrderDeadline && (
+	      <p className="text-sm text-orange-300">Accepting orders until {formatIndianDisplayDate(product.preOrderDeadline)}</p>
+	    )}
+	  </div>
+	)}
 
               <p className="text-gray-400 mt-8 leading-relaxed text-lg">
 
@@ -426,9 +430,12 @@ if (
   depositAmount:
     Number(product.depositAmount ?? 50),
 
-  expectedArrival:
-    product.expectedArrival || undefined,
-})
+	  expectedArrival:
+	    product.expectedArrival || undefined,
+
+	  preOrderDeadline:
+	    product.preOrderDeadline || undefined,
+	})
 
                     }
 
@@ -509,9 +516,12 @@ if (
   depositAmount:
     Number(product.depositAmount ?? 50),
 
-  expectedArrival:
-    product.expectedArrival || undefined,
-})
+	  expectedArrival:
+	    product.expectedArrival || undefined,
+
+	  preOrderDeadline:
+	    product.preOrderDeadline || undefined,
+	})
                     }
 
                     router.push(
@@ -624,9 +634,12 @@ if (
   depositAmount:
     Number(product.depositAmount ?? 50),
 
-  expectedArrival:
-    product.expectedArrival || undefined,
-})
+	  expectedArrival:
+	    product.expectedArrival || undefined,
+
+	  preOrderDeadline:
+	    product.preOrderDeadline || undefined,
+	})
               }
 
               toast.success(
