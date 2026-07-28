@@ -4,6 +4,10 @@ import Link from "next/link"
 
 import { Swiper, SwiperSlide } from "swiper/react"
 import { Navigation, Pagination, Autoplay } from "swiper/modules"
+import {
+  getBannerDesktopUrl,
+  getBannerMobileUrl,
+} from "@/lib/cloudinary-url"
 
 import "swiper/css"
 import "swiper/css/navigation"
@@ -116,21 +120,27 @@ rounded-[32px]
 
               <div className="relative h-full">
 
-                {/* Desktop */}
-
-                <img
-                  src={banner.images.desktop}
-                  alt={banner.title}
-                  className="hidden h-full w-full object-cover md:block"
-                />
-
-                {/* Mobile */}
-
-                <img
-                  src={banner.images.mobile}
-                  alt={banner.title}
-                  className="block h-full w-full object-cover md:hidden"
-                />
+                <picture>
+                  <source
+                    media="(min-width: 768px)"
+                    srcSet={getBannerDesktopUrl(
+                      banner.images.desktop
+                    )}
+                  />
+                  <source
+                    media="(max-width: 767px)"
+                    srcSet={getBannerMobileUrl(
+                      banner.images.mobile
+                    )}
+                  />
+                  <img
+                    src={getBannerMobileUrl(banner.images.mobile)}
+                    alt={banner.title}
+                    loading={banner.order === 1 ? "eager" : "lazy"}
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                </picture>
 
                 {/* Overlay */}
 

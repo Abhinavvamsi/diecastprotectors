@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
+import { getBrandLogoUrl } from "@/lib/cloudinary-url"
 
 export default function BrandsSection({
   brands,
@@ -85,10 +86,11 @@ export default function BrandsSection({
                 {brand.logo && (
 
                   <Image
-                    src={brand.logo}
+                    src={getBrandLogoUrl(brand.logo)}
                     alt={brand.name}
                     width={180}
                     height={100}
+                    sizes="(max-width: 768px) 50vw, 25vw"
                     className="
                     max-h-24
                     w-auto

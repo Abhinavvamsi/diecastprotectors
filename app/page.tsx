@@ -149,8 +149,8 @@ const [
   settingsResponse,
 ] = await Promise.all([
   fetch("/api/get-products", { cache: "no-store" }),
-  fetch("/api/admin/brands", { cache: "no-store" }),
-  fetch("/api/banners", { cache: "no-store" }),
+  fetch("/api/admin/brands"),
+  fetch("/api/banners"),
   fetch("/api/admin/settings", { cache: "no-store" }),
 ])
 

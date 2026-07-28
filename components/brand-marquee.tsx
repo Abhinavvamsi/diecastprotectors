@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { getBrandLogoUrl } from "@/lib/cloudinary-url"
 
 type Brand = {
   id: string
@@ -63,10 +64,11 @@ export default function BrandMarquee({
               >
 
                 <Image
-                  src={brand.logo}
+                  src={getBrandLogoUrl(brand.logo)}
                   alt={brand.name}
                   width={120}
                   height={60}
+                  sizes="120px"
                   className="
                   h-12
                   w-auto
