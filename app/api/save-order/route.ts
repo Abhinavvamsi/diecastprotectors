@@ -6,6 +6,7 @@ import { createHmac, timingSafeEqual } from "crypto"
 import { auth } from "@clerk/nextjs/server"
 import { calculateShippingCharge } from "@/lib/shipping"
 import { getProductPayablePrice } from "@/lib/preorder"
+import { buildWhatsAppItemsSummary } from "@/lib/notifications"
 
 function getTierPrice(product: any, quantity: number) {
   const tiers = (product.quantityPricing || []) as Array<{
@@ -573,6 +574,22 @@ if (!signatureIsValid) {
     const notificationProducts = Array.isArray(body.products)
       ? body.products
       : []
+    const hasReadyStockNotificationItems =
+      notificationProducts.some(
+        (item: any) => !Boolean(item.isPreOrder)
+      )
+    const hasPreOrderNotificationItems =
+      notificationProducts.some((item: any) =>
+        Boolean(item.isPreOrder)
+      )
+    const notificationItems = buildWhatsAppItemsSummary(
+      notificationProducts,
+      {
+        mixedOrderBreakdown:
+          hasReadyStockNotificationItems &&
+          hasPreOrderNotificationItems,
+      }
+    )
     const hasOnlyPreOrderNotificationItems =
       notificationProducts.length > 0 &&
       notificationProducts.every((item: any) =>
@@ -748,6 +765,7 @@ if (!signatureIsValid) {
               expectedArrival:
                 preorderTotals.expectedArrival ||
                 "To be announced",
+              items: notificationItems,
             }
           : {
               orderId,
@@ -759,6 +777,7 @@ if (!signatureIsValid) {
                 "totalAmount" in order
                   ? order.totalAmount
                   : Number(body.totalAmount || 0),
+              items: notificationItems,
             }
       ),
       sendWithTimeout({

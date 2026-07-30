@@ -2,7 +2,10 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/admin"
 import { getOrderItemPricing } from "@/lib/preorder"
-import { sendWhatsAppOrderMessage } from "@/lib/notifications"
+import {
+  buildWhatsAppItemsSummary,
+  sendWhatsAppOrderMessage,
+} from "@/lib/notifications"
 
 export async function POST(req: Request) {
   try {
@@ -129,6 +132,7 @@ export async function POST(req: Request) {
             status: "Confirmed",
             templateName: "preorder_ready_for_payment",
             remainingBalance: orderBalanceDue,
+            items: buildWhatsAppItemsSummary(products),
           }).catch((error) => {
             console.error(
               "Pre-order ready WhatsApp failed:",

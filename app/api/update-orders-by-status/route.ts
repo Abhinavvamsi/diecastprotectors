@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import { resend } from "@/lib/resend"
-import { sendWhatsAppOrderMessage } from "@/lib/notifications"
+import {
+  buildWhatsAppItemsSummary,
+  sendWhatsAppOrderMessage,
+} from "@/lib/notifications"
 import { NextResponse } from "next/server"
 
 export async function POST(
@@ -137,6 +140,11 @@ export async function POST(
             phone: order.phone,
             status: newStatus,
             totalAmount: order.totalAmount,
+            items: buildWhatsAppItemsSummary(
+              Array.isArray(order.products)
+                ? (order.products as any[])
+                : []
+            ),
           }),
         ])
       })

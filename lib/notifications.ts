@@ -11,6 +11,7 @@ type WhatsAppOrder = {
   phone: string
   status?: string
   totalAmount?: number
+  items?: string
   templateName?: ApprovedWhatsAppTemplateName
   hasOnlyPreOrderItems?: boolean
   trackingLink?: string
@@ -71,6 +72,66 @@ function normalizePhoneNumber(phone: string) {
 
 function formatAmount(value?: number) {
   return String(Math.max(0, Math.round(Number(value || 0))))
+}
+
+type WhatsAppItemsSummaryOptions = {
+  mixedOrderBreakdown?: boolean
+}
+
+function formatWhatsAppItemLine(item: any) {
+  const quantity = Math.max(
+    1,
+    Number(item.quantity || 1)
+  )
+
+  return `${item.name} x${quantity}`
+}
+
+export function buildWhatsAppItemsSummary(
+  products: any[] = [],
+  options?: WhatsAppItemsSummaryOptions
+) {
+  const validItems = products.filter(
+    (item) => item && item.name
+  )
+
+  if (!validItems.length) {
+    return "Items not available"
+  }
+
+  if (!options?.mixedOrderBreakdown) {
+    return validItems.map(formatWhatsAppItemLine).join(", ")
+  }
+
+  const readyStockItems = validItems.filter(
+    (item) => !Boolean(item.isPreOrder)
+  )
+  const preOrderItems = validItems.filter((item) =>
+    Boolean(item.isPreOrder)
+  )
+
+  const sections: string[] = []
+
+  if (readyStockItems.length) {
+    sections.push(
+      `Ready to dispatch now: ${readyStockItems
+        .map(formatWhatsAppItemLine)
+        .join(", ")}`
+    )
+  }
+
+  if (preOrderItems.length) {
+    sections.push(
+      `Pre-order deposit items: ${preOrderItems
+        .map(formatWhatsAppItemLine)
+        .join(", ")}`
+    )
+    sections.push(
+      "Pre-order balance will be requested when each item arrives."
+    )
+  }
+
+  return sections.join("\n")
 }
 
 function buildTrackingLink(orderId: string, trackingLink?: string) {
@@ -206,6 +267,10 @@ function buildTemplateParameters(
         { type: "text", text: order.orderId },
         {
           type: "text",
+          text: order.items || "Items not available",
+        },
+        {
+          type: "text",
           text: formatAmount(order.totalAmount),
         },
         {
@@ -221,12 +286,27 @@ function buildTemplateParameters(
       return [
         { type: "text", text: order.customer },
         { type: "text", text: order.orderId },
+        {
+          type: "text",
+          text: order.items || "Items not available",
+        },
+        {
+          type: "text",
+          text: buildTrackingLink(
+            order.orderId,
+            order.trackingLink
+          ),
+        },
       ]
 
     case "preorder_deposit_confirmation":
       return [
         { type: "text", text: order.customer },
         { type: "text", text: order.orderId },
+        {
+          type: "text",
+          text: order.items || "Items not available",
+        },
         {
           type: "text",
           text: formatAmount(order.depositPaid),
@@ -251,6 +331,10 @@ function buildTemplateParameters(
         { type: "text", text: order.orderId },
         {
           type: "text",
+          text: order.items || "Items not available",
+        },
+        {
+          type: "text",
           text: formatAmount(order.remainingBalance),
         },
       ]
@@ -259,6 +343,10 @@ function buildTemplateParameters(
       return [
         { type: "text", text: order.customer },
         { type: "text", text: order.orderId },
+        {
+          type: "text",
+          text: order.items || "Items not available",
+        },
         {
           type: "text",
           text:
