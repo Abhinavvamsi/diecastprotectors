@@ -146,6 +146,17 @@ function buildTrackingLink(orderId: string, trackingLink?: string) {
   )}`
 }
 
+function buildOrdersPaymentDueLink() {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://www.shinseidiecast.com"
+
+  return `${siteUrl.replace(
+    /\/$/,
+    ""
+  )}/orders?filter=payment-due`
+}
+
 function enhanceWhatsAppError(details: string) {
   if (
     details.includes("Unsupported post request") ||
@@ -214,6 +225,16 @@ function shouldRetryTemplateLanguage(details: string) {
     details.includes("132001") ||
     details.toLowerCase().includes("translation") ||
     details.toLowerCase().includes("template name does not exist")
+  )
+}
+
+function shouldRetryTemplateParameters(details: string) {
+  return (
+    details.includes("132000") ||
+    details
+      .toLowerCase()
+      .includes("number of parameters does not match") ||
+    details.toLowerCase().includes("localizable_params")
   )
 }
 
@@ -337,6 +358,10 @@ function buildTemplateParameters(
           type: "text",
           text: formatAmount(order.remainingBalance),
         },
+        {
+          type: "text",
+          text: buildOrdersPaymentDueLink(),
+        },
       ]
 
     case "order_cancelled":
@@ -361,6 +386,40 @@ function buildTemplateParameters(
         },
       ]
   }
+}
+
+function buildTemplateParameterVariants(
+  templateName: ApprovedWhatsAppTemplateName,
+  order: WhatsAppOrder
+) {
+  const primaryParameters = buildTemplateParameters(
+    templateName,
+    order
+  )
+
+  if (!primaryParameters) {
+    return []
+  }
+
+  if (templateName !== "order_confirmation") {
+    return [
+      {
+        label: "primary",
+        parameters: primaryParameters,
+      },
+    ]
+  }
+
+  return [
+    {
+      label: "with_tracking_link",
+      parameters: primaryParameters,
+    },
+    {
+      label: "without_tracking_link",
+      parameters: primaryParameters.slice(0, 4),
+    },
+  ]
 }
 
 export async function sendWhatsAppOrderMessage(
@@ -417,14 +476,14 @@ export async function sendWhatsAppOrderMessage(
     return { skipped: false, template: "text" }
   }
 
-  const parameters = buildTemplateParameters(
+  const parameterVariants = buildTemplateParameterVariants(
     templateName,
     order
   )
   const metaTemplateName =
     getMetaTemplateName(templateName)
 
-  if (!parameters) {
+  if (!parameterVariants.length) {
     return { skipped: true }
   }
 
@@ -434,50 +493,59 @@ export async function sendWhatsAppOrderMessage(
   let lastError: Error | null = null
 
   for (const languageCode of templateLanguageCandidates) {
-    const response = await fetch(
-      `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          to: recipientPhone,
-          type: "template",
-          template: {
-            name: metaTemplateName,
-            language: {
-              code: languageCode,
-            },
-            components: [
-              {
-                type: "body",
-                parameters,
-              },
-            ],
+    for (const variant of parameterVariants) {
+      const response = await fetch(
+        `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
           },
-        }),
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to: recipientPhone,
+            type: "template",
+            template: {
+              name: metaTemplateName,
+              language: {
+                code: languageCode,
+              },
+              components: [
+                {
+                  type: "body",
+                  parameters: variant.parameters,
+                },
+              ],
+            },
+          }),
+        }
+      )
+
+      if (response.ok) {
+        return {
+          skipped: false,
+          template: metaTemplateName,
+          language: languageCode,
+          variant: variant.label,
+        }
       }
-    )
 
-    if (response.ok) {
-      return {
-        skipped: false,
-        template: metaTemplateName,
-        language: languageCode,
+      const details = enhanceWhatsAppError(
+        await response.text()
+      )
+      lastError = new Error(
+        `WhatsApp send failed for template "${metaTemplateName}" using language "${languageCode}" and parameter variant "${variant.label}": ${response.status} ${details}`
+      )
+
+      if (shouldRetryTemplateParameters(details)) {
+        continue
       }
-    }
 
-    const details = enhanceWhatsAppError(
-      await response.text()
-    )
-    lastError = new Error(
-      `WhatsApp send failed for template "${metaTemplateName}" using language "${languageCode}": ${response.status} ${details}`
-    )
+      if (shouldRetryTemplateLanguage(details)) {
+        break
+      }
 
-    if (!shouldRetryTemplateLanguage(details)) {
       throw lastError
     }
   }
