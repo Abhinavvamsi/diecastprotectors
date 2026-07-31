@@ -571,8 +571,9 @@ if (!signatureIsValid) {
       }
     }
 
-    const notificationProducts = Array.isArray(body.products)
-      ? body.products
+    const notificationProducts =
+      "products" in order && Array.isArray(order.products)
+      ? (order.products as any[])
       : []
     const hasReadyStockNotificationItems =
       notificationProducts.some(
@@ -585,6 +586,8 @@ if (!signatureIsValid) {
     const notificationItems = buildWhatsAppItemsSummary(
       notificationProducts,
       {
+        includePreOrderLabel:
+          hasPreOrderNotificationItems,
         mixedOrderBreakdown:
           hasReadyStockNotificationItems &&
           hasPreOrderNotificationItems,

@@ -40,8 +40,19 @@ export async function POST(
 
     await Promise.allSettled(
       orders.map(async (order) => {
+        const orderProducts = Array.isArray(order.products)
+          ? (order.products as any[])
+          : []
+        const whatsAppProducts =
+          newStatus === "Shipped"
+            ? orderProducts.filter(
+                (item) =>
+                  !Boolean(item?.isPreOrder)
+              )
+            : orderProducts
+
         if (newStatus === "Cancelled") {
-          for (const item of order.products as any[]) {
+          for (const item of orderProducts) {
             await prisma.product.update({
               where: {
                 id: item.id,
@@ -141,9 +152,10 @@ export async function POST(
             status: newStatus,
             totalAmount: order.totalAmount,
             items: buildWhatsAppItemsSummary(
-              Array.isArray(order.products)
-                ? (order.products as any[])
-                : []
+              whatsAppProducts,
+              {
+                includePreOrderLabel: true,
+              }
             ),
           }),
         ])

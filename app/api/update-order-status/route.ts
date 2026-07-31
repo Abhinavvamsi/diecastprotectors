@@ -46,11 +46,13 @@ export async function POST(
 
     /* Restore stock if cancelled */
     if (
-      body.status === "Cancelled"
+      body.status === "Cancelled" &&
+      order.status !== "Cancelled"
     ) {
 
-      const products =
-        order.products as any[]
+      const products = Array.isArray(order.products)
+        ? (order.products as any[])
+        : []
 
       for (const item of products) {
 
@@ -88,6 +90,17 @@ export async function POST(
         },
 
       })
+
+    const orderProducts = Array.isArray(order.products)
+      ? (order.products as any[])
+      : []
+    const whatsAppProducts =
+      body.status === "Shipped"
+        ? orderProducts.filter(
+            (item) =>
+              !Boolean(item?.isPreOrder)
+          )
+        : orderProducts
 
     /* Email + WhatsApp Notification */
     await Promise.allSettled([
@@ -192,9 +205,10 @@ export async function POST(
         status: body.status,
         totalAmount: order.totalAmount,
         items: buildWhatsAppItemsSummary(
-          Array.isArray(order.products)
-            ? (order.products as any[])
-            : []
+          whatsAppProducts,
+          {
+            includePreOrderLabel: true,
+          }
         ),
       }),
     ])

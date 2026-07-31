@@ -59,6 +59,7 @@ export async function POST(req: Request) {
         : []
       let orderChanged = false
       let orderBalanceDue = 0
+      const arrivedNotificationItems: any[] = []
 
       const nextProducts = products.map((item) => {
         const isTargetPreOrder =
@@ -98,6 +99,7 @@ export async function POST(req: Request) {
 
         if (!item.preOrderBalancePaid) {
           orderBalanceDue += pricing.lineRemainingPrice
+          arrivedNotificationItems.push(item)
         }
 
         return {
@@ -132,7 +134,12 @@ export async function POST(req: Request) {
             status: "Confirmed",
             templateName: "preorder_ready_for_payment",
             remainingBalance: orderBalanceDue,
-            items: buildWhatsAppItemsSummary(products),
+            items: buildWhatsAppItemsSummary(
+              arrivedNotificationItems,
+              {
+                includePreOrderLabel: true,
+              }
+            ),
           }).catch((error) => {
             console.error(
               "Pre-order ready WhatsApp failed:",

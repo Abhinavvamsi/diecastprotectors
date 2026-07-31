@@ -76,15 +76,23 @@ function formatAmount(value?: number) {
 
 type WhatsAppItemsSummaryOptions = {
   mixedOrderBreakdown?: boolean
+  includePreOrderLabel?: boolean
 }
 
-function formatWhatsAppItemLine(item: any) {
+function formatWhatsAppItemLine(
+  item: any,
+  options?: WhatsAppItemsSummaryOptions
+) {
   const quantity = Math.max(
     1,
     Number(item.quantity || 1)
   )
+  const preOrderLabel =
+    options?.includePreOrderLabel && item.isPreOrder
+      ? " (Pre-order)"
+      : ""
 
-  return `${item.name} x${quantity}`
+  return `${item.name}${preOrderLabel} x${quantity}`
 }
 
 export function buildWhatsAppItemsSummary(
@@ -100,7 +108,9 @@ export function buildWhatsAppItemsSummary(
   }
 
   if (!options?.mixedOrderBreakdown) {
-    return validItems.map(formatWhatsAppItemLine).join(", ")
+    return validItems
+      .map((item) => formatWhatsAppItemLine(item, options))
+      .join(", ")
   }
 
   const readyStockItems = validItems.filter(
@@ -115,7 +125,7 @@ export function buildWhatsAppItemsSummary(
   if (readyStockItems.length) {
     sections.push(
       `Ready to dispatch now: ${readyStockItems
-        .map(formatWhatsAppItemLine)
+        .map((item) => formatWhatsAppItemLine(item, options))
         .join(", ")}`
     )
   }
@@ -123,7 +133,12 @@ export function buildWhatsAppItemsSummary(
   if (preOrderItems.length) {
     sections.push(
       `Pre-order deposit items: ${preOrderItems
-        .map(formatWhatsAppItemLine)
+        .map((item) =>
+          formatWhatsAppItemLine(item, {
+            ...options,
+            includePreOrderLabel: true,
+          })
+        )
         .join(", ")}`
     )
     sections.push(
