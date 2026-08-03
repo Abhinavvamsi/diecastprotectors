@@ -43,6 +43,24 @@ export default async function ProductPage({
 	
 	  }
 
+  const hiddenSaleProduct =
+    await prisma.$queryRaw<
+      Array<{
+        id: string
+      }>
+    >`
+      SELECT id
+      FROM "Product"
+      WHERE id = ${product.id}
+        AND "saleHiddenUntil" IS NOT NULL
+        AND "saleHiddenUntil" > ${new Date().toISOString()}
+      LIMIT 1
+    `
+
+  if (hiddenSaleProduct.length > 0) {
+    notFound()
+  }
+
   const availableProduct = {
     ...product,
     stock: Math.max(

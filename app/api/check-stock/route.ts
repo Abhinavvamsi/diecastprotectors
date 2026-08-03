@@ -38,6 +38,33 @@ export async function POST(
 
     }
 
+    const hiddenSaleProduct =
+      await prisma.$queryRaw<
+        Array<{
+          id: string
+        }>
+      >`
+        SELECT id
+        FROM "Product"
+        WHERE id = ${product.id}
+          AND "saleHiddenUntil" IS NOT NULL
+          AND "saleHiddenUntil" > ${new Date().toISOString()}
+        LIMIT 1
+      `
+
+    if (hiddenSaleProduct.length > 0) {
+      return NextResponse.json(
+        {
+          valid: false,
+          message:
+            `${item.name} will be available when the sale starts`,
+        },
+        {
+          status: 400,
+        }
+      )
+    }
+
     if (
       product.stock - (product.reservedStock || 0) <
       item.quantity

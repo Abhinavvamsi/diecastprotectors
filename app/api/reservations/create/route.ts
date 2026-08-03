@@ -6,6 +6,7 @@ import {
   getIndiaDateKey,
   isPreOrderDeadlineActive,
 } from "@/lib/preorder"
+import { isSaleHidden } from "@/lib/sale-launch"
 
 export async function POST(req: Request) {
   try {
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
 
         const products =
 	          await tx.$queryRaw<any[]>`
-	            SELECT id, stock, "reservedStock", name, "isPreOrder", "preOrderDeadline"
+	            SELECT id, stock, "reservedStock", name, "isPreOrder", "preOrderDeadline", "saleHiddenUntil"
 	            FROM "Product"
             WHERE id IN (${Prisma.join(productIds)})
             FOR UPDATE
@@ -99,6 +100,12 @@ export async function POST(req: Request) {
 	              `${product.name} pre-order deadline has ended`
 	            )
 	          }
+
+          if (isSaleHidden(product)) {
+            throw new Error(
+              `${product.name} will be available when the sale starts`
+            )
+          }
 	        }
 
         // Reserve stock

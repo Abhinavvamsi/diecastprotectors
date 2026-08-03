@@ -50,6 +50,7 @@ model Product {
   depositAmount   Int      @default(50)
   expectedArrival String?
   preOrderDeadline String?
+  saleHiddenUntil String?
 
   brandId         String?
   brand           Brand? @relation(fields: [brandId], references: [id])
@@ -75,6 +76,7 @@ model StoreSettings {
   pickupLocation  String?
   maintenanceMode Boolean @default(false)
   superDealProductIds Json?
+  saleLaunchAt String?
 }
 
 model Brand {

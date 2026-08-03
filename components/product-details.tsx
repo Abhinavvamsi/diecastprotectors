@@ -2,7 +2,10 @@
 
 import { useRouter } from "next/navigation"
 
-import { useState } from "react"
+import {
+  useEffect,
+  useState,
+} from "react"
 
 import Image from "next/image"
 
@@ -18,6 +21,11 @@ import {
   getProductPayablePrice,
   getProductRemainingPrice,
 } from "@/lib/preorder"
+import RecentlyViewedProducts
+from "@/components/recently-viewed-products"
+import {
+  saveRecentlyViewedProduct,
+} from "@/lib/recently-viewed"
 
 export default function ProductDetails({
   product,
@@ -61,6 +69,25 @@ const remainingPrice = product.isPreOrder
 const availableStock = Number(product.stock || 0)
 
   const router = useRouter()
+
+  useEffect(() => {
+    saveRecentlyViewedProduct({
+      ...product,
+      price: product.isPreOrder
+        ? depositPrice
+        : selectedPrice,
+      originalPrice: selectedPrice,
+      image: product.images?.[0],
+      stock: availableStock,
+      remainingPrice,
+    })
+  }, [
+    product,
+    depositPrice,
+    selectedPrice,
+    availableStock,
+    remainingPrice,
+  ])
 
   return (
 
@@ -542,6 +569,10 @@ if (
           </div>
 
         </div>
+
+        <RecentlyViewedProducts
+          currentProductId={product.id}
+        />
 
         {/* Sticky Mobile Buy Bar */}
         {/* Sticky Mobile Buy Bar */}

@@ -11,6 +11,8 @@ import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
 import ProductCard from "@/components/product-card"
 import BrandMarquee from "@/components/brand-marquee"
+import RecentlyViewedProducts
+from "@/components/recently-viewed-products"
 
 const CARS_SCROLL_POSITION_KEY =
   "cars-scroll-position"
@@ -779,6 +781,8 @@ to-purple-600
         </div>
 
       </section>
+
+      <RecentlyViewedProducts />
 
     </main>
 

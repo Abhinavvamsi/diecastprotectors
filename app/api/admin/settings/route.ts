@@ -1,14 +1,34 @@
 import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/admin"
 import { NextResponse } from "next/server"
+import { isFutureSaleLaunch } from "@/lib/sale-launch"
 
 export async function GET() {
 
   const settings =
     await prisma.storeSettings.findFirst()
+  const saleSettings =
+    settings
+      ? await prisma.$queryRaw<
+          Array<{
+            saleLaunchAt: string | null
+          }>
+        >`
+          SELECT "saleLaunchAt"
+          FROM "StoreSettings"
+          WHERE id = ${settings.id}
+          LIMIT 1
+        `
+      : []
 
   return NextResponse.json(
-    settings,
+    settings
+      ? {
+          ...settings,
+          saleLaunchAt:
+            saleSettings[0]?.saleLaunchAt ?? null,
+        }
+      : settings,
     {
       headers: {
         "Cache-Control":
@@ -29,6 +49,28 @@ export async function POST(
 
   const existing =
     await prisma.storeSettings.findFirst()
+  const saleLaunchAt =
+    body.saleLaunchAt || null
+  const now = new Date().toISOString()
+
+  async function syncHiddenSaleProducts() {
+    if (isFutureSaleLaunch(saleLaunchAt)) {
+      await prisma.$executeRaw`
+        UPDATE "Product"
+        SET "saleHiddenUntil" = ${saleLaunchAt}
+        WHERE "saleHiddenUntil" IS NOT NULL
+          AND "saleHiddenUntil" > ${now}
+      `
+      return
+    }
+
+    await prisma.$executeRaw`
+      UPDATE "Product"
+      SET "saleHiddenUntil" = NULL
+      WHERE "saleHiddenUntil" IS NOT NULL
+        AND "saleHiddenUntil" > ${now}
+    `
+  }
 
   if (existing) {
 
@@ -63,7 +105,18 @@ export async function POST(
 
         })
 
-    const response = NextResponse.json(updated)
+    await prisma.$executeRaw`
+      UPDATE "StoreSettings"
+      SET "saleLaunchAt" = ${saleLaunchAt}
+      WHERE id = ${existing.id}
+    `
+
+    await syncHiddenSaleProducts()
+
+    const response = NextResponse.json({
+      ...updated,
+      saleLaunchAt,
+    })
     response.cookies.set("maintenance-mode", String(Boolean(updated.maintenanceMode)), {
       path: "/",
       sameSite: "lax",
@@ -102,7 +155,18 @@ export async function POST(
 
     })
 
-  const response = NextResponse.json(created)
+  await prisma.$executeRaw`
+    UPDATE "StoreSettings"
+    SET "saleLaunchAt" = ${saleLaunchAt}
+    WHERE id = ${created.id}
+  `
+
+  await syncHiddenSaleProducts()
+
+  const response = NextResponse.json({
+    ...created,
+    saleLaunchAt,
+  })
   response.cookies.set("maintenance-mode", String(Boolean(created.maintenanceMode)), {
     path: "/",
     sameSite: "lax",

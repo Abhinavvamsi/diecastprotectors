@@ -22,6 +22,7 @@ import BrandsSection from "@/components/brands-section"
 import BrandMarquee from "@/components/brand-marquee"
 import SuperDealsSection from "@/components/super-deals-section"
 import PremiumLoader from "@/components/premium-loader"
+import SaleCountdown from "@/components/sale-countdown"
 
 
 const bebas = Bebas_Neue({
@@ -102,6 +103,7 @@ const [brands, setBrands] = useState<any[]>([])
 const [banners, setBanners] = useState<Banner[]>([])
 const [allProducts, setAllProducts] = useState<Product[]>([])
 const [storeSettings, setStoreSettings] = useState<any>(null)
+const [productsRefreshKey, setProductsRefreshKey] = useState(0)
   const [showLoader, setShowLoader] =
   useState(true)
 
@@ -189,7 +191,7 @@ inStockProducts.forEach((product: Product) => {
 
     fetchProducts()
 
-  }, [syncStock])
+  }, [syncStock, productsRefreshKey])
 useEffect(() => {
 
   const visited =
@@ -376,6 +378,13 @@ useEffect(() => {
 
       {/* Navbar */}
       <Navbar />
+
+<SaleCountdown
+  launchAt={storeSettings?.saleLaunchAt}
+  onComplete={() =>
+    setProductsRefreshKey((current) => current + 1)
+  }
+/>
 
 {/* Hero Banner */}
 <BannerSlider banners={banners} />

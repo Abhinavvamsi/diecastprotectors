@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useEffect } from "react"
 
 import Navbar from "@/components/navbar"
+import RecentlyViewedProducts from "@/components/recently-viewed-products"
 
 import { Button } from "@/components/ui/button"
 
@@ -597,6 +598,11 @@ hover:shadow-[0_0_30px_rgba(236,72,153,.45)]
         )}
 
       </div>
+
+      <RecentlyViewedProducts
+        title="Recently Viewed"
+        subtitle="Quickly add a car you checked earlier without leaving your cart."
+      />
 
     </main>
 

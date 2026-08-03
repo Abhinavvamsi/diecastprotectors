@@ -18,12 +18,42 @@ type Product = {
   reservedStock?: number
 }
 
+function toDateTimeLocal(value?: string | null) {
+  if (!value) return ""
+
+  const date = new Date(value)
+
+  if (!Number.isFinite(date.getTime())) {
+    return ""
+  }
+
+  const localDate = new Date(
+    date.getTime() -
+      date.getTimezoneOffset() * 60 * 1000
+  )
+
+  return localDate.toISOString().slice(0, 16)
+}
+
+function fromDateTimeLocal(value: string) {
+  if (!value) return ""
+
+  const date = new Date(value)
+
+  if (!Number.isFinite(date.getTime())) {
+    return ""
+  }
+
+  return date.toISOString()
+}
+
 export default function SettingsPage() {
   const [shippingCharge, setShippingCharge] = useState("0")
   const [shippingMessage, setShippingMessage] = useState("")
   const [pickupEnabled, setPickupEnabled] = useState(false)
   const [pickupLocation, setPickupLocation] = useState("")
   const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [saleLaunchAt, setSaleLaunchAt] = useState("")
   const [superDealProductIds, setSuperDealProductIds] = useState<string[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [search, setSearch] = useState("")
@@ -47,7 +77,7 @@ export default function SettingsPage() {
   async function loadSettings() {
     const [settingsResponse, productsResponse] = await Promise.all([
       fetch("/api/admin/settings"),
-      fetch("/api/get-products"),
+      fetch("/api/get-products?includeHiddenSale=true"),
     ])
 
     const data = await settingsResponse.json()
@@ -58,6 +88,7 @@ export default function SettingsPage() {
     setShippingCharge(String(data.shippingCharge || 0))
     setShippingMessage(data.shippingMessage || "")
     setMaintenanceMode(data.maintenanceMode || false)
+    setSaleLaunchAt(toDateTimeLocal(data.saleLaunchAt))
     setSuperDealProductIds(Array.isArray(data.superDealProductIds) ? data.superDealProductIds : [])
     setProducts(productData || [])
   }
@@ -74,6 +105,7 @@ export default function SettingsPage() {
         pickupEnabled,
         pickupLocation,
         maintenanceMode,
+        saleLaunchAt: fromDateTimeLocal(saleLaunchAt),
         superDealProductIds: activeSuperDealProductIds,
       }),
     })
@@ -203,6 +235,47 @@ export default function SettingsPage() {
                 className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform ${maintenanceMode ? "translate-x-10" : "translate-x-1"}`}
               />
             </button>
+          </div>
+
+          <div className="bg-[#09090B] border border-cyan-500/30 rounded-2xl p-6 shadow-[0_0_28px_rgba(34,211,238,.08)]">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-wider text-cyan-300">
+                  Sale Launch Countdown
+                </p>
+                <p className="mt-1 max-w-2xl text-sm text-zinc-500">
+                  Set this before adding sale products. Any new products added while this time is in the future will stay hidden from customers until the countdown ends.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSaleLaunchAt("")}
+                className="h-11 rounded-xl border border-zinc-700 px-5 text-sm font-semibold text-zinc-300 transition hover:border-cyan-400 hover:text-cyan-200"
+              >
+                Clear Timer
+              </button>
+            </div>
+
+            <input
+              type="datetime-local"
+              value={saleLaunchAt}
+              onChange={(event) =>
+                setSaleLaunchAt(event.target.value)
+              }
+              className="mt-5 h-14 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-white outline-none [color-scheme:dark] focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+            />
+
+            {saleLaunchAt && (
+              <p className="mt-3 text-sm text-cyan-200">
+                Homepage countdown will run until{" "}
+                {new Date(saleLaunchAt).toLocaleString("en-IN", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+                .
+              </p>
+            )}
           </div>
 
           <div className="bg-[#09090B] border border-zinc-700 rounded-2xl p-6">

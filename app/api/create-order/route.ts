@@ -1,5 +1,6 @@
 import Razorpay from "razorpay"
 import { NextResponse } from "next/server"
+import { Prisma } from "@prisma/client"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 import { calculateShippingCharge } from "@/lib/shipping"
@@ -74,6 +75,21 @@ export async function POST(req: Request) {
 
 	    const productMap = new Map(products.map((product) => [product.id, product]))
 	    const todayKey = getIndiaDateKey()
+      const hiddenSaleIds = new Set(
+        (
+          await prisma.$queryRaw<
+            Array<{
+              id: string
+            }>
+          >`
+            SELECT id
+            FROM "Product"
+            WHERE id IN (${Prisma.join(productIds)})
+              AND "saleHiddenUntil" IS NOT NULL
+              AND "saleHiddenUntil" > ${new Date().toISOString()}
+          `
+        ).map((product) => product.id)
+      )
 	
 	    for (const item of reservation.items) {
 	      const product = productMap.get(item.productId)
@@ -91,6 +107,20 @@ export async function POST(req: Request) {
 	          }
 	        )
 	      }
+
+      if (
+        product &&
+        hiddenSaleIds.has(product.id)
+      ) {
+        return NextResponse.json(
+          {
+            error: `${product.name} will be available when the sale starts`,
+          },
+          {
+            status: 400,
+          }
+        )
+      }
 	    }
     const hasOnlyPreOrderItems =
       reservation.items.length > 0 &&

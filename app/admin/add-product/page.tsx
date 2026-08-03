@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import AdminNav from "@/components/admin-nav"
 import { Button } from "@/components/ui/button"
 
@@ -28,6 +28,11 @@ export default function AddProductPage() {
   const [uploading,
     setUploading
   ] = useState(false)
+  const [saving,
+    setSaving
+  ] = useState(false)
+  const savingRef =
+    useRef(false)
 
   const [category,
     setCategory
@@ -153,6 +158,10 @@ export default function AddProductPage() {
 
   async function handleAddProduct() {
 
+    if (savingRef.current) {
+      return
+    }
+
     if (
       !name ||
       !description ||
@@ -170,19 +179,24 @@ export default function AddProductPage() {
 
     }
 
-    const response =
-      await fetch(
-        "/api/add-product",
-        {
+    savingRef.current = true
+    setSaving(true)
 
-          method: "POST",
+    try {
 
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
+      const response =
+        await fetch(
+          "/api/add-product",
+          {
 
-          body: JSON.stringify({
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
 
   name,
 
@@ -218,37 +232,57 @@ export default function AddProductPage() {
     ),
 
 }),
-        }
-      )
+          }
+        )
 
-    if (response.ok) {
+      const data =
+        await response.json()
 
-      toast.success(
-        "Product Added 🚀"
-      )
+      if (response.ok) {
 
-      setName("")
-      setDescription("")
-      setPrice("")
-      setImages([])
-      setCategory("")
-      setBadge("")
-      setStock("")
-      setIsPreOrder(false)
-      setDepositAmount("50")
-      setExpectedArrival("")
-      setQuantityPricing([
+        toast.success(
+          data?.saleHiddenUntil
+            ? "Product staged for sale launch 🚀"
+            : "Product Added 🚀"
+        )
+
+        setName("")
+        setDescription("")
+        setPrice("")
+        setImages([])
+        setCategory("")
+        setBadge("")
+        setStock("")
+        setIsPreOrder(false)
+        setDepositAmount("50")
+        setExpectedArrival("")
+        setPreOrderDeadline("")
+        setQuantityPricing([
   {
     quantity: "",
     price: "",
   },
 ])
 
-    } else {
+      } else {
+
+        toast.error(
+          data?.error ||
+          "Failed to add product"
+        )
+
+      }
+
+    } catch (error) {
 
       toast.error(
         "Failed to add product"
       )
+
+    } finally {
+
+      savingRef.current = false
+      setSaving(false)
 
     }
 
@@ -969,6 +1003,7 @@ focus:ring-pink-500/30
             onClick={
               handleAddProduct
             }
+            disabled={saving || uploading}
             className="
             w-full
             h-16
@@ -990,7 +1025,9 @@ hover:shadow-[0_0_40px_rgba(236,72,153,.45)]
             "
           >
 
-            Add Product
+            {saving
+              ? "Adding Product..."
+              : "Add Product"}
 
           </Button>
 

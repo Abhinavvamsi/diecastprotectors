@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import BrandProducts from "@/components/brand-products"
+import RecentlyViewedProducts from "@/components/recently-viewed-products"
 
 type Props = {
   params: Promise<{
@@ -48,6 +49,26 @@ export default async function BrandPage({
     notFound()
 
   }
+
+  const hiddenSaleIds = new Set(
+    (
+      await prisma.$queryRaw<
+        Array<{
+          id: string
+        }>
+      >`
+        SELECT id
+        FROM "Product"
+        WHERE "saleHiddenUntil" IS NOT NULL
+          AND "saleHiddenUntil" > ${new Date().toISOString()}
+      `
+    ).map((product) => product.id)
+  )
+
+  const visibleProducts =
+    brand.products.filter(
+      (product) => !hiddenSaleIds.has(product.id)
+    )
 
   return (
 
@@ -110,7 +131,7 @@ export default async function BrandPage({
 
               <p className="text-zinc-400 mt-2">
 
-                {brand.products.length}
+                {visibleProducts.length}
                 {" "}
                 Products Available
 
@@ -125,8 +146,10 @@ export default async function BrandPage({
         {/* Products */}
 
         <BrandProducts
-          products={brand.products as any[]}
+          products={visibleProducts as any[]}
         />
+
+        <RecentlyViewedProducts />
 
       </div>
 

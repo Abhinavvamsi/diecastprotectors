@@ -3,6 +3,7 @@ import Link from "next/link"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import PreOrdersBrowser from "@/components/preorders-browser"
+import RecentlyViewedProducts from "@/components/recently-viewed-products"
 import { getIndiaDateKey } from "@/lib/preorder"
 
 export const dynamic = "force-dynamic"
@@ -27,6 +28,26 @@ export default async function PreOrdersPage() {
       !product.preOrderDeadline ||
       product.preOrderDeadline >= todayKey
   )
+
+  const hiddenSaleIds = new Set(
+    (
+      await prisma.$queryRaw<
+        Array<{
+          id: string
+        }>
+      >`
+        SELECT id
+        FROM "Product"
+        WHERE "saleHiddenUntil" IS NOT NULL
+          AND "saleHiddenUntil" > ${new Date().toISOString()}
+      `
+    ).map((product) => product.id)
+  )
+
+  const visibleProducts =
+    activeProducts.filter(
+      (product) => !hiddenSaleIds.has(product.id)
+    )
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-white">
@@ -61,7 +82,7 @@ export default async function PreOrdersPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pb-20">
-        {activeProducts.length === 0 ? (
+        {visibleProducts.length === 0 ? (
           <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-12 text-center">
             <h2 className="text-3xl font-bold">No Pre-Orders Yet</h2>
             <p className="mt-3 text-zinc-400">
@@ -69,9 +90,14 @@ export default async function PreOrdersPage() {
             </p>
           </div>
         ) : (
-          <PreOrdersBrowser products={activeProducts as any[]} />
+          <PreOrdersBrowser products={visibleProducts as any[]} />
         )}
       </section>
+
+      <RecentlyViewedProducts
+        title="Recently Viewed"
+        subtitle="Return to the pre-order collectibles you explored earlier."
+      />
 
       <Footer />
     </main>
