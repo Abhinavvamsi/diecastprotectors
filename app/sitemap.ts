@@ -63,48 +63,53 @@ const staticPages: MetadataRoute.Sitemap = [
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const todayKey = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date())
+  try {
+    const todayKey = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date())
 
-  const [brands, products] = await Promise.all([
-    prisma.brand.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-      },
-    }),
-    prisma.product.findMany({
-      select: {
-        id: true,
-        createdAt: true,
-        isPreOrder: true,
-        preOrderDeadline: true,
-      },
-    }),
-  ])
+    const [brands, products] = await Promise.all([
+      prisma.brand.findMany({
+        select: {
+          id: true,
+          createdAt: true,
+        },
+      }),
+      prisma.product.findMany({
+        select: {
+          id: true,
+          createdAt: true,
+          isPreOrder: true,
+          preOrderDeadline: true,
+        },
+      }),
+    ])
 
-  const brandPages: MetadataRoute.Sitemap = brands.map((brand) => ({
-    url: `${siteUrl}/brands/${brand.id}`,
-    lastModified: brand.createdAt,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }))
-
-  const productPages: MetadataRoute.Sitemap = products
-    .filter((product) => {
-      if (!product.isPreOrder) return true
-      return isPreOrderDeadlineActive(product, todayKey)
-    })
-    .map((product) => ({
-      url: `${siteUrl}/products/${product.id}`,
-      lastModified: product.createdAt,
-      changeFrequency: product.isPreOrder ? "weekly" : "daily",
-      priority: product.isPreOrder ? 0.6 : 0.8,
+    const brandPages: MetadataRoute.Sitemap = brands.map((brand) => ({
+      url: `${siteUrl}/brands/${brand.id}`,
+      lastModified: brand.createdAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
     }))
 
-  return [...staticPages, ...brandPages, ...productPages]
+    const productPages: MetadataRoute.Sitemap = products
+      .filter((product) => {
+        if (!product.isPreOrder) return true
+        return isPreOrderDeadlineActive(product, todayKey)
+      })
+      .map((product) => ({
+        url: `${siteUrl}/products/${product.id}`,
+        lastModified: product.createdAt,
+        changeFrequency: product.isPreOrder ? "weekly" : "daily",
+        priority: product.isPreOrder ? 0.6 : 0.8,
+      }))
+
+    return [...staticPages, ...brandPages, ...productPages]
+  } catch (error) {
+    console.error("Sitemap generation failed, using static fallback:", error)
+    return staticPages
+  }
 }
