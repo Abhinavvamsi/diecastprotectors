@@ -24,17 +24,39 @@ const bebas = Bebas_Neue({
 
 })
 
-export const metadata = {
+const siteUrl = "https://www.shinseidiecast.com"
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Shinsei Diecast",
+  url: siteUrl,
+  logo: `${siteUrl}/logo.png`,
+}
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Shinsei Diecast",
+  url: siteUrl,
+}
+
+export const metadata: Metadata = {
 
   title: "Shinsei Diecast",
 
   description: "Premium Diecast Collectibles",
 
+  metadataBase: new URL("https://www.shinseidiecast.com"),
+
+  alternates: {
+    canonical: "/",
+  },
+
   icons: {
 
-    icon: "/logo.png",
+    icon: "/favicon.ico",
 
-    shortcut: "/logo.png",
+    shortcut: "/favicon.ico",
 
     apple: "/logo.png",
 
@@ -50,12 +72,12 @@ export const metadata = {
     "Diecast Collection",
   ],
 
- openGraph: {
+  openGraph: {
   title: "Shinsei Diecast",
   description:
     "Premium Diecast Collectibles",
   url:
-    "https://diecastprotectors.in",
+    "https://www.shinseidiecast.com",
   siteName:
     "Shinsei Diecast",
 
@@ -70,14 +92,14 @@ export const metadata = {
 
   locale: "en_IN",
   type: "website",
-},
-twitter: {
+  },
+  twitter: {
   card: "summary_large_image",
   title: "Shinsei Diecast",
   description:
     "Premium Diecast Collectibles",
   images: ["/logo.png"],
-},
+  },
 }
 
 export default function RootLayout({
@@ -101,6 +123,17 @@ export default function RootLayout({
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
           strategy="beforeInteractive"
+        />
+
+        <Script
+          id="structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              organizationSchema,
+              websiteSchema,
+            ]),
+          }}
         />
 
         {/* Clerk */}
