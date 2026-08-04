@@ -278,6 +278,10 @@ const [selectedSavedAddress,
   setSuggestions
   ] = useState<any[]>([])
 
+const [showAddressSuggestions,
+  setShowAddressSuggestions
+] = useState(false)
+
   const [loading,
     setLoading
   ] = useState(false)
@@ -735,6 +739,7 @@ async function searchAddress(
 ) {
 
   setAddress(value)
+  setShowAddressSuggestions(true)
 
   if (value.length < 3) {
 
@@ -759,6 +764,7 @@ async function searchAddress(
     setSuggestions(
       data.features || []
     )
+    setShowAddressSuggestions(true)
 
   } catch (error) {
 
@@ -766,6 +772,26 @@ async function searchAddress(
 
   }
 
+}
+
+function selectAddressSuggestion(item: any) {
+  setAddress(
+    item.properties.formatted
+  )
+
+  setCity(
+    item.properties.city ||
+    item.properties.county ||
+    ""
+  )
+
+  setPincode(
+    item.properties.postcode ||
+    ""
+  )
+
+  setSuggestions([])
+  setShowAddressSuggestions(false)
 }
 
 async function cancelReservation(
@@ -1153,6 +1179,16 @@ focus:ring-pink-500/30
       <textarea
         placeholder="Start typing your address..."
         value={address}
+        onFocus={() => {
+          if (suggestions.length > 0) {
+            setShowAddressSuggestions(true)
+          }
+        }}
+        onBlur={() => {
+          window.setTimeout(() => {
+            setShowAddressSuggestions(false)
+          }, 120)
+        }}
         onChange={(e) =>
           searchAddress(
             e.target.value
@@ -1177,7 +1213,8 @@ focus:ring-pink-500/30
         "
       />
 
-      {suggestions.length > 0 && (
+      {showAddressSuggestions &&
+        suggestions.length > 0 && (
 
         <div
           className="
@@ -1200,25 +1237,12 @@ focus:ring-pink-500/30
             <button
               key={index}
               type="button"
-              onClick={() => {
-
-                setAddress(
-                  item.properties.formatted
-                )
-
-                setCity(
-                  item.properties.city ||
-                  item.properties.county ||
-                  ""
-                )
-
-                setPincode(
-                  item.properties.postcode ||
-                  ""
-                )
-
-                setSuggestions([])
-
+              onMouseDown={(event) => {
+                event.preventDefault()
+                selectAddressSuggestion(item)
+              }}
+              onTouchStart={() => {
+                selectAddressSuggestion(item)
               }}
               className="
               w-full
