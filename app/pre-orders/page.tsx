@@ -50,7 +50,7 @@ export default async function PreOrdersPage() {
     )
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-white">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#09090B] text-white">
       <Navbar />
       <div className="pointer-events-none absolute -top-24 right-0 h-[420px] w-[420px] rounded-full bg-fuchsia-500/10 blur-[150px] animate-pulse" />
       <div className="pointer-events-none absolute left-0 top-1/3 h-[360px] w-[360px] rounded-full bg-cyan-500/10 blur-[150px] animate-pulse" />

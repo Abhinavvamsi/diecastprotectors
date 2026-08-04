@@ -44,6 +44,56 @@ type SavedCheckoutAddress = {
   updatedAt: string
 }
 
+declare global {
+  interface Window {
+    Razorpay?: any
+  }
+}
+
+function loadRazorpayScript() {
+  return new Promise<boolean>((resolve) => {
+    if (window.Razorpay) {
+      resolve(true)
+      return
+    }
+
+    const existingScript =
+      document.querySelector<HTMLScriptElement>(
+        'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+      )
+
+    if (existingScript) {
+      existingScript.addEventListener(
+        "load",
+        () => resolve(true),
+        { once: true }
+      )
+      existingScript.addEventListener(
+        "error",
+        () => resolve(false),
+        { once: true }
+      )
+      return
+    }
+
+    const script = document.createElement("script")
+    script.src = "https://checkout.razorpay.com/v1/checkout.js"
+    script.async = true
+    script.onload = () => resolve(true)
+    script.onerror = () => resolve(false)
+    document.body.appendChild(script)
+  })
+}
+
+function showPaymentToast(
+  type: "error" | "success",
+  message: string
+) {
+  window.setTimeout(() => {
+    toast[type](message)
+  }, 180)
+}
+
 export default function CheckoutPage() {
 
   const cart = useCartStore(
@@ -826,7 +876,7 @@ async function applyCoupon() {
 
   return (
 
-    <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-white">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#09090B] text-white">
 
       {/* Navbar */}
       <Navbar />
@@ -2251,8 +2301,9 @@ description: "Premium Japanese Diecast Collectibles",
 
                           setLoading(false)
 
-                          toast.error(
-                            "Payment cancelled"
+                          showPaymentToast(
+                            "error",
+                            "Payment cancelled. Your reserved stock has been released."
                           )
 
                         },
@@ -2311,10 +2362,20 @@ if (appliedCouponCode.trim()) {
   }
 
 }
+                    const razorpayLoaded =
+                      await loadRazorpayScript()
+
+                    if (
+                      !razorpayLoaded ||
+                      !window.Razorpay
+                    ) {
+                      throw new Error(
+                        "Unable to open Razorpay. Please check your network and try again."
+                      )
+                    }
+
                     const razorpay =
-                      new (
-                        window as any
-                      ).Razorpay(
+                      new window.Razorpay(
                         options
                       )
 
@@ -2325,8 +2386,9 @@ if (appliedCouponCode.trim()) {
 
                       function () {
 
-                        toast.error(
-                          "Payment failed"
+                        showPaymentToast(
+                          "error",
+                          "Payment failed. Please retry or choose another payment method."
                         )
 
                         setLoading(false)
@@ -2342,8 +2404,11 @@ if (appliedCouponCode.trim()) {
                       )
                     }
 
-                    toast.error(
-                      "Something went wrong"
+                    showPaymentToast(
+                      "error",
+                      error instanceof Error
+                        ? error.message
+                        : "Something went wrong"
                     )
 
                     setLoading(false)

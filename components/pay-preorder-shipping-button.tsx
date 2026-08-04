@@ -115,6 +115,9 @@ export default function PayPreOrderShippingButton({
         modal: {
           ondismiss: () => {
             setLoading(false)
+            window.setTimeout(() => {
+              toast.error("Shipping payment cancelled")
+            }, 180)
           },
         },
         theme: {
@@ -123,7 +126,9 @@ export default function PayPreOrderShippingButton({
       })
 
       razorpay.on("payment.failed", () => {
-        toast.error("Shipping payment failed")
+        window.setTimeout(() => {
+          toast.error("Shipping payment failed")
+        }, 180)
         setLoading(false)
       })
 

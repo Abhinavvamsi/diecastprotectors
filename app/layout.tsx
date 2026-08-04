@@ -1,6 +1,9 @@
 import { ClerkProvider } from "@clerk/nextjs"
 
-import type { Metadata } from "next"
+import type {
+  Metadata,
+  Viewport,
+} from "next"
 
 import Script from "next/script"
 
@@ -102,6 +105,13 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#09090B",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -147,9 +157,30 @@ export default function RootLayout({
 
             {/* Toasts */}
             <Toaster
-              position="top-right"
+              position="top-center"
+              theme="dark"
               richColors
               closeButton
+              offset={{
+                top: "calc(env(safe-area-inset-top, 0px) + 16px)",
+              }}
+              mobileOffset={{
+                top: "calc(env(safe-area-inset-top, 0px) + 86px)",
+                right: "14px",
+                left: "14px",
+              }}
+              toastOptions={{
+                classNames: {
+                  toast:
+                    "border border-white/10 bg-[#101017] text-white shadow-[0_0_30px_rgba(236,72,153,0.18)]",
+                  title:
+                    "text-sm font-semibold tracking-wide",
+                  description:
+                    "text-sm text-zinc-200",
+                  closeButton:
+                    "bg-[#101017] text-white border-white/20",
+                },
+              }}
             />
 
           </ThemeProvider>

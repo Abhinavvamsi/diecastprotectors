@@ -110,6 +110,9 @@ export default function PayPreOrderBalanceButton({
         modal: {
           ondismiss: () => {
             setLoading(false)
+            window.setTimeout(() => {
+              toast.error("Balance payment cancelled")
+            }, 180)
           },
         },
         theme: {
@@ -118,7 +121,9 @@ export default function PayPreOrderBalanceButton({
       })
 
       razorpay.on("payment.failed", () => {
-        toast.error("Balance payment failed")
+        window.setTimeout(() => {
+          toast.error("Balance payment failed")
+        }, 180)
         setLoading(false)
       })
 

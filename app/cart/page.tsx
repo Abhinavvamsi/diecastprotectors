@@ -168,7 +168,7 @@ const hasUnavailableProducts =
 
   return (
 
-    <main className="relative min-h-screen overflow-hidden bg-[#09090B] text-white">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#09090B] text-white">
 
       {/* Global Navbar */}
       <Navbar />
