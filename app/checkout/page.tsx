@@ -94,6 +94,27 @@ function showPaymentToast(
   }, 180)
 }
 
+function preparePaymentViewport() {
+  if (typeof window === "undefined") return 0
+
+  const scrollTop = window.scrollY
+  const activeElement = document.activeElement
+
+  if (activeElement instanceof HTMLElement) {
+    activeElement.blur()
+  }
+
+  requestAnimationFrame(() => {
+    window.scrollTo({
+      top: scrollTop,
+      left: 0,
+      behavior: "auto",
+    })
+  })
+
+  return scrollTop
+}
+
 export default function CheckoutPage() {
 
   const cart = useCartStore(
@@ -590,6 +611,10 @@ useEffect(() => {
 }, [couponCode])
 
 useEffect(() => {
+  void loadRazorpayScript()
+}, [])
+
+useEffect(() => {
   let cancelled = false
 
   async function syncAppliedCouponWithCart() {
@@ -877,6 +902,18 @@ async function applyCoupon() {
   return (
 
     <main className="relative min-h-screen overflow-x-hidden bg-[#09090B] text-white">
+
+      {loading && (
+        <div className="pointer-events-none fixed inset-x-4 top-[calc(env(safe-area-inset-top,0px)+88px)] z-40 mx-auto max-w-sm rounded-2xl border border-pink-500/30 bg-[#111118]/95 px-5 py-4 text-center shadow-[0_0_45px_rgba(236,72,153,.28)] backdrop-blur-xl md:hidden">
+          <div className="mx-auto mb-3 h-9 w-9 animate-spin rounded-full border-2 border-pink-400 border-t-transparent" />
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-pink-200">
+            Opening Secure Payment
+          </p>
+          <p className="mt-1 text-xs text-zinc-400">
+            Please wait, do not refresh or go back.
+          </p>
+        </div>
+      )}
 
       {/* Navbar */}
       <Navbar />
@@ -1904,6 +1941,9 @@ bg-pink-500/10
     cart.length === 0 ||
     shipping === null
   }
+  onPointerDown={() => {
+    preparePaymentViewport()
+  }}
   
   className="
 h-14
@@ -1932,6 +1972,9 @@ disabled:cursor-not-allowed
 "
 
                 onClick={async () => {
+
+                  const paymentScrollTop =
+                    preparePaymentViewport()
 
                   setLoading(true)
                   setValidating(true)
@@ -2380,6 +2423,14 @@ if (appliedCouponCode.trim()) {
                       )
 
                     razorpay.open()
+
+                    requestAnimationFrame(() => {
+                      window.scrollTo({
+                        top: paymentScrollTop,
+                        left: 0,
+                        behavior: "auto",
+                      })
+                    })
 
                     razorpay.on(
                       "payment.failed",
