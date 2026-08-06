@@ -14,6 +14,7 @@ import { Toaster } from "sonner"
 import {
   ThemeProvider,
 } from "@/components/theme-provider"
+import StoreAssistant from "@/components/store-assistant"
 
 import {
   Bebas_Neue,
@@ -154,6 +155,8 @@ export default function RootLayout({
 
             {/* App */}
             {children}
+
+            <StoreAssistant />
 
             {/* Toasts */}
             <Toaster
