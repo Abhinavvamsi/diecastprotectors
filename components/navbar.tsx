@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 import Image from "next/image"
 
@@ -13,7 +14,9 @@ import {
 } from "lucide-react"
 
 import {
+  useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react"
 
@@ -30,7 +33,25 @@ import { useCartStore } from "@/store/cart-store"
 const CARS_SCROLL_POSITION_KEY =
   "cars-scroll-position"
 
+const ADMIN_PREFETCH_SESSION_KEY =
+  "admin-routes-prefetched"
+
+const ADMIN_PREFETCH_ROUTES = [
+  "/admin",
+  "/admin/products",
+  "/admin/orders",
+  "/admin/pre-orders",
+  "/admin/settings",
+  "/admin/brands",
+  "/admin/banners",
+  "/admin/coupons",
+  "/admin/bulk-import",
+]
+
 export default function Navbar() {
+
+  const router = useRouter()
+  const adminPrefetchStarted = useRef(false)
 
   const saveCarsScrollPosition = () => {
     if (window.location.pathname !== "/cars") return
@@ -66,6 +87,42 @@ export default function Navbar() {
 
   const [role, setRole] =
   useState("")
+
+  const prefetchAdminRoutes =
+    useCallback(() => {
+      if (!isAdmin) return
+      if (adminPrefetchStarted.current) return
+
+      adminPrefetchStarted.current = true
+
+      if (
+        sessionStorage.getItem(
+          ADMIN_PREFETCH_SESSION_KEY
+        ) === "true"
+      ) {
+        return
+      }
+
+      sessionStorage.setItem(
+        ADMIN_PREFETCH_SESSION_KEY,
+        "true"
+      )
+
+      const runPrefetch = () => {
+        for (const route of ADMIN_PREFETCH_ROUTES) {
+          router.prefetch(route)
+        }
+      }
+
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(runPrefetch, {
+          timeout: 1200,
+        })
+        return
+      }
+
+      globalThis.setTimeout(runPrefetch, 0)
+    }, [isAdmin, router])
 
   /* Clear cart when account changes */
   useEffect(() => {
@@ -336,6 +393,10 @@ text-white
             <Link
               href="/admin"
               prefetch={true}
+              onMouseEnter={prefetchAdminRoutes}
+              onFocus={prefetchAdminRoutes}
+              onTouchStart={prefetchAdminRoutes}
+              onClick={prefetchAdminRoutes}
               className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent font-semibold"
             >
 
@@ -503,6 +564,11 @@ shadow-[0_0_12px_rgba(236,72,153,0.5)]
 
             <Link
               href="/admin"
+              prefetch={true}
+              onMouseEnter={prefetchAdminRoutes}
+              onFocus={prefetchAdminRoutes}
+              onTouchStart={prefetchAdminRoutes}
+              onClick={prefetchAdminRoutes}
               className="block text-lg bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent"
             >
 

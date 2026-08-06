@@ -66,17 +66,20 @@ export default function AdminOrdersSearch({
       w-full
       h-14
       rounded-2xl
-      bg-zinc-900
-      border-zinc-700
+      bg-zinc-900/95
+      border-pink-400/30
       text-white
-      placeholder:text-zinc-500
-      focus:border-pink-500
-      focus:ring-pink-500/30
+      placeholder:text-zinc-300/80
+      placeholder:uppercase
+      placeholder:tracking-[0.05em]
+      focus:border-pink-300
+      focus:ring-pink-400/25
       border
       px-5
       outline-none
       focus:ring-2
       transition-all
+      hover:border-pink-300/55
       "
     />
   )

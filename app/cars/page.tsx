@@ -13,6 +13,8 @@ import ProductCard from "@/components/product-card"
 import BrandMarquee from "@/components/brand-marquee"
 import RecentlyViewedProducts
 from "@/components/recently-viewed-products"
+import LightweightLoading
+from "@/components/lightweight-loading"
 
 const CARS_SCROLL_POSITION_KEY =
   "cars-scroll-position"
@@ -256,15 +258,11 @@ if (loading) {
 
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 py-20">
-
-        <p className="text-center text-lg text-gray-400">
-
-          Loading our collection...
-
-        </p>
-
-      </div>
+      <LightweightLoading
+        label="Browse Inventory"
+        message="Loading available diecast cars"
+        compact
+      />
 
     </main>
 
@@ -437,9 +435,10 @@ to-purple-600
   relative
   group
   rounded-2xl
-  shadow-[0_0_30px_rgba(236,72,153,.14)]
+  shadow-[0_0_36px_rgba(236,72,153,.2)]
   ring-1
-  ring-pink-500/20
+  ring-pink-400/35
+  bg-[linear-gradient(135deg,rgba(236,72,153,0.08),rgba(22,22,30,0.96))]
   "
 >
 
@@ -451,8 +450,8 @@ to-purple-600
       -translate-y-1/2
       w-5
       h-5
-      text-gray-400
-      group-focus-within:text-pink-500
+      text-zinc-300
+      group-focus-within:text-pink-300
       transition-colors
       duration-300
       "
@@ -474,25 +473,28 @@ to-purple-600
       rounded-2xl
 
       border
-      border-[#2B2B3A]
+      border-pink-400/35
 
-      bg-[#15151D]
+      bg-[#171720]/95
 
       text-white
-      placeholder:text-gray-400
+      placeholder:text-zinc-300/85
+      placeholder:uppercase
+      placeholder:tracking-[0.08em]
 
       transition-all
       duration-300
 
       focus:outline-none
-      focus:border-pink-500
+      focus:border-pink-300
 
-      focus:shadow-[0_0_42px_rgba(236,72,153,.38)]
+      focus:shadow-[0_0_46px_rgba(236,72,153,.34)]
 
-      hover:border-pink-500/60
+      hover:border-pink-300/70
 
+      hover:bg-[#1A1A24]
       hover:-translate-y-0.5
-      hover:shadow-[0_0_28px_rgba(236,72,153,.18)]
+      hover:shadow-[0_0_32px_rgba(236,72,153,.22)]
       "
     />
 

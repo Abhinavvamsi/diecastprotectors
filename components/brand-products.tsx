@@ -90,14 +90,14 @@ export default function BrandProducts({
   return (
     <>
       <div className="mb-8">
-        <div className="relative group rounded-2xl shadow-[0_0_30px_rgba(236,72,153,.14)] ring-1 ring-pink-500/20">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-pink-500 transition-colors duration-300" />
+        <div className="relative group rounded-2xl bg-[linear-gradient(135deg,rgba(236,72,153,0.08),rgba(22,22,30,0.96))] shadow-[0_0_36px_rgba(236,72,153,.2)] ring-1 ring-pink-400/35">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-300 transition-colors duration-300 group-focus-within:text-pink-300" />
           <input
             type="text"
             placeholder="Search this brand..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-16 pl-14 pr-5 rounded-2xl border border-[#2B2B3A] bg-[#15151D] text-white placeholder:text-gray-400 transition-all duration-300 focus:outline-none focus:border-pink-500 focus:shadow-[0_0_42px_rgba(236,72,153,.38)] hover:border-pink-500/60 hover:-translate-y-0.5 hover:shadow-[0_0_28px_rgba(236,72,153,.18)]"
+            className="h-16 w-full rounded-2xl border border-pink-400/35 bg-[#171720]/95 pl-14 pr-5 text-white placeholder:text-zinc-300/85 placeholder:uppercase placeholder:tracking-[0.08em] transition-all duration-300 focus:border-pink-300 focus:outline-none focus:shadow-[0_0_46px_rgba(236,72,153,.34)] hover:-translate-y-0.5 hover:border-pink-300/70 hover:bg-[#1A1A24] hover:shadow-[0_0_32px_rgba(236,72,153,.22)]"
           />
         </div>
       </div>

@@ -61,14 +61,14 @@ export default function AdminPreOrdersList({
 
   return (
     <div className="space-y-5">
-      <div className="relative rounded-2xl border border-cyan-500/20 bg-[#111118] shadow-[0_0_30px_rgba(34,211,238,.08)] ring-1 ring-cyan-500/10">
-        <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-300/70" />
+      <div className="relative rounded-2xl border border-cyan-400/30 bg-[linear-gradient(135deg,rgba(34,211,238,0.08),rgba(17,17,24,0.96))] shadow-[0_0_34px_rgba(34,211,238,.14)] ring-1 ring-cyan-400/20">
+        <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-cyan-100/90" />
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search pre-orders by name, brand, or price..."
-          className="h-14 w-full rounded-2xl bg-transparent pl-14 pr-5 text-white placeholder:text-zinc-500 outline-none"
+          className="h-14 w-full rounded-2xl bg-transparent pl-14 pr-5 text-white placeholder:text-cyan-50/78 placeholder:uppercase placeholder:tracking-[0.06em] outline-none"
         />
       </div>
 

@@ -295,7 +295,7 @@ export default function SettingsPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search products..."
-                  className="w-full h-12 rounded-xl border border-zinc-700 bg-[#09090B] px-4 text-white placeholder:text-zinc-500 outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
+                  className="h-12 w-full rounded-xl border border-pink-400/30 bg-[#111118] px-4 text-white placeholder:text-zinc-300/80 placeholder:uppercase placeholder:tracking-[0.05em] outline-none transition-all focus:border-pink-300 focus:ring-2 focus:ring-pink-400/20 hover:border-pink-300/55"
                 />
               </div>
             </div>

@@ -134,7 +134,7 @@ const [deletingId, setDeletingId] =
 
             <Search
               size={20}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300"
             />
 
             <input
@@ -144,7 +144,7 @@ const [deletingId, setDeletingId] =
                 setSearch(event.target.value)
               }
               placeholder="Search products, categories, or brands..."
-              className="h-12 w-full rounded-xl border border-zinc-700 bg-zinc-900 pl-12 pr-4 text-white outline-none transition-all placeholder:text-zinc-500 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/30"
+              className="h-12 w-full rounded-xl border border-pink-400/30 bg-zinc-900/95 pl-12 pr-4 text-white outline-none transition-all placeholder:text-zinc-300/80 placeholder:uppercase placeholder:tracking-[0.06em] focus:border-pink-300 focus:ring-2 focus:ring-pink-400/25 hover:border-pink-300/55 hover:bg-zinc-900"
             />
 
           </div>

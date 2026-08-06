@@ -1836,7 +1836,10 @@ text-green-400
 
     ) : shipping === null ? (
 
-      <p>Loading...</p>
+      <span className="inline-flex items-center gap-2 text-zinc-400">
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-pink-400 border-t-transparent" />
+        Calculating
+      </span>
 
     ) : shipping > 0 ? (
 
