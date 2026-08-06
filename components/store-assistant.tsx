@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useUser } from "@clerk/nextjs"
 import {
   Bot,
   MessageCircle,
@@ -15,10 +16,27 @@ import {
   useRef,
   useState,
 } from "react"
+import { toast } from "sonner"
+import { useCartStore } from "@/store/cart-store"
 
 type ChatAction = {
   label: string
-  href: string
+  href?: string
+  type?: "link" | "add_to_cart" | "buy_now"
+  product?: {
+    id: string
+    name: string
+    brandName?: string
+    price: number
+    originalPrice: number
+    remainingPrice?: number
+    image: string
+    stock: number
+    isPreOrder?: boolean
+    depositAmount?: number
+    expectedArrival?: string
+    preOrderDeadline?: string
+  }
 }
 
 type ChatMessage = {
@@ -55,7 +73,9 @@ const initialMessage: ChatMessage = {
   ],
 }
 
-function isExternalLink(href: string) {
+function isExternalLink(href?: string) {
+  if (!href) return false
+
   return /^https?:\/\//i.test(href)
 }
 
@@ -63,8 +83,54 @@ function getMessageId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
+function getProductActions(actions?: ChatAction[]) {
+  const products = new Map<
+    string,
+    {
+      product: NonNullable<ChatAction["product"]>
+      addAction?: ChatAction
+      buyAction?: ChatAction
+    }
+  >()
+
+  actions
+    ?.filter((action) => action.product)
+    .forEach((action) => {
+      const product = action.product!
+      const current =
+        products.get(product.id) || {
+          product,
+        }
+
+      if (action.type === "add_to_cart") {
+        current.addAction = action
+      }
+
+      if (action.type === "buy_now") {
+        current.buyAction = action
+      }
+
+      products.set(product.id, current)
+    })
+
+  return Array.from(products.values())
+}
+
+function getLinkActions(actions?: ChatAction[]) {
+  return actions?.filter(
+    (action) =>
+      action.type !== "add_to_cart" &&
+      action.type !== "buy_now"
+  )
+}
+
 export default function StoreAssistant() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user } = useUser()
+  const addToCart = useCartStore(
+    (state) => state.addToCart
+  )
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
@@ -201,6 +267,44 @@ export default function StoreAssistant() {
     setLoading(false)
   }
 
+  function handleProductAction(action: ChatAction) {
+    const product = action.product
+    if (!product) return
+
+    if (!user) {
+      toast.error("Please login first")
+      router.push("/sign-in")
+      return
+    }
+
+    if (Number(product.stock || 0) <= 0) {
+      toast.error("This item is currently unavailable")
+      return
+    }
+
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      image: product.image,
+      stock: product.stock,
+      isPreOrder: product.isPreOrder,
+      depositAmount: product.depositAmount,
+      expectedArrival: product.expectedArrival,
+      preOrderDeadline: product.preOrderDeadline,
+    })
+
+    if (action.type === "buy_now") {
+      toast.success("Redirecting to checkout 🚀")
+      setOpen(false)
+      router.push("/checkout")
+      return
+    }
+
+    toast.success(`${product.name} added to cart 🛒`)
+  }
+
   if (hidden) {
     return null
   }
@@ -262,12 +366,92 @@ export default function StoreAssistant() {
                     {message.text}
                   </div>
 
-                  {message.actions?.length ? (
+                  {getProductActions(message.actions).length ? (
+                    <div className="mt-3 space-y-3">
+                      {getProductActions(message.actions).map(
+                        ({ product, addAction, buyAction }) => (
+                          <div
+                            key={product.id}
+                            className="overflow-hidden rounded-2xl border border-cyan-400/20 bg-[#0D0D14] shadow-[0_0_24px_rgba(34,211,238,.08)]"
+                          >
+                            <div className="flex gap-3 p-3">
+                              {product.image ? (
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="h-20 w-20 shrink-0 rounded-xl border border-white/10 bg-black object-contain"
+                                />
+                              ) : null}
+
+                              <div className="min-w-0 flex-1">
+                                <p className="line-clamp-2 text-sm font-bold uppercase leading-5 text-white">
+                                  {product.name}
+                                </p>
+
+                                {product.brandName ? (
+                                  <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-pink-300">
+                                    {product.brandName}
+                                  </p>
+                                ) : null}
+
+                                <p className="mt-2 text-lg font-black text-pink-400">
+                                  ₹{product.price}
+                                </p>
+
+                                {product.isPreOrder ? (
+                                  <div className="mt-1 space-y-0.5 text-[12px] font-semibold leading-5 text-cyan-200">
+                                    <p>Original: ₹{product.originalPrice}</p>
+                                    <p>Deposit now: ₹{product.price}</p>
+                                    <p>Remaining later: ₹{product.remainingPrice || 0}</p>
+                                    {product.expectedArrival ? (
+                                      <p>Arrives: {product.expectedArrival}</p>
+                                    ) : null}
+                                  </div>
+                                ) : (
+                                  <p className="mt-1 text-[12px] font-semibold text-green-400">
+                                    Ready stock: {product.stock}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2 border-t border-white/10 p-3">
+                              {addAction ? (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleProductAction(addAction)
+                                  }
+                                  className="rounded-xl border border-cyan-300/30 bg-cyan-400/10 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-cyan-100 transition hover:border-cyan-300/60 hover:bg-cyan-400/15"
+                                >
+                                  Add to Cart
+                                </button>
+                              ) : null}
+
+                              {buyAction ? (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleProductAction(buyAction)
+                                  }
+                                  className="rounded-xl border border-pink-400/40 bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.12em] text-white shadow-[0_0_18px_rgba(236,72,153,.24)] transition hover:scale-[1.01]"
+                                >
+                                  Buy Now
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  ) : null}
+
+                  {getLinkActions(message.actions)?.length ? (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {message.actions.map((action) =>
+                      {getLinkActions(message.actions)?.map((action, index) =>
                         isExternalLink(action.href) ? (
                           <a
-                            key={action.href + action.label}
+                            key={`${message.id}-${action.label}-${index}`}
                             href={action.href}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -277,8 +461,8 @@ export default function StoreAssistant() {
                           </a>
                         ) : (
                           <Link
-                            key={action.href + action.label}
-                            href={action.href}
+                            key={`${message.id}-${action.label}-${index}`}
+                            href={action.href || "/"}
                             className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.12em] text-white transition hover:border-cyan-300/40 hover:bg-cyan-400/10"
                           >
                             {action.label}

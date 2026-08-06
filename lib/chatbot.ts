@@ -13,10 +13,26 @@ import {
   isPreOrderDeadlineActive,
 } from "@/lib/preorder"
 import { getPreOrderShippingBatch } from "@/lib/preorder-shipping"
+import { isSaleHidden } from "@/lib/sale-launch"
 
 type ChatbotAction = {
   label: string
-  href: string
+  href?: string
+  type?: "link" | "add_to_cart" | "buy_now"
+  product?: {
+    id: string
+    name: string
+    brandName?: string
+    price: number
+    originalPrice: number
+    remainingPrice?: number
+    image: string
+    stock: number
+    isPreOrder?: boolean
+    depositAmount?: number
+    expectedArrival?: string
+    preOrderDeadline?: string
+  }
 }
 
 export type ChatbotReply = {
@@ -54,6 +70,28 @@ function formatOrderItems(items: any[]) {
       const quantity = Math.max(1, Number(item?.quantity || 1))
       const label = item?.isPreOrder ? " (pre-order)" : ""
       return `${item?.name || item?.id || "Item"} x${quantity}${label}`
+    })
+    .join("\n")
+}
+
+function formatPreOrderPaymentItems(items: any[]) {
+  return items
+    .slice(0, 5)
+    .map((item) => {
+      const pricing = getOrderItemPricing(item)
+      const quantity = Math.max(1, pricing.quantity)
+      const remaining = item.preOrderBalancePaid
+        ? 0
+        : pricing.lineRemainingPrice
+      const status = item.preOrderBalancePaid
+        ? "balance paid"
+        : item.preOrderArrived
+        ? "payable now"
+        : "payable after arrival"
+
+      return `${item?.name || item?.id || "Item"} x${quantity} — deposit ${formatMoney(
+        pricing.linePayablePrice
+      )}, remaining ${formatMoney(remaining)} (${status})`
     })
     .join("\n")
 }
@@ -101,18 +139,31 @@ async function getOrderStatusReply(
     (item) => !getOrderItemPricing(item).isPreOrder
   )
 
-  const balanceDue = preOrderItems.reduce((total, item) => {
+  const preOrderTotals = preOrderItems.reduce((totals, item) => {
     const pricing = getOrderItemPricing(item)
 
-    if (
-      !item.preOrderArrived ||
-      item.preOrderBalancePaid
-    ) {
-      return total
+    totals.original += pricing.lineOriginalPrice
+    totals.depositPaid += pricing.linePayablePrice
+
+    if (item.preOrderBalancePaid) {
+      totals.balancePaid += pricing.lineRemainingPrice
+      return totals
     }
 
-    return total + pricing.lineRemainingPrice
-  }, 0)
+    if (item.preOrderArrived) {
+      totals.balanceDueNow += pricing.lineRemainingPrice
+    } else {
+      totals.balanceDueLater += pricing.lineRemainingPrice
+    }
+
+    return totals
+  }, {
+    original: 0,
+    depositPaid: 0,
+    balancePaid: 0,
+    balanceDueNow: 0,
+    balanceDueLater: 0,
+  })
 
   const waitingForArrivalCount = preOrderItems.filter(
     (item) =>
@@ -126,7 +177,13 @@ async function getOrderStatusReply(
   )
 
   const preOrderLine = preOrderItems.length
-    ? `\n\nPre-order update:\n${preOrderItems.length} pre-order item${preOrderItems.length === 1 ? "" : "s"} in this order.${waitingForArrivalCount ? ` ${waitingForArrivalCount} still awaiting arrival.` : ""}${balanceDue > 0 ? ` Balance due now: ${formatMoney(balanceDue)}.` : ""}${shippingBatch.shippingAmount > 0 ? ` Shipping due now: ${formatMoney(shippingBatch.shippingAmount)}.` : ""}`
+    ? `\n\nPre-order payment summary:\nOriginal pre-order amount: ${formatMoney(
+        preOrderTotals.original
+      )}\nDeposit paid: ${formatMoney(
+        preOrderTotals.depositPaid
+      )}${preOrderTotals.balancePaid > 0 ? `\nBalance already paid: ${formatMoney(preOrderTotals.balancePaid)}` : ""}${preOrderTotals.balanceDueNow > 0 ? `\nBalance due now: ${formatMoney(preOrderTotals.balanceDueNow)}` : ""}${preOrderTotals.balanceDueLater > 0 ? `\nBalance due after arrival: ${formatMoney(preOrderTotals.balanceDueLater)}` : ""}\nRemaining balance total: ${formatMoney(
+        preOrderTotals.balanceDueNow + preOrderTotals.balanceDueLater
+      )}${waitingForArrivalCount ? `\n${waitingForArrivalCount} pre-order item${waitingForArrivalCount === 1 ? " is" : "s are"} still awaiting arrival.` : ""}${shippingBatch.shippingAmount > 0 ? `\nShipping due now: ${formatMoney(shippingBatch.shippingAmount)}.` : ""}`
     : ""
 
   const readyStockLine = readyStockItems.length
@@ -134,7 +191,7 @@ async function getOrderStatusReply(
     : ""
 
   return {
-    answer: `Order ${order.orderId} is currently ${order.status}.\n\nTotal paid: ${formatMoney(order.totalAmount)}.${readyStockLine}${preOrderItems.length ? `\n\nPre-order items:\n${formatOrderItems(preOrderItems)}` : ""}${preOrderLine}`,
+    answer: `Order ${order.orderId} is currently ${order.status}.\n\nTotal paid: ${formatMoney(order.totalAmount)}.${readyStockLine}${preOrderItems.length ? `\n\nPre-order items:\n${formatPreOrderPaymentItems(preOrderItems)}` : ""}${preOrderLine}`,
     suggestions: [
       "Track another order",
       "Payment due orders",
@@ -146,10 +203,12 @@ async function getOrderStatusReply(
         href: `/track-order?orderId=${encodeURIComponent(order.orderId)}`,
       },
       {
-        label: preOrderItems.length
+        label: preOrderTotals.balanceDueNow > 0 ||
+          shippingBatch.shippingAmount > 0
           ? "Open Payment Due"
           : "Order History",
-        href: preOrderItems.length
+        href: preOrderTotals.balanceDueNow > 0 ||
+          shippingBatch.shippingAmount > 0
           ? "/orders?filter=payment-due"
           : "/orders",
       },
@@ -211,18 +270,35 @@ async function searchProducts(message: string) {
     "with",
     "of",
     "from",
+    "all",
+    "want",
+    "need",
+    "find",
+    "looking",
+    "model",
+    "models",
   ])
 
-  const terms = query
+  const baseTerms = query
     .split(" ")
     .map((term) => term.trim())
     .filter((term) => term.length >= 2 && !stopWords.has(term))
+
+  const terms = Array.from(
+    new Set(
+      baseTerms.flatMap((term) =>
+        term.endsWith("s") && term.length > 3
+          ? [term, term.slice(0, -1)]
+          : [term]
+      )
+    )
+  )
 
   if (!terms.length) return []
 
   const primaryTerm = terms.join(" ")
 
-  return prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: {
       OR: [
         {
@@ -260,11 +336,32 @@ async function searchProducts(message: string) {
     include: {
       brand: true,
     },
-    take: 5,
+    take: 20,
     orderBy: {
       createdAt: "desc",
     },
   })
+
+  return products
+    .filter((product) => {
+      const availableStock = Math.max(
+        0,
+        Number(product.stock || 0) - Number(product.reservedStock || 0)
+      )
+
+      if (availableStock <= 0) return false
+      if (isSaleHidden(product)) return false
+
+      if (
+        product.isPreOrder &&
+        !isPreOrderDeadlineActive(product)
+      ) {
+        return false
+      }
+
+      return true
+    })
+    .slice(0, 5)
 }
 
 function formatProductResult(product: any) {
@@ -281,10 +378,104 @@ function formatProductResult(product: any) {
       : "Open now"
     const isOpen = isPreOrderDeadlineActive(product)
 
-    return `${product.name}${product.brand?.name ? ` (${product.brand.name})` : ""} — Pre-order ${isOpen ? "open" : "closed"}, deposit ₹${deposit}, remaining ₹${remaining}, available ${availableStock}, closes ${deadline}.`
+    return `${product.name}${product.brand?.name ? ` (${product.brand.name})` : ""}\nPre-order ${isOpen ? "open" : "closed"} • Deposit today: ₹${deposit} • Remaining later: ₹${remaining} • Available: ${availableStock} • Closes: ${deadline}`
   }
 
-  return `${product.name}${product.brand?.name ? ` (${product.brand.name})` : ""} — Ready stock available: ${availableStock}, price ₹${product.price}.`
+  return `${product.name}${product.brand?.name ? ` (${product.brand.name})` : ""}\nReady stock: ${availableStock} • Price: ₹${product.price}`
+}
+
+function buildProductActionProduct(product: any) {
+  const availableStock = Math.max(
+    0,
+    Number(product.stock || 0) - Number(product.reservedStock || 0)
+  )
+  const image = Array.isArray(product.images)
+    ? String(product.images[0] || "")
+    : ""
+  const payablePrice = product.isPreOrder
+    ? getProductPayablePrice(product)
+    : Number(product.price || 0)
+  const remainingPrice = product.isPreOrder
+    ? getProductRemainingPrice(product)
+    : 0
+
+  return {
+    id: product.id,
+    name: product.name,
+    brandName: product.brand?.name || undefined,
+    price: payablePrice,
+    originalPrice: Number(product.price || payablePrice),
+    remainingPrice,
+    image,
+    stock: availableStock,
+    isPreOrder: Boolean(product.isPreOrder),
+    depositAmount: Number(product.depositAmount ?? 50),
+    expectedArrival: product.expectedArrival || undefined,
+    preOrderDeadline: product.preOrderDeadline || undefined,
+  }
+}
+
+function buildProductActions(products: any[]): ChatbotAction[] {
+  return products
+    .slice(0, 3)
+    .flatMap((product) => {
+      const actionProduct = buildProductActionProduct(product)
+      const shortName =
+        product.name.length > 18
+          ? `${product.name.slice(0, 18)}…`
+          : product.name
+
+      return [
+        {
+          label: `Add ${shortName}`,
+          type: "add_to_cart" as const,
+          product: actionProduct,
+        },
+        {
+          label: `Buy ${shortName}`,
+          type: "buy_now" as const,
+          product: actionProduct,
+        },
+      ]
+    })
+}
+
+async function buildProductSearchReply(
+  text: string
+): Promise<ChatbotReply | null> {
+  const products = await searchProducts(text)
+
+  if (!products.length) return null
+
+  const containsPreOrder = products.some(
+    (product) => product.isPreOrder
+  )
+
+  return {
+    answer: `I found ${products.length} available match${products.length === 1 ? "" : "es"}.\n\n${products
+      .map((product, index) => `${index + 1}. ${formatProductResult(product)}`)
+      .join("\n\n")}`,
+    suggestions: containsPreOrder
+      ? [
+          "Open pre-orders",
+          "Browse inventory",
+          "How pre-orders work",
+        ]
+      : [
+          "Browse inventory",
+          "Shipping charges",
+          "Track my order",
+        ],
+    actions: [
+      ...buildProductActions(products),
+      {
+        label: containsPreOrder
+          ? "Open Pre-Orders"
+          : "Browse Inventory",
+        href: containsPreOrder ? "/pre-orders" : "/cars",
+      },
+    ],
+  }
 }
 
 export async function getChatbotReply(
@@ -356,6 +547,10 @@ export async function getChatbotReply(
     text.includes("item arrived")
 
   if (isPreOrderQuestion) {
+    const productReply = await buildProductSearchReply(text)
+
+    if (productReply) return productReply
+
     return {
       answer:
         "Pre-orders collect only the deposit amount during checkout. The remaining balance is collected later after the specific pre-order item is marked as arrived by admin. If an order contains multiple pre-order items with different arrival times, each balance payment unlocks separately when that item arrives. Pre-order shipping is also collected later at dispatch time.",
@@ -531,38 +726,9 @@ export async function getChatbotReply(
     text.includes("product") ||
     text.includes("car")
   ) {
-    const products = await searchProducts(text)
+    const productReply = await buildProductSearchReply(text)
 
-    if (products.length) {
-      const containsPreOrder = products.some(
-        (product) => product.isPreOrder
-      )
-
-      return {
-        answer: `Here’s what I found:\n\n${products
-          .map(formatProductResult)
-          .join("\n")}`,
-        suggestions: containsPreOrder
-          ? [
-              "Open pre-orders",
-              "Browse inventory",
-              "How pre-orders work",
-            ]
-          : [
-              "Browse inventory",
-              "Shipping charges",
-              "Track my order",
-            ],
-        actions: [
-          {
-            label: containsPreOrder
-              ? "Open Pre-Orders"
-              : "Browse Inventory",
-            href: containsPreOrder ? "/pre-orders" : "/cars",
-          },
-        ],
-      }
-    }
+    if (productReply) return productReply
   }
 
   if (
@@ -581,6 +747,10 @@ export async function getChatbotReply(
       ],
     }
   }
+
+  const productReply = await buildProductSearchReply(text)
+
+  if (productReply) return productReply
 
   return buildFallbackReply()
 }
