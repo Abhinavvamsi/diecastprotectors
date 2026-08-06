@@ -3,6 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import AdminNav from "@/components/admin-nav"
 import AdminOrdersSearch from "@/components/admin-orders-search"
+import MarkPreOrderShippingPaidButton from "@/components/mark-preorder-shipping-paid-button"
 export const dynamic = "force-dynamic"
 
 import { prisma } from "@/lib/prisma"
@@ -994,6 +995,16 @@ text-purple-400
                         getPreOrderShippingPaidTotal(
                           orderItems
                         )
+                      const hasUnpaidPreOrderShippingItems =
+                        itemBreakdowns.some(
+                          ({ item, pricing }) =>
+                            pricing.isPreOrder &&
+                            pricing.quantity > 0 &&
+                            !item.preOrderShippingPaid
+                        )
+                      const canCoverPreOrderShippingFromOrderShipping =
+                        hasUnpaidPreOrderShippingItems &&
+                        shippingCharge > 0
 	                      const couponDiscount = Math.max(
                         0,
                         itemsSubtotal +
@@ -1021,9 +1032,34 @@ text-purple-400
                             </div>
                           )}
                           {preOrderShippingDue > 0 && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-zinc-400">Pre-Order Shipping Due</span>
-                              <span>₹{preOrderShippingDue}</span>
+                            <div className="rounded-2xl border border-orange-500/20 bg-orange-500/10 p-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-orange-200">Pre-Order Shipping Due</span>
+                                <span className="font-semibold text-orange-100">₹{preOrderShippingDue}</span>
+                              </div>
+                              <MarkPreOrderShippingPaidButton
+                                orderId={order.id}
+                                amount={preOrderShippingDue}
+                              />
+                            </div>
+                          )}
+                          {canCoverPreOrderShippingFromOrderShipping && (
+                            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-3">
+                              <div className="space-y-1">
+                                <p className="font-semibold text-emerald-100">
+                                  Customer already paid order shipping
+                                </p>
+                                <p className="text-xs text-emerald-100/75">
+                                  Use this when the ready-stock shipment was held until the pre-order arrives.
+                                </p>
+                              </div>
+                              <MarkPreOrderShippingPaidButton
+                                orderId={order.id}
+                                amount={0}
+                                mode="covered"
+                                label="Mark Pre-Order Shipping Covered"
+                                successMessage="Pre-order shipping marked covered by existing order shipping"
+                              />
                             </div>
                           )}
                           {showCouponDiscount && (

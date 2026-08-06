@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useUser } from "@clerk/nextjs"
 import {
@@ -305,6 +304,19 @@ export default function StoreAssistant() {
     toast.success(`${product.name} added to cart 🛒`)
   }
 
+  function handleLinkAction(action: ChatAction) {
+    const href = action.href || "/"
+
+    closeAssistant()
+
+    if (isExternalLink(href)) {
+      window.open(href, "_blank", "noopener,noreferrer")
+      return
+    }
+
+    router.push(href)
+  }
+
   if (hidden) {
     return null
   }
@@ -448,25 +460,16 @@ export default function StoreAssistant() {
 
                   {getLinkActions(message.actions)?.length ? (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {getLinkActions(message.actions)?.map((action, index) =>
-                        isExternalLink(action.href) ? (
-                          <a
+                      {getLinkActions(message.actions)?.map(
+                        (action, index) => (
+                          <button
                             key={`${message.id}-${action.label}-${index}`}
-                            href={action.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            type="button"
+                            onClick={() => handleLinkAction(action)}
                             className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.12em] text-white transition hover:border-cyan-300/40 hover:bg-cyan-400/10"
                           >
                             {action.label}
-                          </a>
-                        ) : (
-                          <Link
-                            key={`${message.id}-${action.label}-${index}`}
-                            href={action.href || "/"}
-                            className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs uppercase tracking-[0.12em] text-white transition hover:border-cyan-300/40 hover:bg-cyan-400/10"
-                          >
-                            {action.label}
-                          </Link>
+                          </button>
                         )
                       )}
                     </div>
