@@ -2,12 +2,12 @@
 
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
 import Link from "next/link"
 import { Search } from "lucide-react"
-import { motion } from "framer-motion"
 import Navbar from "@/components/navbar"
 import ProductCard from "@/components/product-card"
 import BrandMarquee from "@/components/brand-marquee"
@@ -21,6 +21,9 @@ const CARS_SCROLL_POSITION_KEY =
 
 const CARS_LAST_PRODUCT_KEY =
   "cars-last-product-id"
+
+const INITIAL_RENDER_COUNT = 18
+const LOAD_MORE_COUNT = 18
 
 type Product = {
   id: string
@@ -56,11 +59,11 @@ export default function CarsPage() {
 
   const [products, setProducts] =
     useState<Product[]>([])
-const [brands, setBrands] =
-  useState<Brand[]>([])
 
 const [loading, setLoading] =
   useState(true)
+  const [visibleCount, setVisibleCount] =
+    useState(INITIAL_RENDER_COUNT)
 
   const [selectedBrand,
   setSelectedBrand
@@ -106,20 +109,14 @@ const [sortBy,
 
     const [
       productsResponse,
-      brandsResponse,
     ] = await Promise.all([
 
       fetch("/api/get-cars"),
-
-      fetch("/api/admin/brands"),
 
     ])
 
     const productsData =
       await productsResponse.json()
-
-    const brandsData =
-      await brandsResponse.json()
 
     const sorted =
       [...productsData].sort(
@@ -145,8 +142,6 @@ const [sortBy,
       )
 
     setProducts(sorted)
-
-    setBrands(brandsData)
 
   } catch (error) {
 
@@ -231,25 +226,109 @@ useEffect(() => {
 
 }, [loading])
 
-const brandFilters = [
+  const brands = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          products
+            .filter((product) =>
+              Boolean(product.brand?.name)
+            )
+            .map((product) => [
+              product.brand!.id,
+              {
+                id: product.brand!.id,
+                name: product.brand!.name,
+                logo:
+                  product.brand?.logo || "",
+              },
+            ])
+        ).values()
+      ),
+    [products]
+  )
+
+const brandFilters = useMemo(() => [
 
   { name: "All", logo: "" },
 
-  ...Array.from(
-    new Map(
-      products
-        .filter((product) => Boolean(product.brand?.name))
-        .map((product) => [
-          product.brand!.name,
-          {
-            name: product.brand!.name,
-            logo: product.brand?.logo || "",
-          },
-        ])
-    ).values()
-  ),
+  ...brands.map((brand) => ({
+    name: brand.name,
+    logo: brand.logo || "",
+  })),
 
-]
+], [brands])
+
+const filteredProducts = useMemo(
+  () =>
+    products
+      .filter((product) => {
+        const matchesBrand =
+          selectedBrand === "All"
+            ? true
+            : product.brand?.name ===
+              selectedBrand
+
+        const matchesSearch =
+          product.name
+            .toLowerCase()
+            .includes(search.toLowerCase())
+
+        const matchesStock =
+          stockFilter === "All"
+            ? true
+            : stockFilter === "In Stock"
+            ? product.stock > 0
+            : product.stock === 0
+
+        return (
+          matchesBrand &&
+          matchesSearch &&
+          matchesStock
+        )
+      })
+      .sort((a, b) => {
+        const aOutOfStock = a.stock === 0
+        const bOutOfStock = b.stock === 0
+
+        if (aOutOfStock !== bOutOfStock) {
+          return aOutOfStock ? 1 : -1
+        }
+
+        if (sortBy === "Price Low") {
+          return a.price - b.price
+        }
+
+        if (sortBy === "Price High") {
+          return b.price - a.price
+        }
+
+        if (sortBy === "Name A-Z") {
+          return a.name.localeCompare(
+            b.name
+          )
+        }
+
+        return 0
+      }),
+  [
+    products,
+    search,
+    selectedBrand,
+    stockFilter,
+    sortBy,
+  ]
+)
+
+useEffect(() => {
+  setVisibleCount(INITIAL_RENDER_COUNT)
+}, [
+  search,
+  selectedBrand,
+  stockFilter,
+  sortBy,
+])
+
 if (loading) {
 
   return (
@@ -621,36 +700,7 @@ to-purple-600
 
   <p className="text-gray-400">
 
-    Showing {
-
-      products.filter((product) => {
-
-        const matchesBrand =
-          selectedBrand === "All"
-            ? true
-            : product.brand?.name === selectedBrand
-
-        const matchesSearch =
-          product.name
-            .toLowerCase()
-            .includes(search.toLowerCase())
-
-        const matchesStock =
-          stockFilter === "All"
-            ? true
-            : stockFilter === "In Stock"
-            ? product.stock > 0
-            : product.stock === 0
-
-        return (
-          matchesBrand &&
-          matchesSearch &&
-          matchesStock
-        )
-
-      }).length
-
-    } Products
+    Showing {filteredProducts.length} Products
 
   </p>
 
@@ -708,56 +758,8 @@ to-purple-600
             "
           >
 
-            {products
-  .filter((product) => {
-
-    const matchesBrand =
-      selectedBrand === "All"
-        ? true
-        : product.brand?.name === selectedBrand
-
-    const matchesSearch =
-      product.name
-        .toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
-
-    const matchesStock =
-      stockFilter === "All"
-        ? true
-        : stockFilter === "In Stock"
-        ? product.stock > 0
-        : product.stock === 0
-
-    return (
-      matchesBrand &&
-      matchesSearch &&
-      matchesStock
-    )
-
-  })
-
-  .sort((a, b) => {
-
-    if (sortBy === "Price Low") {
-      return a.price - b.price
-    }
-
-    if (sortBy === "Price High") {
-      return b.price - a.price
-    }
-
-    if (sortBy === "Name A-Z") {
-      return a.name.localeCompare(
-        b.name
-      )
-    }
-
-    return 0
-
-  })
-
+            {filteredProducts
+  .slice(0, visibleCount)
   .map((product) => (
 
     <div
@@ -779,6 +781,25 @@ to-purple-600
 
 ))}
           </div>
+
+          {visibleCount <
+          filteredProducts.length ? (
+            <div className="mt-10 flex justify-center">
+              <button
+                type="button"
+                onClick={() =>
+                  setVisibleCount(
+                    (current) =>
+                      current +
+                      LOAD_MORE_COUNT
+                  )
+                }
+                className="h-12 rounded-full border border-pink-500/40 bg-pink-500/10 px-6 text-sm font-semibold uppercase tracking-[0.2em] text-pink-200 transition-all duration-300 hover:border-pink-400 hover:bg-pink-500/20 hover:shadow-[0_0_24px_rgba(236,72,153,.18)]"
+              >
+                Load More Cars
+              </button>
+            </div>
+          ) : null}
 
         </div>
 
