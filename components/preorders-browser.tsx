@@ -5,6 +5,9 @@ import { Search } from "lucide-react"
 import ProductCard from "@/components/product-card"
 import { getProductPayablePrice, getProductRemainingPrice } from "@/lib/preorder"
 
+const INITIAL_PREORDER_RENDER_COUNT = 18
+const LOAD_MORE_PREORDER_COUNT = 18
+
 type PreOrderProduct = {
   id: string
   name: string
@@ -40,6 +43,9 @@ export default function PreOrdersBrowser({
   const [stockFilter, setStockFilter] = useState("All")
   const [sortBy, setSortBy] = useState("Newest")
   const [prefsReady, setPrefsReady] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(
+    INITIAL_PREORDER_RENDER_COUNT
+  )
 
   useEffect(() => {
     const savedSearch = sessionStorage.getItem(SEARCH_KEY)
@@ -127,6 +133,10 @@ export default function PreOrdersBrowser({
         return 0
       })
   }, [products, search, selectedBrand, stockFilter, sortBy])
+
+  useEffect(() => {
+    setVisibleCount(INITIAL_PREORDER_RENDER_COUNT)
+  }, [search, selectedBrand, stockFilter, sortBy])
 
   return (
     <div className="rounded-[2rem] border border-cyan-500/15 bg-white/5 p-4 shadow-[0_0_60px_rgba(34,211,238,.08)] backdrop-blur-xl md:p-6">
@@ -235,35 +245,57 @@ export default function PreOrdersBrowser({
           </p>
         </div>
       ) : (
-        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))] p-[1px] shadow-[0_0_24px_rgba(34,211,238,.08)] transition-transform duration-300 hover:-translate-y-1"
-            >
-	                <ProductCard
-                id={product.id}
-                name={product.name}
-                price={getProductPayablePrice(product)}
-                image={product.images?.[0] || ""}
-                description={product.description}
-                stock={Math.max(
-                  0,
-                  Number(product.stock || 0) -
-                    Number(product.reservedStock || 0)
-                )}
-                badge={product.badge}
-                quantityPricing={product.quantityPricing}
-                isPreOrder={product.isPreOrder}
-                depositAmount={product.depositAmount}
-	                expectedArrival={product.expectedArrival}
-	                preOrderDeadline={product.preOrderDeadline}
-	                originalPrice={product.price}
-                remainingPrice={getProductRemainingPrice(product)}
-              />
+        <>
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {filteredProducts
+              .slice(0, visibleCount)
+              .map((product) => (
+                <div
+                  key={product.id}
+                  className="rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))] p-[1px] shadow-[0_0_24px_rgba(34,211,238,.08)] transition-transform duration-300 hover:-translate-y-1"
+                >
+	                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    price={getProductPayablePrice(product)}
+                    image={product.images?.[0] || ""}
+                    description={product.description}
+                    stock={Math.max(
+                      0,
+                      Number(product.stock || 0) -
+                        Number(product.reservedStock || 0)
+                    )}
+                    badge={product.badge}
+                    quantityPricing={product.quantityPricing}
+                    isPreOrder={product.isPreOrder}
+                    depositAmount={product.depositAmount}
+	                  expectedArrival={product.expectedArrival}
+	                  preOrderDeadline={product.preOrderDeadline}
+	                  originalPrice={product.price}
+                    remainingPrice={getProductRemainingPrice(product)}
+                  />
+                </div>
+              ))}
+          </div>
+
+          {visibleCount < filteredProducts.length ? (
+            <div className="mt-10 flex justify-center">
+              <button
+                type="button"
+                onClick={() =>
+                  setVisibleCount(
+                    (current) =>
+                      current +
+                      LOAD_MORE_PREORDER_COUNT
+                  )
+                }
+                className="h-12 rounded-full border border-cyan-400/40 bg-cyan-500/10 px-6 text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200 transition-all duration-300 hover:border-cyan-300 hover:bg-cyan-500/20 hover:shadow-[0_0_24px_rgba(34,211,238,.18)]"
+              >
+                Load More Pre-Orders
+              </button>
             </div>
-          ))}
-        </div>
+          ) : null}
+        </>
       )}
     </div>
   )
