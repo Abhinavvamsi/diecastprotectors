@@ -15,6 +15,8 @@ import RecentlyViewedProducts
 from "@/components/recently-viewed-products"
 import LightweightLoading
 from "@/components/lightweight-loading"
+import SaleCountdown
+from "@/components/sale-countdown"
 
 const CARS_SCROLL_POSITION_KEY =
   "cars-scroll-position"
@@ -45,6 +47,9 @@ type Brand = {
   id: string
   name: string
   logo?: string
+}
+type StoreSettings = {
+  saleLaunchAt?: string | null
 }
 
 export default function CarsPage() {
@@ -78,6 +83,10 @@ const [stockFilter,
 const [sortBy,
   setSortBy
 ] = useState("Newest")
+const [storeSettings, setStoreSettings] =
+  useState<StoreSettings | null>(null)
+const [productsRefreshKey, setProductsRefreshKey] =
+  useState(0)
 
   useEffect(() => {
     const savedSearch = sessionStorage.getItem(CARS_SEARCH_KEY)
@@ -109,14 +118,22 @@ const [sortBy,
 
     const [
       productsResponse,
+      settingsResponse,
     ] = await Promise.all([
 
       fetch("/api/get-cars"),
+      fetch("/api/admin/settings", {
+        cache: "no-store",
+      }),
 
     ])
 
     const productsData =
       await productsResponse.json()
+    const settingsData =
+      settingsResponse.ok
+        ? await settingsResponse.json()
+        : null
 
     const sorted =
       [...productsData].sort(
@@ -142,6 +159,7 @@ const [sortBy,
       )
 
     setProducts(sorted)
+    setStoreSettings(settingsData)
 
   } catch (error) {
 
@@ -157,7 +175,7 @@ const [sortBy,
 
   fetchData()
 
-}, [])
+}, [productsRefreshKey])
 
 useEffect(() => {
 
@@ -353,6 +371,15 @@ if (loading) {
     <main className="min-h-screen bg-[#09090B] text-white">
 
       <Navbar />
+
+      <SaleCountdown
+        launchAt={storeSettings?.saleLaunchAt}
+        onComplete={() =>
+          setProductsRefreshKey(
+            (current) => current + 1
+          )
+        }
+      />
 
       <section
       

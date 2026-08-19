@@ -4,6 +4,7 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import PreOrdersBrowser from "@/components/preorders-browser"
 import RecentlyViewedProducts from "@/components/recently-viewed-products"
+import SaleCountdown from "@/components/sale-countdown"
 import { getIndiaDateKey } from "@/lib/preorder"
 
 export const dynamic = "force-dynamic"
@@ -11,17 +12,39 @@ export const dynamic = "force-dynamic"
 export default async function PreOrdersPage() {
   const todayKey = getIndiaDateKey()
 
-  const products = await prisma.product.findMany({
-    where: {
-      isPreOrder: true,
-    },
-    include: {
-      brand: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  })
+  const [products, settingsRows] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        isPreOrder: true,
+      },
+      include: {
+        brand: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+    prisma.$queryRaw<
+      Array<{
+        preOrderFeaturedProductIds: unknown
+        saleLaunchAt: string | null
+      }>
+    >`
+      SELECT "preOrderFeaturedProductIds", "saleLaunchAt"
+      FROM "StoreSettings"
+      LIMIT 1
+    `.catch(() => []),
+  ])
+
+  const preOrderFeaturedProductIds =
+    Array.isArray(settingsRows[0]?.preOrderFeaturedProductIds)
+      ? settingsRows[0].preOrderFeaturedProductIds.filter(
+          (productId): productId is string =>
+            typeof productId === "string"
+        )
+      : []
+  const saleLaunchAt =
+    settingsRows[0]?.saleLaunchAt ?? null
 
   const activeProducts = products.filter(
     (product) =>
@@ -49,9 +72,39 @@ export default async function PreOrdersPage() {
       (product) => !hiddenSaleIds.has(product.id)
     )
 
+  const normalizedProducts =
+    visibleProducts.map((product) => ({
+      ...product,
+      images: Array.isArray(product.images)
+        ? product.images.filter(
+            (image): image is string =>
+              typeof image === "string"
+          )
+        : [],
+      quantityPricing: Array.isArray(product.quantityPricing)
+        ? product.quantityPricing.filter(
+            (
+              item
+            ): item is {
+              quantity: string
+              price: string
+            } =>
+              typeof item === "object" &&
+              item !== null &&
+              typeof (item as { quantity?: unknown }).quantity ===
+                "string" &&
+              typeof (item as { price?: unknown }).price === "string"
+          )
+        : [],
+    }))
+
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#09090B] text-white">
       <Navbar />
+      <SaleCountdown
+        launchAt={saleLaunchAt}
+        refreshOnComplete
+      />
       <div className="pointer-events-none absolute -top-24 right-0 h-[420px] w-[420px] rounded-full bg-fuchsia-500/10 blur-[150px] animate-pulse" />
       <div className="pointer-events-none absolute left-0 top-1/3 h-[360px] w-[360px] rounded-full bg-cyan-500/10 blur-[150px] animate-pulse" />
 
@@ -90,7 +143,10 @@ export default async function PreOrdersPage() {
             </p>
           </div>
         ) : (
-          <PreOrdersBrowser products={visibleProducts as any[]} />
+          <PreOrdersBrowser
+            products={normalizedProducts}
+            featuredProductIds={preOrderFeaturedProductIds}
+          />
         )}
       </section>
 

@@ -1,6 +1,77 @@
 import { NextResponse } from "next/server"
 import { requireOwner } from "@/lib/admin"
 import { prisma } from "@/lib/prisma"
+import { isFutureSaleLaunch } from "@/lib/sale-launch"
+import {
+  normalizeExpectedArrivalCell,
+  normalizePreOrderDeadlineCell,
+} from "@/lib/bulk-import-dates"
+
+type UploadedImage = {
+  name: string
+  url: string
+}
+
+type ImportRow = {
+  Name: string
+  Description: string
+  Price: string | number
+  Stock: string | number
+  Brand: string
+  Category: string
+  Badge?: string
+  Image: string
+  Deposit?: string | number
+  ExpectedArrival?: string
+  PreOrderDeadline?: string
+  "Pre Order Deadline"?: string
+  "Pre-Order Deadline"?: string
+  "Accepting Until"?: string
+  status: "VALID" | "INVALID"
+  errors?: string[]
+}
+
+type SkippedRow = {
+  name: string
+  errors: string[]
+}
+
+function getDeadline(row: ImportRow) {
+  const value =
+    row.PreOrderDeadline ||
+    row["Pre Order Deadline"] ||
+    row["Pre-Order Deadline"] ||
+    row["Accepting Until"] ||
+    ""
+
+  return normalizePreOrderDeadlineCell(value)
+}
+
+function hasValue(value: unknown) {
+  return (
+    value !== undefined &&
+    value !== null &&
+    String(value).trim() !== ""
+  )
+}
+
+function looksLikePreOrderRow(row: ImportRow) {
+  const badge =
+    String(row.Badge || "")
+      .trim()
+      .toLowerCase()
+
+  return (
+    hasValue(row.Deposit) ||
+    hasValue(row.ExpectedArrival) ||
+    hasValue(row.PreOrderDeadline) ||
+    hasValue(row["Pre Order Deadline"]) ||
+    hasValue(row["Pre-Order Deadline"]) ||
+    hasValue(row["Accepting Until"]) ||
+    badge.includes("pre order") ||
+    badge.includes("pre-order")
+  )
+}
 
 export async function POST(
   req: Request
@@ -13,13 +84,31 @@ export async function POST(
     const {
       rows,
       uploadedImages,
+      importType,
     } = await req.json()
+    const isPreOrderImport =
+      importType === "preorder" ||
+      rows.some((row: ImportRow) =>
+        looksLikePreOrderRow(row)
+      )
+    const settings =
+      await prisma.storeSettings.findFirst({
+        select: {
+          saleLaunchAt: true,
+        },
+      })
+    const saleHiddenUntil =
+      isFutureSaleLaunch(
+        settings?.saleLaunchAt
+      )
+        ? settings?.saleLaunchAt
+        : null
 
     /* Image lookup table */
     const imageMap =
       new Map(
         uploadedImages.map(
-          (image: any) => [
+          (image: UploadedImage) => [
             image.name.toLowerCase(),
             image.url,
           ]
@@ -28,31 +117,31 @@ export async function POST(
 
     const validRows =
       rows.filter(
-        (row: any) =>
+        (row: ImportRow) =>
           row.status === "VALID"
       )
 
-    const skippedRows: any[] =
+    const skippedRows: SkippedRow[] =
       rows
         .filter(
-          (row: any) =>
+          (row: ImportRow) =>
             row.status === "INVALID"
         )
-        .map((row: any) => ({
+        .map((row: ImportRow) => ({
           name: row.Name,
-          errors: row.errors,
+          errors: row.errors || [],
         }))
 
     let imported = 0
+
+    const brands =
+      await prisma.brand.findMany()
 
     for (const row of validRows) {
 
       try {
 
         /* Brand */
-
-        const brands =
-  await prisma.brand.findMany()
 
 const brand =
   brands.find(
@@ -86,9 +175,6 @@ const brand =
         }
 
         /* Image */
-console.log("========== IMPORT ==========")
-console.log("Rows:", rows)
-console.log("Uploaded Images:", uploadedImages)
         const imageUrl =
           imageMap.get(
             row.Image
@@ -140,7 +226,8 @@ console.log("Uploaded Images:", uploadedImages)
 
         /* Create Product */
 
-        await prisma.product.create({
+        const createdProduct =
+          await prisma.product.create({
 
           data: {
 
@@ -161,6 +248,21 @@ console.log("Uploaded Images:", uploadedImages)
             badge:
               row.Badge || "",
 
+            isPreOrder:
+              isPreOrderImport,
+
+            depositAmount:
+              isPreOrderImport
+                ? Number(row.Deposit || 50)
+                : 50,
+
+            expectedArrival:
+              isPreOrderImport
+                ? normalizeExpectedArrivalCell(
+                    row.ExpectedArrival
+                  ) || null
+                : null,
+
             brandId:
               brand.id,
 
@@ -173,6 +275,27 @@ console.log("Uploaded Images:", uploadedImages)
           },
 
         })
+
+        if (saleHiddenUntil) {
+          await prisma.$executeRaw`
+            UPDATE "Product"
+            SET "saleHiddenUntil" = ${saleHiddenUntil}
+            WHERE id = ${createdProduct.id}
+          `
+        }
+
+        const preOrderDeadline =
+          isPreOrderImport
+            ? getDeadline(row)
+            : ""
+
+        if (preOrderDeadline) {
+          await prisma.$executeRaw`
+            UPDATE "Product"
+            SET "preOrderDeadline" = ${preOrderDeadline}
+            WHERE id = ${createdProduct.id}
+          `
+        }
 
         imported++
 

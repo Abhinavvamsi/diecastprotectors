@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import BrandProducts from "@/components/brand-products"
 import RecentlyViewedProducts from "@/components/recently-viewed-products"
+import { getIndiaDateKey, isPreOrderDeadlineActive } from "@/lib/preorder"
 
 type Props = {
   params: Promise<{
@@ -18,6 +19,7 @@ export default async function BrandPage({
 
   const { id } =
     await params
+  const todayKey = getIndiaDateKey()
 
   const brand =
     await prisma.brand.findUnique({
@@ -29,10 +31,6 @@ export default async function BrandPage({
       include: {
 
         products: {
-
-          where: {
-            isPreOrder: false,
-          },
 
           orderBy: {
             createdAt: "desc",
@@ -67,8 +65,36 @@ export default async function BrandPage({
 
   const visibleProducts =
     brand.products.filter(
-      (product) => !hiddenSaleIds.has(product.id)
+      (product) =>
+        !hiddenSaleIds.has(product.id) &&
+        isPreOrderDeadlineActive(product, todayKey)
     )
+
+  const normalizedProducts =
+    visibleProducts.map((product) => ({
+      ...product,
+      images: Array.isArray(product.images)
+        ? product.images.filter(
+            (image): image is string =>
+              typeof image === "string"
+          )
+        : [],
+      quantityPricing: Array.isArray(product.quantityPricing)
+        ? product.quantityPricing.filter(
+            (
+              item
+            ): item is {
+              quantity: string
+              price: string
+            } =>
+              typeof item === "object" &&
+              item !== null &&
+              typeof (item as { quantity?: unknown }).quantity ===
+                "string" &&
+              typeof (item as { price?: unknown }).price === "string"
+          )
+        : [],
+    }))
 
   return (
 
@@ -146,7 +172,7 @@ export default async function BrandPage({
         {/* Products */}
 
         <BrandProducts
-          products={visibleProducts as any[]}
+          products={normalizedProducts}
         />
 
         <RecentlyViewedProducts />

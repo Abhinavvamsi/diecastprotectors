@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Search } from "lucide-react"
 import ProductCard from "@/components/product-card"
+import { getProductPayablePrice, getProductRemainingPrice } from "@/lib/preorder"
 
 type Product = {
   id: string
@@ -12,9 +13,15 @@ type Product = {
   description: string
   stock: number
   reservedStock?: number
-  quantityPricing?: any[]
-  badge?: string
+  quantityPricing?: {
+    quantity: string
+    price: string
+  }[]
+  badge?: string | null
   isPreOrder?: boolean
+  depositAmount?: number
+  expectedArrival?: string | null
+  preOrderDeadline?: string | null
   brand?: {
     name?: string
   }
@@ -61,8 +68,6 @@ export default function BrandProducts({
         const matchesSearch =
           !term ||
           product.name.toLowerCase().includes(term)
-        const matchesPreOrder =
-          !product.isPreOrder
         const matchesStock =
           stockFilter === "All"
             ? true
@@ -70,7 +75,7 @@ export default function BrandProducts({
             ? availableStock > 0
             : availableStock === 0
 
-        return matchesSearch && matchesPreOrder && matchesStock
+        return matchesSearch && matchesStock
       })
       .sort((a, b) => {
         const stockA = Math.max(0, a.stock - (a.reservedStock || 0))
@@ -79,8 +84,12 @@ export default function BrandProducts({
         if (stockA === 0 && stockB > 0) return 1
         if (stockA > 0 && stockB === 0) return -1
 
-        if (sortBy === "Price Low") return a.price - b.price
-        if (sortBy === "Price High") return b.price - a.price
+        if (sortBy === "Price Low") {
+          return getProductPayablePrice(a) - getProductPayablePrice(b)
+        }
+        if (sortBy === "Price High") {
+          return getProductPayablePrice(b) - getProductPayablePrice(a)
+        }
         if (sortBy === "Name A-Z") return a.name.localeCompare(b.name)
 
         return 0
@@ -153,12 +162,18 @@ export default function BrandProducts({
               key={product.id}
               id={product.id}
               name={product.name}
-              price={product.price}
+              price={getProductPayablePrice(product)}
               image={product.images?.[0] || ""}
               description={product.description}
               stock={Math.max(0, product.stock - (product.reservedStock || 0))}
               quantityPricing={product.quantityPricing}
-              badge={product.badge}
+              badge={product.badge || undefined}
+              isPreOrder={product.isPreOrder}
+              depositAmount={product.depositAmount}
+              expectedArrival={product.expectedArrival}
+              preOrderDeadline={product.preOrderDeadline}
+              originalPrice={product.price}
+              remainingPrice={getProductRemainingPrice(product)}
             />
           ))}
         </div>

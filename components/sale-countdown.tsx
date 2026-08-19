@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 type SaleCountdownProps = {
   launchAt?: string | null
   onComplete?: () => void
   liveWindowMinutes?: number
+  refreshOnComplete?: boolean
 }
 
 function getTimeLeft(launchAt?: string | null) {
@@ -55,7 +57,9 @@ export default function SaleCountdown({
   launchAt,
   onComplete,
   liveWindowMinutes = 60,
+  refreshOnComplete = false,
 }: SaleCountdownProps) {
+  const router = useRouter()
   const [now, setNow] =
     useState(() => Date.now())
   const [timeLeft, setTimeLeft] =
@@ -79,12 +83,21 @@ export default function SaleCountdown({
 
       if (!next && !completed) {
         setCompleted(true)
+        if (refreshOnComplete) {
+          router.refresh()
+        }
         onComplete?.()
       }
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [launchAt, completed, onComplete])
+  }, [
+    launchAt,
+    completed,
+    onComplete,
+    refreshOnComplete,
+    router,
+  ])
 
   const units = useMemo(
     () =>
@@ -143,17 +156,26 @@ export default function SaleCountdown({
                 The new drop is unlocked
               </h2>
               <p className="mt-3 max-w-2xl text-sm text-zinc-300 md:text-base">
-                Browse the latest cars before the best pieces disappear.
+                Browse ready-stock cars and pre-order slots before the best pieces disappear.
               </p>
             </div>
 
-            <Link
-              href="/cars"
-              prefetch
-              className="inline-flex h-14 items-center justify-center rounded-2xl bg-gradient-to-r from-green-400 via-cyan-400 to-blue-500 px-7 text-base font-black uppercase tracking-[0.18em] text-black shadow-[0_0_35px_rgba(34,211,238,.28)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(34,211,238,.45)]"
-            >
-              Shop Sale Cars
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/cars"
+                prefetch
+                className="inline-flex h-14 items-center justify-center rounded-2xl bg-gradient-to-r from-green-400 via-cyan-400 to-blue-500 px-7 text-base font-black uppercase tracking-[0.18em] text-black shadow-[0_0_35px_rgba(34,211,238,.28)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(34,211,238,.45)]"
+              >
+                Shop Ready Stock
+              </Link>
+              <Link
+                href="/pre-orders"
+                prefetch
+                className="inline-flex h-14 items-center justify-center rounded-2xl border border-cyan-300/50 bg-cyan-500/10 px-7 text-base font-black uppercase tracking-[0.18em] text-cyan-100 shadow-[0_0_30px_rgba(34,211,238,.18)] transition-all duration-300 hover:scale-105 hover:bg-cyan-500/20 hover:shadow-[0_0_46px_rgba(34,211,238,.35)]"
+              >
+                Explore Pre-Orders
+              </Link>
+            </div>
           </div>
         </motion.div>
       </section>
@@ -190,10 +212,10 @@ export default function SaleCountdown({
               Sale Drop Incoming
             </p>
             <h2 className="mt-3 text-3xl font-black text-white md:text-5xl">
-              New cars unlock when the timer ends
+              New cars and pre-orders unlock when the timer ends
             </h2>
             <p className="mt-3 max-w-2xl text-sm text-zinc-300 md:text-base">
-              Sale products are hidden for now and will automatically appear across the site at launch.
+              Sale products and pre-order drops are hidden for now and will automatically appear across the site at launch.
             </p>
           </div>
 

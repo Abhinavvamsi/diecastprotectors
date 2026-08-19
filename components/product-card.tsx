@@ -61,6 +61,11 @@ export default function ProductCard({
   const isLowStock =
     Number(stock || 0) > 0 &&
     Number(stock || 0) <= 3
+  const normalizedBadge =
+    badge?.trim().toLowerCase().replace(/[\s-]/g, "")
+  const shouldShowBadge =
+    Boolean(badge) &&
+    !(isPreOrder && normalizedBadge === "preorder")
 
   const addToCart =
     useCartStore(
@@ -89,7 +94,7 @@ export default function ProductCard({
 >
 
       <div
-  className="
+  className={`
   group
 relative
 overflow-hidden
@@ -102,13 +107,16 @@ overflow-hidden
   border
   border-[#2B2B3A]
   shadow-sm
-  hover:border-pink-500
+  ${
+    isPreOrder
+      ? "hover:border-cyan-400 hover:shadow-[0_0_35px_rgba(34,211,238,0.35)]"
+      : "hover:border-pink-500 hover:shadow-[0_0_35px_rgba(236,72,153,0.35)]"
+  }
 hover:-translate-y-2
-hover:shadow-[0_0_35px_rgba(236,72,153,0.35)]
   transition-all
   duration-500
   cursor-pointer
-  "
+  `}
 >
 
         {/* Product Image */}
@@ -146,7 +154,7 @@ to-transparent
 />
 
           {/* Dynamic Badge */}
-          {badge && (
+          {shouldShowBadge && (
 
             <div
               className="

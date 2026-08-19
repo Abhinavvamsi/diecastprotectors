@@ -16,22 +16,27 @@ type PreOrderProduct = {
   description: string
   stock: number
   reservedStock?: number
-  quantityPricing?: any[]
-  badge?: string
+  quantityPricing?: {
+    quantity: string
+    price: string
+  }[]
+  badge?: string | null
   isPreOrder?: boolean
-	  depositAmount?: number
-	  expectedArrival?: string | null
-	  preOrderDeadline?: string | null
+  depositAmount?: number
+  expectedArrival?: string | null
+  preOrderDeadline?: string | null
   brand?: {
-    name?: string
-    logo?: string
-  }
+    name?: string | null
+    logo?: string | null
+  } | null
 }
 
 export default function PreOrdersBrowser({
   products,
+  featuredProductIds = [],
 }: {
   products: PreOrderProduct[]
+  featuredProductIds?: string[]
 }) {
   const SEARCH_KEY = "preorders-search"
   const BRAND_KEY = "preorders-brand"
@@ -45,6 +50,16 @@ export default function PreOrdersBrowser({
   const [prefsReady, setPrefsReady] = useState(false)
   const [visibleCount, setVisibleCount] = useState(
     INITIAL_PREORDER_RENDER_COUNT
+  )
+  const featuredRank = useMemo(
+    () =>
+      new Map(
+        featuredProductIds.map((productId, index) => [
+          productId,
+          index,
+        ])
+      ),
+    [featuredProductIds]
   )
 
   useEffect(() => {
@@ -126,13 +141,22 @@ export default function PreOrdersBrowser({
         if (stockA === 0 && stockB > 0) return 1
         if (stockA > 0 && stockB === 0) return -1
 
-        if (sortBy === "Price Low") return a.price - b.price
-        if (sortBy === "Price High") return b.price - a.price
+        const rankA = featuredRank.get(a.id) ?? Number.POSITIVE_INFINITY
+        const rankB = featuredRank.get(b.id) ?? Number.POSITIVE_INFINITY
+
+        if (rankA !== rankB) return rankA - rankB
+
+        if (sortBy === "Price Low") {
+          return getProductPayablePrice(a) - getProductPayablePrice(b)
+        }
+        if (sortBy === "Price High") {
+          return getProductPayablePrice(b) - getProductPayablePrice(a)
+        }
         if (sortBy === "Name A-Z") return a.name.localeCompare(b.name)
 
         return 0
       })
-  }, [products, search, selectedBrand, stockFilter, sortBy])
+  }, [products, search, selectedBrand, stockFilter, sortBy, featuredRank])
 
   useEffect(() => {
     setVisibleCount(INITIAL_PREORDER_RENDER_COUNT)
@@ -221,6 +245,9 @@ export default function PreOrdersBrowser({
       <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <p className="text-gray-400">
           Showing {filteredProducts.length} Pre-Orders
+          {featuredProductIds.length > 0
+            ? ` • Featured picks shown first`
+            : ""}
         </p>
         <div className="flex flex-col gap-2">
           <p className="text-sm font-medium text-cyan-300">Sort By</p>
@@ -254,7 +281,7 @@ export default function PreOrdersBrowser({
                   key={product.id}
                   className="rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))] p-[1px] shadow-[0_0_24px_rgba(34,211,238,.08)] transition-transform duration-300 hover:-translate-y-1"
                 >
-	                  <ProductCard
+                  <ProductCard
                     id={product.id}
                     name={product.name}
                     price={getProductPayablePrice(product)}
@@ -265,13 +292,13 @@ export default function PreOrdersBrowser({
                       Number(product.stock || 0) -
                         Number(product.reservedStock || 0)
                     )}
-                    badge={product.badge}
+                    badge={product.badge || undefined}
                     quantityPricing={product.quantityPricing}
                     isPreOrder={product.isPreOrder}
                     depositAmount={product.depositAmount}
-	                  expectedArrival={product.expectedArrival}
-	                  preOrderDeadline={product.preOrderDeadline}
-	                  originalPrice={product.price}
+                    expectedArrival={product.expectedArrival}
+                    preOrderDeadline={product.preOrderDeadline}
+                    originalPrice={product.price}
                     remainingPrice={getProductRemainingPrice(product)}
                   />
                 </div>

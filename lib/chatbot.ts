@@ -503,6 +503,11 @@ export async function getChatbotReply(
   }
 
   const settings = await prisma.storeSettings.findFirst({
+    select: {
+      pickupEnabled: true,
+      pickupLocation: true,
+      shippingCharge: true,
+    },
     orderBy: {
       id: "asc",
     },

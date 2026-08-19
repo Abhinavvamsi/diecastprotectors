@@ -2,7 +2,52 @@
 import { motion } from "framer-motion"
 import { useState } from "react"
 import * as XLSX from "xlsx"
+
+type ImportType =
+  | "regular"
+  | "preorder"
+
+type PreviewCell =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+
+type PreviewRow = Record<
+  string,
+  PreviewCell | string[]
+> & {
+  status?: "VALID" | "INVALID"
+  errors?: string[]
+}
+
+type ImportResult = {
+  imported: number
+  skipped: number
+  skippedRows?: {
+    name: string
+    errors: string[]
+  }[]
+}
+
+type ImportSummary = {
+  total: number
+  valid: number
+  invalid: number
+}
+
+type PreviewResponse = {
+  rows: PreviewRow[]
+  summary: ImportSummary
+  importType?: ImportType
+  error?: string
+}
+
 export default function BulkImportForm() {
+
+  const [importType, setImportType] =
+    useState<ImportType>("regular")
 
   const [excelFile, setExcelFile] =
     useState<File | null>(null)
@@ -14,10 +59,10 @@ export default function BulkImportForm() {
     useState(false)
 
   const [preview, setPreview] =
-    useState<any[]>([])
+    useState<PreviewRow[]>([])
 
   const [summary, setSummary] =
-  useState<any>(null)
+  useState<ImportSummary | null>(null)
 
   const [importing, setImporting] =
   useState(false)
@@ -39,7 +84,7 @@ const [showSummary, setShowSummary] =
   useState(false)
 
 const [importResult, setImportResult] =
-  useState<any>(null)
+  useState<ImportResult | null>(null)
 
 
 
@@ -153,12 +198,14 @@ async function testCloudinary() {
 
             rows,
 
+            importType,
+
           }),
 
         }
       )
 
-    const data =
+    const data: PreviewResponse =
       await response.json()
 
     if (!response.ok) {
@@ -171,6 +218,10 @@ async function testCloudinary() {
 
     setPreview(data.rows)
     setSummary(data.summary)
+
+    if (data.importType) {
+      setImportType(data.importType)
+    }
 
   } finally {
 
@@ -246,6 +297,8 @@ setProgressText("Creating products...")
   uploadedImages:
     uploadResult.uploaded,
 
+  importType,
+
 }),
 
         }
@@ -283,9 +336,80 @@ setShowSummary(true)
 
 }
 
+const previewColumns =
+  preview.length > 0
+    ? Object.keys(preview[0])
+    : []
+
   return (
 
     <div className="space-y-8">
+
+      <div className="grid gap-4 md:grid-cols-2">
+
+        <button
+          type="button"
+          onClick={() => {
+            setImportType("regular")
+            setPreview([])
+            setSummary(null)
+          }}
+          className={`
+            rounded-3xl
+            border
+            p-6
+            text-left
+            transition-all
+            ${
+              importType === "regular"
+                ? "border-pink-500 bg-pink-500/10 shadow-[0_0_35px_rgba(236,72,153,.25)]"
+                : "border-zinc-800 bg-zinc-950 hover:border-zinc-600"
+            }
+          `}
+        >
+          <p className="text-sm uppercase tracking-[0.3em] text-pink-400">
+            Regular Stock
+          </p>
+          <h2 className="mt-3 text-2xl font-black">
+            Ready Inventory Import
+          </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            Use Name, Description, Price, Stock, Brand, Category, Badge and Image.
+          </p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setImportType("preorder")
+            setPreview([])
+            setSummary(null)
+          }}
+          className={`
+            rounded-3xl
+            border
+            p-6
+            text-left
+            transition-all
+            ${
+              importType === "preorder"
+                ? "border-cyan-400 bg-cyan-500/10 shadow-[0_0_35px_rgba(34,211,238,.2)]"
+                : "border-zinc-800 bg-zinc-950 hover:border-zinc-600"
+            }
+          `}
+        >
+          <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">
+            Pre-Orders
+          </p>
+          <h2 className="mt-3 text-2xl font-black">
+            Pre-Order Bulk Import
+          </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            Add Deposit, Expected Arrival, and optional PreOrderDeadline columns.
+          </p>
+        </button>
+
+      </div>
 
       {/* Excel Upload */}
 
@@ -715,7 +839,7 @@ setShowSummary(true)
 
               <tr className="border-b border-zinc-800">
 
-                {Object.keys(preview[0]).map((key) => (
+                {previewColumns.map((key) => (
 
                   <th
                     key={key}
@@ -746,116 +870,71 @@ setShowSummary(true)
     className="border-b border-zinc-900"
   >
 
-    <td className="px-5 py-4">
-      {row.Name || (
-        <span className="text-red-400">
-          Not Filled
-        </span>
-      )}
-    </td>
+    {previewColumns.map((key) => (
 
-    <td className="px-5 py-4">
-      {row.Description || (
-        <span className="text-red-400">
-          Not Filled
-        </span>
-      )}
-    </td>
+      <td
+        key={key}
+        className="px-5 py-4 align-top"
+      >
 
-    <td className="px-5 py-4">
-      {row.Price !== undefined &&
-       row.Price !== ""
-        ? row.Price
-        : (
+        {key === "status" ? (
+
+          row.status === "VALID" ? (
+
+            <span className="px-3 py-1 rounded-full bg-green-600/20 text-green-400">
+              VALID
+            </span>
+
+          ) : (
+
+            <span className="px-3 py-1 rounded-full bg-red-600/20 text-red-400">
+              INVALID
+            </span>
+
+          )
+
+        ) : key === "errors" ? (
+
+          (row.errors?.length ?? 0) === 0
+            ? "-"
+            : (
+              <ul className="space-y-1">
+
+                {row.errors?.map(
+                  (error, i) => (
+
+                    <li
+                      key={i}
+                      className="text-red-400"
+                    >
+
+                      • {error}
+
+                    </li>
+
+                  )
+                )}
+
+              </ul>
+            )
+
+        ) : row[key] !== undefined &&
+          row[key] !== null &&
+          String(row[key]).trim() !== "" ? (
+
+          String(row[key])
+
+        ) : (
+
           <span className="text-red-400">
             Not Filled
           </span>
-        )}
-    </td>
 
-    <td className="px-5 py-4">
-      {row.Stock !== undefined &&
-       row.Stock !== ""
-        ? row.Stock
-        : (
-          <span className="text-red-400">
-            Not Filled
-          </span>
-        )}
-    </td>
-
-    <td className="px-5 py-4">
-      {row.Brand || (
-        <span className="text-red-400">
-          Not Filled
-        </span>
-      )}
-    </td>
-
-    <td className="px-5 py-4">
-      {row.Category || (
-        <span className="text-red-400">
-          Not Filled
-        </span>
-      )}
-    </td>
-
-    <td className="px-5 py-4">
-      {row.Badge || "-"}
-    </td>
-
-    <td className="px-5 py-4">
-      {row.Image || (
-        <span className="text-red-400">
-          Not Filled
-        </span>
-      )}
-    </td>
-
-    <td className="px-5 py-4">
-
-      {row.status === "VALID" ? (
-
-        <span className="px-3 py-1 rounded-full bg-green-600/20 text-green-400">
-          VALID
-        </span>
-
-      ) : (
-
-        <span className="px-3 py-1 rounded-full bg-red-600/20 text-red-400">
-          INVALID
-        </span>
-
-      )}
-
-    </td>
-
-    <td className="px-5 py-4">
-
-      {row.errors.length === 0
-        ? "-"
-        : (
-          <ul className="space-y-1">
-
-            {row.errors.map(
-              (error: string, i: number) => (
-
-                <li
-                  key={i}
-                  className="text-red-400"
-                >
-
-                  • {error}
-
-                </li>
-
-              )
-            )}
-
-          </ul>
         )}
 
-    </td>
+      </td>
+
+    ))}
 
   </tr>
 
@@ -900,11 +979,11 @@ setShowSummary(true)
 
     </button>
 
-   {summary?.invalid > 0 && (
+   {(summary?.invalid ?? 0) > 0 && (
 
   <p className="text-yellow-400 text-sm">
 
-    {summary.invalid} invalid product{summary.invalid === 1 ? "" : "s"} will be skipped automatically.
+    {summary?.invalid ?? 0} invalid product{summary?.invalid === 1 ? "" : "s"} will be skipped automatically.
 
   </p>
 
@@ -1000,7 +1079,7 @@ Skipped
 
 </div>
 
-{importResult.skippedRows?.length > 0 && (
+{(importResult.skippedRows?.length ?? 0) > 0 && (
 
 <div
 className="
@@ -1038,9 +1117,9 @@ Reason
 
 <tbody>
 
-{importResult.skippedRows.map(
+{(importResult.skippedRows ?? []).map(
 
-(row:any,index:number)=>(
+(row, index) => (
 
 <tr
 key={index}

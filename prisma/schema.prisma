@@ -76,6 +76,7 @@ model StoreSettings {
   pickupLocation  String?
   maintenanceMode Boolean @default(false)
   superDealProductIds Json?
+  preOrderFeaturedProductIds Json?
   saleLaunchAt String?
 }
 

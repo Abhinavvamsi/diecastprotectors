@@ -23,6 +23,7 @@ import BrandMarquee from "@/components/brand-marquee"
 import SuperDealsSection from "@/components/super-deals-section"
 import PremiumLoader from "@/components/premium-loader"
 import SaleCountdown from "@/components/sale-countdown"
+import { isPreOrderDeadlineActive } from "@/lib/preorder"
 
 
 const bebas = Bebas_Neue({
@@ -50,6 +51,10 @@ type Product = {
   badge?: string
   brandId?: string
   isPreOrder?: boolean
+  depositAmount?: number
+  expectedArrival?: string | null
+  preOrderDeadline?: string | null
+  remainingPrice?: number
 
 brand?: {
   id: string
@@ -102,6 +107,7 @@ const [search,
 const [brands, setBrands] = useState<any[]>([])
 const [banners, setBanners] = useState<Banner[]>([])
 const [allProducts, setAllProducts] = useState<Product[]>([])
+const [preOrderProducts, setPreOrderProducts] = useState<Product[]>([])
 const [storeSettings, setStoreSettings] = useState<any>(null)
 const [productsRefreshKey, setProductsRefreshKey] = useState(0)
   const [showLoader, setShowLoader] =
@@ -150,7 +156,7 @@ const [
   bannersResponse,
   settingsResponse,
 ] = await Promise.all([
-  fetch("/api/get-products", { cache: "no-store" }),
+  fetch("/api/get-products?includePreOrder=true", { cache: "no-store" }),
   fetch("/api/admin/brands"),
   fetch("/api/banners", { cache: "no-store" }),
   fetch("/api/admin/settings", { cache: "no-store" }),
@@ -161,7 +167,14 @@ const inStockProducts = data.filter(
   (product: Product) =>
     product.stock > 0 && !product.isPreOrder
 )
+const inStockPreOrderProducts = data.filter(
+  (product: Product) =>
+    product.stock > 0 &&
+    product.isPreOrder &&
+    isPreOrderDeadlineActive(product)
+)
 setAllProducts(inStockProducts)
+setPreOrderProducts(inStockPreOrderProducts)
 setProducts(inStockProducts.slice(0, 9))
 
 const brandData = await brandsResponse.json()
@@ -245,12 +258,25 @@ useEffect(() => {
 
 ]
 
-  const superDealProducts = (() => {
+  const superDealProducts = useMemo(() => {
     const selectedIds = Array.isArray(storeSettings?.superDealProductIds)
       ? storeSettings.superDealProductIds
       : []
+    const selectedPreOrderIds = Array.isArray(
+      storeSettings?.preOrderFeaturedProductIds
+    )
+      ? storeSettings.preOrderFeaturedProductIds
+      : []
     const picked: Product[] = []
     const usedIds = new Set<string>()
+
+    for (const id of selectedPreOrderIds) {
+      const product = preOrderProducts.find((item) => item.id === id)
+      if (product && !usedIds.has(product.id)) {
+        picked.push(product)
+        usedIds.add(product.id)
+      }
+    }
 
     for (const id of selectedIds) {
       const product = allProducts.find((item) => item.id === id)
@@ -268,7 +294,7 @@ useEffect(() => {
     }
 
     return picked.slice(0, 6)
-  })()
+  }, [allProducts, preOrderProducts, storeSettings])
 
   const brandRouteIds = useMemo(() => {
     return brands.slice(0, 6).map((brand) => brand.id)

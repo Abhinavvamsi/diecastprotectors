@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 const MAX_SUPER_DEALS = 6
+const MAX_PREORDER_FEATURED = 6
 
 type Product = {
   id: string
@@ -16,6 +17,9 @@ type Product = {
   category: string
   stock: number
   reservedStock?: number
+  isPreOrder?: boolean
+  depositAmount?: number
+  expectedArrival?: string | null
 }
 
 function toDateTimeLocal(value?: string | null) {
@@ -55,29 +59,56 @@ export default function SettingsPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [saleLaunchAt, setSaleLaunchAt] = useState("")
   const [superDealProductIds, setSuperDealProductIds] = useState<string[]>([])
+  const [preOrderFeaturedProductIds, setPreOrderFeaturedProductIds] = useState<string[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [search, setSearch] = useState("")
+  const [preOrderSearch, setPreOrderSearch] = useState("")
   const [stockFilter, setStockFilter] = useState("All")
+  const [preOrderStockFilter, setPreOrderStockFilter] = useState("All")
   const [prefsReady, setPrefsReady] = useState(false)
   const SEARCH_KEY = "admin-settings-search"
+  const PREORDER_SEARCH_KEY = "admin-settings-preorder-search"
   const STOCK_KEY = "admin-settings-stock"
+  const PREORDER_STOCK_KEY = "admin-settings-preorder-stock"
+
+  const readyProducts = useMemo(
+    () => products.filter((product) => !product.isPreOrder),
+    [products]
+  )
+
+  const preOrderProducts = useMemo(
+    () => products.filter((product) => product.isPreOrder),
+    [products]
+  )
 
   const activeSuperDealProductIds = useMemo(() => {
-    if (products.length === 0) return []
+    if (readyProducts.length === 0) return []
 
     return superDealProductIds.filter((productId) => {
-      const product = products.find((item) => item.id === productId)
+      const product = readyProducts.find((item) => item.id === productId)
       if (!product) return false
 
       const availableStock = Math.max(0, product.stock - (product.reservedStock || 0))
       return availableStock > 0
     })
-  }, [products, superDealProductIds])
+  }, [readyProducts, superDealProductIds])
+
+  const activePreOrderFeaturedProductIds = useMemo(() => {
+    if (preOrderProducts.length === 0) return []
+
+    return preOrderFeaturedProductIds.filter((productId) => {
+      const product = preOrderProducts.find((item) => item.id === productId)
+      if (!product) return false
+
+      const availableStock = Math.max(0, product.stock - (product.reservedStock || 0))
+      return availableStock > 0
+    })
+  }, [preOrderProducts, preOrderFeaturedProductIds])
 
   async function loadSettings() {
     const [settingsResponse, productsResponse] = await Promise.all([
       fetch("/api/admin/settings"),
-      fetch("/api/get-products?includeHiddenSale=true"),
+      fetch("/api/get-products?includePreOrder=true&includeHiddenSale=true"),
     ])
 
     const data = await settingsResponse.json()
@@ -90,6 +121,11 @@ export default function SettingsPage() {
     setMaintenanceMode(data.maintenanceMode || false)
     setSaleLaunchAt(toDateTimeLocal(data.saleLaunchAt))
     setSuperDealProductIds(Array.isArray(data.superDealProductIds) ? data.superDealProductIds : [])
+    setPreOrderFeaturedProductIds(
+      Array.isArray(data.preOrderFeaturedProductIds)
+        ? data.preOrderFeaturedProductIds
+        : []
+    )
     setProducts(productData || [])
   }
 
@@ -107,6 +143,7 @@ export default function SettingsPage() {
         maintenanceMode,
         saleLaunchAt: fromDateTimeLocal(saleLaunchAt),
         superDealProductIds: activeSuperDealProductIds,
+        preOrderFeaturedProductIds: activePreOrderFeaturedProductIds,
       }),
     })
 
@@ -119,9 +156,13 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const savedSearch = sessionStorage.getItem(SEARCH_KEY)
+    const savedPreOrderSearch = sessionStorage.getItem(PREORDER_SEARCH_KEY)
     const savedStock = sessionStorage.getItem(STOCK_KEY)
+    const savedPreOrderStock = sessionStorage.getItem(PREORDER_STOCK_KEY)
     if (savedSearch !== null) setSearch(savedSearch)
+    if (savedPreOrderSearch !== null) setPreOrderSearch(savedPreOrderSearch)
     if (savedStock !== null) setStockFilter(savedStock)
+    if (savedPreOrderStock !== null) setPreOrderStockFilter(savedPreOrderStock)
     setPrefsReady(true)
     loadSettings()
   }, [])
@@ -129,8 +170,10 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!prefsReady) return
     sessionStorage.setItem(SEARCH_KEY, search)
+    sessionStorage.setItem(PREORDER_SEARCH_KEY, preOrderSearch)
     sessionStorage.setItem(STOCK_KEY, stockFilter)
-  }, [prefsReady, search, stockFilter])
+    sessionStorage.setItem(PREORDER_STOCK_KEY, preOrderStockFilter)
+  }, [prefsReady, search, preOrderSearch, stockFilter, preOrderStockFilter])
 
   useEffect(() => {
     if (products.length === 0) return
@@ -140,9 +183,21 @@ export default function SettingsPage() {
     }
   }, [activeSuperDealProductIds, products.length, superDealProductIds.length])
 
+  useEffect(() => {
+    if (products.length === 0) return
+
+    if (activePreOrderFeaturedProductIds.length !== preOrderFeaturedProductIds.length) {
+      setPreOrderFeaturedProductIds(activePreOrderFeaturedProductIds)
+    }
+  }, [
+    activePreOrderFeaturedProductIds,
+    preOrderFeaturedProductIds.length,
+    products.length,
+  ])
+
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase()
-    return products.filter((product) => {
+    return readyProducts.filter((product) => {
       const availableStock = Math.max(0, product.stock - (product.reservedStock || 0))
       const matchesSearch = product.name.toLowerCase().includes(term)
       const matchesStock =
@@ -154,7 +209,23 @@ export default function SettingsPage() {
 
       return matchesSearch && matchesStock
     })
-  }, [products, search, stockFilter])
+  }, [readyProducts, search, stockFilter])
+
+  const filteredPreOrderProducts = useMemo(() => {
+    const term = preOrderSearch.trim().toLowerCase()
+    return preOrderProducts.filter((product) => {
+      const availableStock = Math.max(0, product.stock - (product.reservedStock || 0))
+      const matchesSearch = product.name.toLowerCase().includes(term)
+      const matchesStock =
+        preOrderStockFilter === "All"
+          ? true
+          : preOrderStockFilter === "In Stock"
+          ? availableStock > 0
+          : availableStock === 0
+
+      return matchesSearch && matchesStock
+    })
+  }, [preOrderProducts, preOrderSearch, preOrderStockFilter])
 
   return (
     <main className="min-h-screen bg-[#09090B] text-white p-8">
@@ -438,6 +509,174 @@ export default function SettingsPage() {
                       <div className="mt-3 flex items-center justify-between gap-4">
                         <span className="text-xl font-bold text-white">₹{product.price}</span>
                         <span className="text-xs text-zinc-400">{selectedCount}/{MAX_SUPER_DEALS} chosen</span>
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="bg-[#09090B] border border-cyan-500/30 rounded-2xl p-6 shadow-[0_0_28px_rgba(34,211,238,.08)]">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-wider text-cyan-300">
+                  Pre-Order Featured Picks
+                </p>
+                <p className="mt-1 text-sm text-zinc-500">
+                  Pick up to {MAX_PREORDER_FEATURED} pre-order products to highlight on the pre-orders page. Sold-out or deleted picks are removed automatically.
+                </p>
+              </div>
+
+              <div className="w-full md:w-80">
+                <input
+                  type="text"
+                  value={preOrderSearch}
+                  onChange={(e) => setPreOrderSearch(e.target.value)}
+                  placeholder="Search pre-orders..."
+                  className="h-12 w-full rounded-xl border border-cyan-400/30 bg-[#111118] px-4 text-white placeholder:text-zinc-300/80 placeholder:uppercase placeholder:tracking-[0.05em] outline-none transition-all focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20 hover:border-cyan-300/55"
+                />
+              </div>
+            </div>
+
+            {activePreOrderFeaturedProductIds.length > 0 && (
+              <div className="mt-6 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-sm uppercase tracking-wider text-cyan-300">
+                      Selected Pre-Order Picks
+                    </p>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      These pre-order products get priority placement on the pre-orders page.
+                    </p>
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    {activePreOrderFeaturedProductIds.length}/{MAX_PREORDER_FEATURED} selected
+                  </p>
+                </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {activePreOrderFeaturedProductIds.map((productId) => {
+                    const selectedProduct = preOrderProducts.find((product) => product.id === productId)
+                    if (!selectedProduct) return null
+                    const availableStock = Math.max(0, selectedProduct.stock - (selectedProduct.reservedStock || 0))
+
+                    return (
+                      <div
+                        key={productId}
+                        className="flex items-center gap-4 rounded-2xl border border-cyan-500/20 bg-[#111118] p-3"
+                      >
+                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-zinc-700 bg-black/40">
+                          <Image
+                            src={selectedProduct.images?.[0] || "/logo.png"}
+                            alt={selectedProduct.name}
+                            fill
+                            className="object-contain p-2"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
+                            Pick {activePreOrderFeaturedProductIds.indexOf(productId) + 1}
+                          </p>
+                          <h3 className="mt-1 truncate text-sm font-semibold text-white">
+                            {selectedProduct.name}
+                          </h3>
+                          <p className="mt-1 text-xs text-zinc-400">
+                            ₹{selectedProduct.price} • {availableStock > 0 ? "Accepting orders" : "Sold out"}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4">
+              <p className="text-cyan-300 text-sm font-medium mb-3">Filter</p>
+              <div className="flex flex-wrap gap-3">
+                {["All", "In Stock", "Sold Out"].map((filter) => (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setPreOrderStockFilter(filter)}
+                    className={`
+                      px-5 py-2.5 rounded-full border transition-all duration-300
+                      ${
+                        preOrderStockFilter === filter
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-transparent"
+                          : "border-zinc-700 text-zinc-300 hover:border-cyan-400"
+                      }
+                    `}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 max-h-[560px] overflow-y-auto pr-1">
+              {filteredPreOrderProducts.map((product) => {
+                const selected = activePreOrderFeaturedProductIds.includes(product.id)
+                const availableStock = Math.max(0, product.stock - (product.reservedStock || 0))
+                const selectedCount = activePreOrderFeaturedProductIds.length
+
+                return (
+                  <button
+                    key={product.id}
+                    type="button"
+                    onClick={() => {
+                      setPreOrderFeaturedProductIds((current) => {
+                        const currentActiveCount = current.filter((productId) => {
+                          const selectedProduct = preOrderProducts.find((item) => item.id === productId)
+                          if (!selectedProduct) return false
+
+                          const selectedAvailableStock = Math.max(
+                            0,
+                            selectedProduct.stock - (selectedProduct.reservedStock || 0),
+                          )
+
+                          return selectedAvailableStock > 0
+                        }).length
+
+                        if (current.includes(product.id)) {
+                          return current.filter((id) => id !== product.id)
+                        }
+
+                        if (currentActiveCount >= MAX_PREORDER_FEATURED) {
+                          toast.error(`You can select only ${MAX_PREORDER_FEATURED} pre-orders`)
+                          return current
+                        }
+
+                        return [...current, product.id]
+                      })
+                    }}
+                    className={`text-left rounded-2xl border transition-all duration-300 overflow-hidden ${selected ? "border-cyan-400 bg-cyan-500/10 shadow-[0_0_25px_rgba(34,211,238,.22)]" : "border-zinc-700 bg-[#111118] hover:border-cyan-400/50"}`}
+                  >
+                    <div className="relative h-40 bg-[#09090B]">
+                      <Image
+                        src={product.images?.[0] || "/logo.png"}
+                        alt={product.name}
+                        fill
+                        className="object-contain p-3"
+                      />
+                      <div className="absolute top-3 left-3 rounded-full bg-black/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+                        {selected ? "Selected" : "Tap to Pick"}
+                      </div>
+                      <div className="absolute top-3 right-3 rounded-full bg-black/70 px-3 py-1 text-[11px] font-semibold text-cyan-200">
+                        {availableStock > 0 ? "Accepting" : "Sold Out"}
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
+                        Pre-Order
+                      </p>
+                      <h3 className="mt-2 text-lg font-bold text-white line-clamp-2 min-h-[3rem]">
+                        {product.name}
+                      </h3>
+                      <div className="mt-3 flex items-center justify-between gap-4">
+                        <span className="text-xl font-bold text-white">₹{product.price}</span>
+                        <span className="text-xs text-zinc-400">{selectedCount}/{MAX_PREORDER_FEATURED} chosen</span>
                       </div>
                     </div>
                   </button>

@@ -36,16 +36,17 @@ export default async function BulkImportPage() {
 
           <p className="mt-5 max-w-3xl text-lg text-zinc-400 leading-8">
 
-            Upload hundreds of products in minutes using a single Excel file and a ZIP
-            containing all product images. Every row is validated before importing,
-            ensuring clean and accurate product data.
+            Upload regular stock or pre-order products in minutes using a single
+            Excel file and a ZIP containing all product images. Every row is
+            validated before importing, ensuring clean and accurate product data.
 
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
 
             <a
-              href="https://docs.google.com/spreadsheets/d/15D20omuEFxXub8oi4VeBdJrGtymkoWVcLaxOVm1oE7M/edit?usp=sharing"
+              href="/api/admin/bulk-import/template"
+              download
               className="
 rounded-xl
 bg-gradient-to-r
@@ -63,7 +64,7 @@ hover:shadow-[0_0_35px_rgba(236,72,153,.45)]
 active:scale-95
 "
             >
-              View Excel Template
+              Download Excel Template
             </a>
 
             <span className="rounded-xl border border-zinc-700 px-6 py-3 text-zinc-300">
@@ -171,6 +172,10 @@ active:scale-95
             <li>✅ Image names must exactly match the Excel Image column.</li>
 
             <li>✅ Upload all images inside a single ZIP file.</li>
+
+            <li>✅ Pre-order imports support Deposit, ExpectedArrival, and optional PreOrderDeadline columns.</li>
+
+            <li>✅ Deposit can be a percentage from 1-100 or a fixed rupee amount above 100.</li>
 
             <li>✅ Invalid products are skipped automatically.</li>
 
