@@ -143,18 +143,33 @@ export default function PreOrdersBrowser({
 
         const rankA = featuredRank.get(a.id) ?? Number.POSITIVE_INFINITY
         const rankB = featuredRank.get(b.id) ?? Number.POSITIVE_INFINITY
-
-        if (rankA !== rankB) return rankA - rankB
+        const featuredOrder = rankA === rankB ? 0 : rankA - rankB
 
         if (sortBy === "Price Low") {
-          return getProductPayablePrice(a) - getProductPayablePrice(b)
+          const priceOrder =
+            getProductPayablePrice(a) - getProductPayablePrice(b)
+
+          if (priceOrder !== 0) return priceOrder
+          if (featuredOrder !== 0) return featuredOrder
+          return a.name.localeCompare(b.name)
         }
         if (sortBy === "Price High") {
-          return getProductPayablePrice(b) - getProductPayablePrice(a)
-        }
-        if (sortBy === "Name A-Z") return a.name.localeCompare(b.name)
+          const priceOrder =
+            getProductPayablePrice(b) - getProductPayablePrice(a)
 
-        return 0
+          if (priceOrder !== 0) return priceOrder
+          if (featuredOrder !== 0) return featuredOrder
+          return a.name.localeCompare(b.name)
+        }
+        if (sortBy === "Name A-Z") {
+          const nameOrder = a.name.localeCompare(b.name)
+
+          if (nameOrder !== 0) return nameOrder
+          if (featuredOrder !== 0) return featuredOrder
+          return 0
+        }
+
+        return featuredOrder
       })
   }, [products, search, selectedBrand, stockFilter, sortBy, featuredRank])
 
