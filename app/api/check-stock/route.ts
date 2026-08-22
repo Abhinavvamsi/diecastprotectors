@@ -1,16 +1,70 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
+async function safeReadJson(
+  req: Request
+) {
+  try {
+    const text = await req.text()
+
+    if (!text.trim()) {
+      return null
+    }
+
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
+}
+
 export async function POST(
   req: Request
 ) {
+  try {
 
   const body =
-    await req.json()
+    await safeReadJson(req)
+
+  const products =
+    Array.isArray(body?.products)
+      ? body.products
+      : []
+
+  if (products.length === 0) {
+    return NextResponse.json(
+      {
+        valid: false,
+        message:
+          "No products provided",
+      },
+      {
+        status: 400,
+      }
+    )
+  }
 
   for (
-    const item of body.products
+    const item of products
   ) {
+    if (
+      !item ||
+      typeof item.id !== "string" ||
+      !Number.isFinite(
+        Number(item.quantity)
+      ) ||
+      Number(item.quantity) <= 0
+    ) {
+      return NextResponse.json(
+        {
+          valid: false,
+          message:
+            "Invalid product data",
+        },
+        {
+          status: 400,
+        }
+      )
+    }
 
     const product =
       await prisma.product.findUnique({
@@ -88,5 +142,22 @@ export async function POST(
   return NextResponse.json({
     valid: true,
   })
+  } catch (error) {
+    console.error(
+      "Check Stock Error:",
+      error
+    )
+
+    return NextResponse.json(
+      {
+        valid: false,
+        message:
+          "Unable to verify stock right now",
+      },
+      {
+        status: 500,
+      }
+    )
+  }
 
 }

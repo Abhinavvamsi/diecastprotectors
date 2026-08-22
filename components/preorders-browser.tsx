@@ -198,7 +198,7 @@ export default function PreOrdersBrowser({
             <button
               key={brand.name}
               onClick={() => setSelectedBrand(brand.name)}
-              className={`flex min-w-[7rem] items-center justify-center gap-2 rounded-full border px-5 py-2.5 transition-all duration-300 ${
+              className={`flex min-h-[4.75rem] min-w-[10rem] items-center justify-center gap-3 rounded-full border px-7 py-4 text-base font-black uppercase tracking-wide transition-all duration-300 ${
                 selectedBrand === brand.name
                   ? "border-transparent bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
                   : "border-[#2B2B3A] text-gray-300 hover:border-cyan-400"
@@ -212,7 +212,7 @@ export default function PreOrdersBrowser({
                     <img
                       src={brand.logo}
                       alt={brand.name}
-                      className="h-6 w-6 rounded-full object-contain"
+                      className="h-10 w-10 rounded-full object-contain"
                     />
                   ) : null}
                   <span>{brand.name}</span>

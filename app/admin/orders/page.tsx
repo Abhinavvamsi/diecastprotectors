@@ -18,6 +18,21 @@ import {
   getPreOrderShippingPaidTotal,
 } from "@/lib/preorder-shipping"
 
+function getIndiaDayRange(dateKey: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+    return null
+  }
+
+  const start = new Date(`${dateKey}T00:00:00+05:30`)
+  const end = new Date(start)
+  end.setUTCDate(end.getUTCDate() + 1)
+
+  return {
+    start,
+    end,
+  }
+}
+
 export default async function OrdersPage({
   searchParams,
 }: {
@@ -27,6 +42,7 @@ export default async function OrdersPage({
   productId?: string
   preorderFilter?: string
   preorderPaymentFilter?: string
+  date?: string
 }>
 }) {
 
@@ -38,11 +54,35 @@ export default async function OrdersPage({
   productId = "",
   preorderFilter = "All",
   preorderPaymentFilter = "All",
+  date = "",
 } = await searchParams
   const normalizedPreorderFilter =
     preorderFilter === "Pre Order"
       ? "Pre-Orders"
       : preorderFilter
+  const selectedDate =
+    /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : ""
+  const selectedDateRange =
+    getIndiaDayRange(selectedDate)
+  const dateScopedWhere = selectedDateRange
+    ? {
+        createdAt: {
+          gte: selectedDateRange.start,
+          lt: selectedDateRange.end,
+        },
+      }
+    : {}
+  const ordersWhere = {
+    ...dateScopedWhere,
+    ...(status !== "All"
+      ? {
+          status,
+        }
+      : {}),
+  }
+  const dateQuery = selectedDate
+    ? `&date=${encodeURIComponent(selectedDate)}`
+    : ""
 
   const orders =
   await prisma.order.findMany({
@@ -66,13 +106,7 @@ export default async function OrdersPage({
       status: true,
     },
     
-    where: {
-      ...(status !== "All"
-        ? {
-            status,
-          }
-        : {}),
-    },
+    where: ordersWhere,
 
     orderBy: {
       createdAt: "desc",
@@ -216,50 +250,60 @@ const [
 
   prisma.order.count({
     where: {
+      ...dateScopedWhere,
       status: "Confirmed",
     },
   }),
 
   prisma.order.count({
     where: {
+      ...dateScopedWhere,
       status: "Packed",
     },
   }),
 
   prisma.order.count({
     where: {
+      ...dateScopedWhere,
       status: "Shipped",
     },
   }),
 
   prisma.order.count({
     where: {
+      ...dateScopedWhere,
       status: "Delivered",
     },
   }),
 
   prisma.order.count({
     where: {
+      ...dateScopedWhere,
       status: "Cancelled",
     },
   }),
 
-  prisma.order.count(),
+  prisma.order.count({
+    where: dateScopedWhere,
+  }),
 
   prisma.order.count({
     where: {
+      ...dateScopedWhere,
       status: "Delivered",
     },
   }),
 
   prisma.order.count({
     where: {
+      ...dateScopedWhere,
       status: "Confirmed",
     },
   }),
 
   prisma.order.aggregate({
     where: {
+      ...dateScopedWhere,
       status: {
         not: "Cancelled",
       },
@@ -475,7 +519,7 @@ shadow-2xl
 
   <Link
   key={item.name}
-	  href={`?search=${search}&status=${item.name}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}`}
+	  href={`?search=${search}&status=${item.name}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}${dateQuery}`}
   className={`
     px-5
     py-2
@@ -519,7 +563,7 @@ shadow-2xl
     ].map((item) => (
       <Link
         key={item.name}
-	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}&preorderFilter=${item.name}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}`}
+	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}&preorderFilter=${item.name}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}${dateQuery}`}
         className={`
           px-5 py-2 rounded-full border transition-all flex items-center gap-2
           ${
@@ -566,7 +610,7 @@ shadow-2xl
 	    ].map((item) => (
 	      <Link
 	        key={item.name}
-	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}&preorderPaymentFilter=${item.name}`}
+	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}&preorderPaymentFilter=${item.name}${dateQuery}`}
 	        className={`
 	          px-5 py-2 rounded-full border transition-all flex items-center gap-2
 	          ${
@@ -644,7 +688,86 @@ shadow-2xl
 	  value={preorderPaymentFilter}
 	/>
 
-<AdminOrdersSearch initialSearch={search} />
+<div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px_auto_auto]">
+  <AdminOrdersSearch initialSearch={search} />
+
+  <label className="relative block">
+    <span className="absolute left-5 top-2 text-[10px] uppercase tracking-[0.22em] text-cyan-300">
+      Order Date
+    </span>
+    <input
+      type="date"
+      name="date"
+      defaultValue={selectedDate}
+      className="
+      h-14
+      w-full
+      rounded-2xl
+      border
+      border-cyan-400/40
+      bg-zinc-900/95
+      px-5
+      pt-5
+      text-white
+      outline-none
+      transition-all
+      [color-scheme:dark]
+      focus:border-cyan-300
+      focus:ring-2
+      focus:ring-cyan-400/25
+      hover:border-cyan-300/60
+      "
+    />
+  </label>
+
+  <button
+    type="submit"
+    className="
+    h-14
+    rounded-2xl
+    border
+    border-cyan-400/35
+    bg-cyan-500/10
+    px-6
+    text-sm
+    font-bold
+    uppercase
+    tracking-[0.12em]
+    text-cyan-100
+    transition-all
+    hover:border-cyan-300
+    hover:bg-cyan-500/20
+    "
+  >
+    View Date
+  </button>
+
+  {selectedDate && (
+    <Link
+      href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}`}
+      className="
+      flex
+      h-14
+      items-center
+      justify-center
+      rounded-2xl
+      border
+      border-zinc-700
+      px-6
+      text-sm
+      font-bold
+      uppercase
+      tracking-[0.12em]
+      text-zinc-300
+      transition-all
+      hover:border-pink-400
+      hover:text-pink-300
+      "
+    >
+      Clear Date
+    </Link>
+  )}
+</div>
 
 </form>
 

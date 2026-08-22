@@ -1,9 +1,40 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { Loader2 } from "lucide-react"
 import { useCartStore } from "@/store/cart-store"
+
+const pendingOrderStorageKey = "pending-order"
+const pendingOrderBackupStorageKey =
+  "pending-order-backup"
+const confirmedOrderStorageKey =
+  "confirmed-order-after-payment"
+const confirmedOrderMaxAgeMs = 30 * 60 * 1000
+
+type SaveOrderResponse = {
+  orderId?: string
+  error?: string
+}
+
+async function readApiJson<T = unknown>(
+  response: Response,
+  fallbackMessage = "Failed to save order"
+): Promise<T & { error?: string }> {
+  const text = await response.text()
+
+  if (!text.trim()) {
+    return {} as T & { error?: string }
+  }
+
+  try {
+    return JSON.parse(text)
+  } catch {
+    return {
+      error: fallbackMessage,
+    } as T & { error?: string }
+  }
+}
 
 export default function ProcessingPage() {
   const router = useRouter()
@@ -12,30 +43,153 @@ export default function ProcessingPage() {
   )
 
   useEffect(() => {
+    router.prefetch("/success")
+
     let cancelled = false
 
     const sleep = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms))
 
-    async function savePendingOrder() {
-      const rawPendingOrder =
-        sessionStorage.getItem("pending-order")
+    function safeGetItem(
+      storage: Storage,
+      key: string
+    ) {
+      try {
+        return storage.getItem(key)
+      } catch {
+        return null
+      }
+    }
 
-      if (!rawPendingOrder) {
+    function safeSetItem(
+      storage: Storage,
+      key: string,
+      value: string
+    ) {
+      try {
+        storage.setItem(key, value)
+      } catch {
+        return
+      }
+    }
+
+    function safeRemoveItem(
+      storage: Storage,
+      key: string
+    ) {
+      try {
+        storage.removeItem(key)
+      } catch {
+        return
+      }
+    }
+
+    function readPendingOrder() {
+      const rawPendingOrder =
+        safeGetItem(sessionStorage, pendingOrderStorageKey) ||
+        safeGetItem(localStorage, pendingOrderBackupStorageKey)
+
+      if (!rawPendingOrder) return null
+
+      try {
+        return JSON.parse(rawPendingOrder)
+      } catch {
+        safeRemoveItem(sessionStorage, pendingOrderStorageKey)
+        safeRemoveItem(
+          localStorage,
+          pendingOrderBackupStorageKey
+        )
+        return null
+      }
+    }
+
+    function readRecentConfirmedOrderId() {
+      const rawConfirmedOrder =
+        safeGetItem(sessionStorage, confirmedOrderStorageKey) ||
+        safeGetItem(localStorage, confirmedOrderStorageKey)
+
+      if (!rawConfirmedOrder) return null
+
+      try {
+        const confirmedOrder = JSON.parse(rawConfirmedOrder)
+        const savedAt = Number(confirmedOrder.savedAt || 0)
+        const orderId =
+          typeof confirmedOrder.orderId === "string"
+            ? confirmedOrder.orderId
+            : ""
+
+        if (
+          orderId &&
+          Date.now() - savedAt <= confirmedOrderMaxAgeMs
+        ) {
+          return orderId
+        }
+      } catch {
+        if (rawConfirmedOrder.startsWith("HWS-")) {
+          return rawConfirmedOrder
+        }
+      }
+
+      safeRemoveItem(sessionStorage, confirmedOrderStorageKey)
+      safeRemoveItem(localStorage, confirmedOrderStorageKey)
+      return null
+    }
+
+    function rememberConfirmedOrder(orderId: string) {
+      const payload = JSON.stringify({
+        orderId,
+        savedAt: Date.now(),
+      })
+
+      safeSetItem(
+        sessionStorage,
+        confirmedOrderStorageKey,
+        payload
+      )
+      safeSetItem(
+        localStorage,
+        confirmedOrderStorageKey,
+        payload
+      )
+    }
+
+    async function savePendingOrder() {
+      const pendingOrder = readPendingOrder()
+
+      if (!pendingOrder) {
+        const confirmedOrderId =
+          readRecentConfirmedOrderId()
+
+        if (confirmedOrderId) {
+          setMessage(
+            "Order already confirmed. Opening your success page..."
+          )
+          router.replace(
+            `/success?orderId=${encodeURIComponent(
+              confirmedOrderId
+            )}`
+          )
+          return
+        }
+
         setMessage(
-          "Finalizing your order. Please keep this page open."
+          "Payment details are not available on this device. If money was deducted, please contact support with your Razorpay payment ID."
         )
         return
       }
 
-      const pendingOrder = JSON.parse(rawPendingOrder)
+      const maxAttempts = 10
 
-      for (let attempt = 1; attempt <= 3; attempt += 1) {
+      for (
+        let attempt = 1;
+        attempt <= maxAttempts;
+        attempt += 1
+      ) {
         try {
           setMessage(
             attempt === 1
               ? "Saving your order now..."
-              : `Saving your order now... attempt ${attempt}/3`
+              : `Saving your order now... attempt ${attempt}/${maxAttempts}`
           )
 
           const saveOrderResponse = await fetch(
@@ -49,33 +203,52 @@ export default function ProcessingPage() {
           }
           )
 
-          const savedOrder = await saveOrderResponse.json()
+          const savedOrder = await readApiJson<SaveOrderResponse>(
+            saveOrderResponse,
+            "Failed to save order"
+          )
 
-          if (!saveOrderResponse.ok) {
+          if (
+            !saveOrderResponse.ok ||
+            !savedOrder.orderId
+          ) {
             throw new Error(
               savedOrder.error || "Failed to save order"
             )
           }
 
-          sessionStorage.removeItem("pending-order")
+          rememberConfirmedOrder(savedOrder.orderId)
+          safeRemoveItem(sessionStorage, pendingOrderStorageKey)
+          safeRemoveItem(
+            localStorage,
+            pendingOrderBackupStorageKey
+          )
           useCartStore.getState().clearCart()
 
           if (!cancelled) {
-            window.location.replace(
-              `/success?orderId=${savedOrder.orderId}`
+            setMessage(
+              "Order confirmed. Opening your success page..."
+            )
+
+            router.replace(
+              `/success?orderId=${encodeURIComponent(
+                savedOrder.orderId
+              )}`
             )
           }
           return
         } catch (error) {
           if (cancelled) return
 
-          if (attempt < 3) {
-            await sleep(1200 * attempt)
+          if (attempt < maxAttempts) {
+            await sleep(
+              Math.min(10000, 1200 * attempt)
+            )
             continue
           }
 
           setMessage(
-            "We hit a temporary issue while saving your order. Please keep this page open."
+            "Payment is captured, but the order is still syncing. Please keep this page open and contact support if it does not confirm shortly."
           )
           return
         }

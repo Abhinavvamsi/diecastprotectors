@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { resend } from "@/lib/resend"
 import { sendWhatsAppOrderMessage } from "@/lib/notifications"
-import { NextResponse } from "next/server"
+import { after, NextResponse } from "next/server"
 import { createHmac, timingSafeEqual } from "crypto"
 import { auth } from "@clerk/nextjs/server"
 import { calculateShippingCharge } from "@/lib/shipping"
@@ -52,8 +52,24 @@ export async function POST(
   try {
     const { userId } = await auth()
 
-    const body =
-      await req.json()
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
+
+    let body: any
+
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid order payload" },
+        { status: 400 }
+      )
+    }
+
     const reservationId = body.reservationId
     const razorpayOrderId =
       body.razorpay_order_id || body.orderId
@@ -62,14 +78,35 @@ export async function POST(
     const razorpaySignature =
       body.razorpay_signature || body.signature
 
-    const existingOrder = await prisma.order.findFirst({
-      where: {
-        reservationId,
-      },
-      select: {
-        orderId: true,
-      },
-    })
+    const existingOrderFilters = [
+      ...(reservationId
+        ? [
+            {
+              reservationId,
+            },
+          ]
+        : []),
+      ...(razorpayPaymentId
+        ? [
+            {
+              paymentId: razorpayPaymentId,
+            },
+          ]
+        : []),
+    ]
+
+    const existingOrder =
+      existingOrderFilters.length > 0
+        ? await prisma.order.findFirst({
+            where: {
+              userId,
+              OR: existingOrderFilters,
+            },
+            select: {
+              orderId: true,
+            },
+          })
+        : null
 
     if (existingOrder) {
       return NextResponse.json({
@@ -113,13 +150,6 @@ if (!signatureIsValid) {
     { status: 400 }
   )
 }
-    if (!reservationId) {
-      return NextResponse.json(
-        { error: "Reservation ID is required" },
-        { status: 400 }
-      )
-    }
-
     let orderId = ""
 
     const order =
@@ -139,7 +169,15 @@ if (!signatureIsValid) {
       const savedOrder =
         await tx.order.findFirst({
           where: {
-            reservationId,
+            userId,
+            OR: [
+              {
+                reservationId,
+              },
+              {
+                paymentId: razorpayPaymentId,
+              },
+            ],
           },
           select: {
             orderId: true,
@@ -164,7 +202,10 @@ if (!signatureIsValid) {
         )
       }
 
-      if (reservation.userId !== body.userId) {
+      if (
+        body.userId &&
+        reservation.userId !== body.userId
+      ) {
         throw new Error("Invalid stock reservation")
       }
 
@@ -208,7 +249,15 @@ if (!signatureIsValid) {
           const savedOrder =
             await tx.order.findFirst({
               where: {
-                reservationId,
+                userId,
+                OR: [
+                  {
+                    reservationId,
+                  },
+                  {
+                    paymentId: razorpayPaymentId,
+                  },
+                ],
               },
               select: {
                 orderId: true,
@@ -232,7 +281,15 @@ if (!signatureIsValid) {
         const savedOrder =
           await tx.order.findFirst({
             where: {
-              reservationId,
+              userId,
+              OR: [
+                {
+                  reservationId,
+                },
+                {
+                  paymentId: razorpayPaymentId,
+                },
+              ],
             },
             select: {
               orderId: true,
@@ -461,7 +518,7 @@ if (!signatureIsValid) {
 
         if (coupon && coupon.active) {
           const usedBy = (coupon.usedBy as string[]) || []
-          if (!usedBy.includes(body.userId)) {
+          if (!usedBy.includes(userId)) {
             if (subtotal >= Number(coupon.minOrder || 0)) {
               discount =
                 coupon.type === "PERCENT" ||
@@ -491,7 +548,7 @@ if (!signatureIsValid) {
   orderId,
 
   userId:
-    body.userId,
+    userId,
 
   customer:
     body.customer,
@@ -532,6 +589,10 @@ if (!signatureIsValid) {
 
       })
 
+    },
+    {
+      maxWait: 15000,
+      timeout: 20000,
     }
   )
 
@@ -544,30 +605,39 @@ if (!signatureIsValid) {
     }
 
     if (body.couponCode) {
-      const coupon =
-        await prisma.coupon.findUnique({
-          where: {
-            code:
-              body.couponCode,
-          },
-        })
+      try {
+        const coupon =
+          await prisma.coupon.findUnique({
+            where: {
+              code:
+                body.couponCode,
+            },
+          })
 
-      if (coupon) {
-        const usedBy =
-          (coupon.usedBy as string[]) || []
+        if (coupon) {
+          const usedBy =
+            (coupon.usedBy as string[]) || []
 
-        await prisma.coupon.update({
-          where: {
-            code:
-              body.couponCode,
-          },
-          data: {
-            usedBy: [
-              ...usedBy,
-              body.userId,
-            ],
-          },
-        })
+          await prisma.coupon.update({
+            where: {
+              code:
+                body.couponCode,
+            },
+            data: {
+              usedBy: Array.from(
+                new Set([
+                  ...usedBy,
+                  userId,
+                ])
+              ),
+            },
+          })
+        }
+      } catch (couponError) {
+        console.error(
+          "Coupon usage update failed:",
+          couponError
+        )
       }
     }
 
@@ -669,8 +739,29 @@ if (!signatureIsValid) {
       ])
     }
 
-      // Send notifications after the order is already saved.
-      await Promise.allSettled([
+    const sendWhatsAppWithTimeout = async (
+      payload: Parameters<
+        typeof sendWhatsAppOrderMessage
+      >[0]
+    ) => {
+      return Promise.race([
+        sendWhatsAppOrderMessage(payload),
+        new Promise((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                new Error(
+                  "WhatsApp notification timeout"
+                )
+              ),
+            8000
+          )
+        ),
+      ])
+    }
+
+    after(async () => {
+      const results = await Promise.allSettled([
         sendWithTimeout({
           from:
             "orders@shinseidiecast.com",
@@ -750,7 +841,7 @@ if (!signatureIsValid) {
 
         `,
       }),
-      sendWhatsAppOrderMessage(
+      sendWhatsAppWithTimeout(
         hasOnlyPreOrderNotificationItems
           ? {
               orderId,
@@ -871,7 +962,10 @@ if (!signatureIsValid) {
 
         <ul>
 
-          ${body.products
+          ${(Array.isArray(body.products)
+            ? body.products
+            : []
+          )
             .map(
               (item: any) => `
                 <li>
@@ -889,7 +983,8 @@ if (!signatureIsValid) {
 
         `,
       }),
-    ]).then((results) => {
+    ])
+
       results.forEach((result, index) => {
         if (result.status === "rejected") {
           const reason =

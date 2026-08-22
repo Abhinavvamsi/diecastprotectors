@@ -1,17 +1,56 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
+async function safeReadJson(
+  req: Request
+) {
+  try {
+    const text = await req.text()
+
+    if (!text.trim()) {
+      return null
+    }
+
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
+}
+
 export async function POST(
   req: Request
 ) {
 
   try {
 
-    const {
-      code,
-      userId,
-      total,
-    } = await req.json()
+    const body =
+      await safeReadJson(req)
+
+    const code =
+      typeof body?.code === "string"
+        ? body.code.trim()
+        : ""
+
+    const userId =
+      typeof body?.userId === "string"
+        ? body.userId
+        : ""
+
+    const total =
+      Number(body?.total || 0)
+
+    if (!code) {
+      return NextResponse.json(
+        {
+          valid: false,
+          message:
+            "Enter a coupon code",
+        },
+        {
+          status: 400,
+        }
+      )
+    }
 
     const coupon =
   await prisma.coupon.findUnique({
@@ -95,7 +134,10 @@ export async function POST(
 
   } catch (error) {
 
-    console.log(error)
+    console.error(
+      "Validate Coupon Error:",
+      error
+    )
 
     return NextResponse.json(
 

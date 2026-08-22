@@ -631,17 +631,22 @@ to-purple-600
           setSelectedBrand(brand.name)
         }
         className={`
-          px-5
-          py-2.5
+          px-7
+          py-4
           rounded-full
           border
-          min-w-[7rem]
+          min-h-[4.75rem]
+          min-w-[10rem]
           transition-all
           duration-300
           flex
           items-center
           justify-center
-          gap-2
+          gap-3
+          text-base
+          font-black
+          uppercase
+          tracking-wide
         
           ${
             selectedBrand === brand.name
@@ -658,7 +663,7 @@ to-purple-600
               <img
                 src={brand.logo}
                 alt={brand.name}
-                className="h-6 w-6 rounded-full object-contain"
+                className="h-10 w-10 rounded-full object-contain"
               />
             ) : null}
             <span>{brand.name}</span>

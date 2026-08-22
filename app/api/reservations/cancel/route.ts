@@ -2,14 +2,36 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
 
+async function safeReadJson(
+  req: Request
+) {
+  try {
+    const text = await req.text()
+
+    if (!text.trim()) {
+      return null
+    }
+
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
+}
+
 export async function POST(req: Request) {
   try {
-    const { reservationId } = await req.json()
+    const body =
+      await safeReadJson(req)
+
+    const reservationId =
+      typeof body?.reservationId === "string"
+        ? body.reservationId
+        : ""
 
     if (!reservationId) {
       return NextResponse.json(
-        { error: "Reservation ID required" },
-        { status: 400 }
+        { success: true },
+        { status: 200 }
       )
     }
 

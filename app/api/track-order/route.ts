@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 
 import { NextResponse } from "next/server"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(
   req: Request
 ) {
@@ -55,7 +57,12 @@ export async function GET(
     }
 
     return NextResponse.json(
-      order
+      order,
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      }
     )
 
   } catch (error) {
@@ -67,6 +74,9 @@ export async function GET(
       },
       {
         status: 500,
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
       }
     )
 

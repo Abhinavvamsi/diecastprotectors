@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 import Navbar from "@/components/navbar"
 
@@ -38,10 +39,66 @@ import { getProductPayablePrice } from "@/lib/preorder"
 
 type SavedCheckoutAddress = {
   name: string
+  contactName?: string
+  phone?: string
+  email?: string
   address: string
   city: string
   pincode: string
   updatedAt: string
+}
+
+type StoreSettingsResponse = {
+  pickupEnabled?: boolean
+  pickupLocation?: string | null
+  shippingMessage?: string | null
+  error?: string
+  message?: string
+}
+
+type CouponValidationResponse = {
+  valid?: boolean
+  message?: string
+  error?: string
+  coupon?: {
+    type?: string
+    value?: number | string
+  }
+}
+
+type GeoapifyResponse = {
+  features?: any[]
+  error?: string
+  message?: string
+}
+
+type StockCheckResponse = {
+  valid?: boolean
+  message?: string
+  error?: string
+}
+
+type ReservationCreateResponse = {
+  reservation?: {
+    id: string
+    expiresAt: string
+  }
+  error?: string
+  message?: string
+}
+
+type RazorpayOrderResponse = {
+  id?: string
+  amount?: number
+  currency?: string
+  error?: string
+  message?: string
+}
+
+type SaveOrderResponse = {
+  orderId?: string
+  error?: string
+  message?: string
 }
 
 declare global {
@@ -94,28 +151,38 @@ function showPaymentToast(
   }, 180)
 }
 
-function preparePaymentViewport() {
-  if (typeof window === "undefined") return 0
+async function readApiJson<T = unknown>(
+  response: Response,
+  fallbackMessage = "Something went wrong. Please try again."
+): Promise<T & { error?: string; message?: string }> {
+  const text = await response.text()
 
-  const scrollTop = window.scrollY
+  if (!text.trim()) {
+    return {} as T & { error?: string; message?: string }
+  }
+
+  try {
+    return JSON.parse(text)
+  } catch {
+    return {
+      error: fallbackMessage,
+      message: fallbackMessage,
+    } as T & { error?: string; message?: string }
+  }
+}
+
+function preparePaymentViewport() {
+  if (typeof document === "undefined") return
+
   const activeElement = document.activeElement
 
   if (activeElement instanceof HTMLElement) {
     activeElement.blur()
   }
-
-  requestAnimationFrame(() => {
-    window.scrollTo({
-      top: scrollTop,
-      left: 0,
-      behavior: "auto",
-    })
-  })
-
-  return scrollTop
 }
 
 export default function CheckoutPage() {
+  const router = useRouter()
 
   const cart = useCartStore(
     (state) => state.cart
@@ -142,6 +209,11 @@ const removeFromCart =
   const { user } = useUser()
 
   useEffect(() => {
+    router.prefetch("/processing")
+    router.prefetch("/success")
+  }, [router])
+
+  useEffect(() => {
     async function refreshCartPrices() {
       const response = await fetch(
         "/api/get-products?includePreOrder=true",
@@ -150,7 +222,13 @@ const removeFromCart =
 
       if (!response.ok) return
 
-      const products = await response.json()
+      const products = await readApiJson<any[]>(
+        response,
+        "Unable to refresh cart prices"
+      )
+
+      if (!Array.isArray(products)) return
+
       for (const product of products) {
         syncProduct({
           id: product.id,
@@ -338,6 +416,9 @@ const [reservationExpiresAt,
 const reservationIdRef =
   useRef<string | null>(null)
 
+const paymentHandoffActiveRef =
+  useRef(false)
+
 const activeReservationStorageKey =
   "active-checkout-reservation-id"
 
@@ -401,13 +482,21 @@ const savedAddressesStorageKey = user
   ? `saved-checkout-addresses-${user.id}`
   : null
 
-function normalizeAddress(address: SavedCheckoutAddress) {
+function normalizeAddress(
+  address: Partial<SavedCheckoutAddress>
+): SavedCheckoutAddress {
   return {
     ...address,
-    name: address.name.trim(),
-    address: address.address.trim(),
-    city: address.city.trim(),
-    pincode: address.pincode.trim(),
+    name: (address.name || "Saved Address").trim(),
+    contactName: (address.contactName || "").trim(),
+    phone: (address.phone || "").trim(),
+    email: (address.email || "").trim(),
+    address: (address.address || "").trim(),
+    city: (address.city || "").trim(),
+    pincode: (address.pincode || "").trim(),
+    updatedAt:
+      address.updatedAt ||
+      new Date().toISOString(),
   }
 }
 
@@ -426,7 +515,17 @@ function readSavedAddresses() {
 
     if (!Array.isArray(parsed)) return []
 
-    return parsed.slice(0, 2)
+    return parsed
+      .slice(0, 2)
+      .map((savedAddress) =>
+        normalizeAddress(savedAddress)
+      )
+      .filter(
+        (savedAddress) =>
+          savedAddress.address &&
+          savedAddress.city &&
+          savedAddress.pincode
+      )
   } catch {
     return []
   }
@@ -447,6 +546,18 @@ function applySavedAddress(
   savedAddress: SavedCheckoutAddress,
   index: number
 ) {
+  if (savedAddress.contactName) {
+    setCustomer(savedAddress.contactName)
+  }
+
+  if (savedAddress.phone) {
+    setPhone(savedAddress.phone)
+  }
+
+  if (savedAddress.email) {
+    setEmail(savedAddress.email)
+  }
+
   setAddress(savedAddress.address)
   setCity(savedAddress.city)
   setPincode(savedAddress.pincode)
@@ -460,18 +571,33 @@ function saveCurrentAddress() {
         ? selectedSavedAddress + 1
         : savedAddresses.length + 1
     }`,
+    contactName: customer,
+    phone,
+    email,
     address,
     city,
     pincode,
     updatedAt: new Date().toISOString(),
   })
 
-  if (!nextAddress.address || !nextAddress.city || !nextAddress.pincode) {
-    toast.error("Fill address, city and pincode first")
+  if (
+    !nextAddress.contactName ||
+    !nextAddress.phone ||
+    !nextAddress.email ||
+    !nextAddress.address ||
+    !nextAddress.city ||
+    !nextAddress.pincode
+  ) {
+    toast.error(
+      "Fill name, phone, email and address before saving"
+    )
     return
   }
 
-  if (selectedSavedAddress !== null) {
+  if (
+    selectedSavedAddress !== null &&
+    savedAddresses[selectedSavedAddress]
+  ) {
     const nextAddresses = [...savedAddresses]
     nextAddresses[selectedSavedAddress] = nextAddress
     setSavedAddresses(nextAddresses)
@@ -514,7 +640,9 @@ useEffect(() => {
       )
 
     const data =
-      await response.json()
+      await readApiJson<StoreSettingsResponse>(
+        response
+      )
 
     if (data) {
         setPickupEnabled(
@@ -561,7 +689,12 @@ useEffect(() => {
       await fetch("/api/get-products?includePreOrder=true")
 
     const data =
-      await response.json()
+      await readApiJson<any[]>(
+        response,
+        "Unable to load product suggestions"
+      )
+
+    if (!Array.isArray(data)) return
 
     const cartIds =
       cart.map(item => item.id)
@@ -637,20 +770,25 @@ useEffect(() => {
         }),
       })
 
-      const data = await response.json()
+      const data =
+        await readApiJson<CouponValidationResponse>(
+          response
+        )
 
       if (cancelled) return
 
-      if (!response.ok || !data.valid) {
+      if (!response.ok || !data.valid || !data.coupon) {
         setDiscount(0)
         return
       }
 
+      const coupon = data.coupon
+
       const discountAmount =
-        data.coupon.type === "PERCENT" ||
-        data.coupon.type === "PERCENTAGE"
-          ? Math.floor((total * Number(data.coupon.value)) / 100)
-          : Number(data.coupon.value || 0)
+        coupon.type === "PERCENT" ||
+        coupon.type === "PERCENTAGE"
+          ? Math.floor((total * Number(coupon.value)) / 100)
+          : Number(coupon.value || 0)
 
       setDiscount(Math.min(discountAmount, total))
     } catch {
@@ -672,6 +810,10 @@ useEffect(() => {
 
   const existing = readSavedAddresses()
   setSavedAddresses(existing)
+
+  if (existing[0] && !phone && !address && !city && !pincode) {
+    applySavedAddress(existing[0], 0)
+  }
 }, [savedAddressesStorageKey])
 
 useEffect(() => {
@@ -679,6 +821,10 @@ useEffect(() => {
   if (!reservationId) return
 
   const handlePageExit = () => {
+    if (paymentHandoffActiveRef.current) {
+      return
+    }
+
     const activeReservation =
       reservationIdRef.current ||
       sessionStorage.getItem(
@@ -719,6 +865,10 @@ useEffect(() => {
       handlePageExit
     )
     if (reservationIdRef.current) {
+      if (paymentHandoffActiveRef.current) {
+        return
+      }
+
       void cancelReservationSilently(
         reservationIdRef.current
       )
@@ -759,7 +909,9 @@ async function searchAddress(
       )
 
     const data =
-      await response.json()
+      await readApiJson<GeoapifyResponse>(
+        response
+      )
 
     setSuggestions(
       data.features || []
@@ -863,9 +1015,11 @@ async function applyCoupon() {
       )
 
     const data =
-      await response.json()
+      await readApiJson<CouponValidationResponse>(
+        response
+      )
 
-    if (!data.valid) {
+    if (!data.valid || !data.coupon) {
 
   toast.error(
     data.message
@@ -877,25 +1031,26 @@ async function applyCoupon() {
 
 }
 
+    const coupon = data.coupon
     let discountAmount = 0
 
     if (
-      data.coupon.type ===
+      coupon.type ===
       "PERCENT" ||
-      data.coupon.type === "PERCENTAGE"
+      coupon.type === "PERCENTAGE"
     ) {
 
       discountAmount =
         Math.floor(
           total *
-          data.coupon.value /
+          Number(coupon.value) /
           100
         )
 
     } else {
 
       discountAmount =
-        data.coupon.value
+        Number(coupon.value || 0)
 
     }
 
@@ -1089,15 +1244,15 @@ focus:ring-pink-500/30
       "
     />
 
-    {/* Saved Addresses */}
+    {/* Saved Delivery Details */}
     <div className="mb-5 rounded-2xl border border-zinc-800 bg-zinc-950/60 p-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-white">
-            Saved Addresses
+            Saved Delivery Details
           </h3>
           <p className="text-xs text-zinc-400 mt-1">
-            Save up to 2 addresses and reuse them anytime.
+            Save name, phone, email and address once. We auto-fill it next time.
           </p>
         </div>
 
@@ -1116,8 +1271,8 @@ focus:ring-pink-500/30
           "
         >
           {selectedSavedAddress !== null
-            ? "Update Saved Address"
-            : "Save Address"}
+            ? "Update Details"
+            : "Save Details"}
         </Button>
       </div>
 
@@ -1135,7 +1290,9 @@ focus:ring-pink-500/30
                   return
                 }
 
-                setSelectedSavedAddress(index)
+                toast.info(
+                  "Fill the delivery form, then tap Save Details"
+                )
               }}
               className={`
                 rounded-xl border p-4 text-left transition
@@ -1148,7 +1305,7 @@ focus:ring-pink-500/30
             >
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-white">
-                  Address {index + 1}
+                  Delivery Slot {index + 1}
                 </p>
                 <span className="text-[11px] uppercase tracking-widest text-zinc-400">
                   {savedAddress ? "Saved" : "Empty"}
@@ -1157,6 +1314,16 @@ focus:ring-pink-500/30
 
               {savedAddress ? (
                 <div className="mt-3 space-y-1 text-sm text-zinc-300">
+                  {savedAddress.contactName ? (
+                    <p className="font-semibold text-white">
+                      {savedAddress.contactName}
+                    </p>
+                  ) : null}
+                  {savedAddress.phone ? (
+                    <p className="text-pink-300">
+                      {savedAddress.phone}
+                    </p>
+                  ) : null}
                   <p>{savedAddress.address}</p>
                   <p>
                     {savedAddress.city} - {savedAddress.pincode}
@@ -1164,7 +1331,7 @@ focus:ring-pink-500/30
                 </div>
               ) : (
                 <p className="mt-3 text-sm text-zinc-500">
-                  Click to reserve this slot and save the current address here.
+                  Fill the form, then tap Save Details to store it here.
                 </p>
               )}
             </button>
@@ -2000,8 +2167,7 @@ disabled:cursor-not-allowed
 
                 onClick={async () => {
 
-                  const paymentScrollTop =
-                    preparePaymentViewport()
+                  preparePaymentViewport()
 
                   setLoading(true)
                   setValidating(true)
@@ -2156,7 +2322,10 @@ const stockCheckResponse =
   )
 
 const stockCheck =
-  await stockCheckResponse.json()
+  await readApiJson<StockCheckResponse>(
+    stockCheckResponse,
+    "Unable to verify stock. Please try again."
+  )
 
 if (!stockCheckResponse.ok || !stockCheck.valid) {
 
@@ -2191,7 +2360,10 @@ setValidating(false)
                       )
 
                     const reservationData =
-                      await reservationResponse.json()
+                      await readApiJson<ReservationCreateResponse>(
+                        reservationResponse,
+                        "Unable to reserve these products"
+                      )
 
                     if (!reservationResponse.ok) {
                       toast.error(
@@ -2203,13 +2375,21 @@ setValidating(false)
                     }
 
                     const activeReservationId =
-                      reservationData.reservation.id
+                      reservationData.reservation?.id
+
+                    if (!activeReservationId) {
+                      throw new Error(
+                        "Unable to reserve these products"
+                      )
+                    }
 
                     reservationIdRef.current =
                       activeReservationId
+                    paymentHandoffActiveRef.current =
+                      true
                     setReservationId(activeReservationId)
                     setReservationExpiresAt(
-                      reservationData.reservation.expiresAt
+                      reservationData.reservation?.expiresAt || null
                     )
                     sessionStorage.setItem(
                       activeReservationStorageKey,
@@ -2240,7 +2420,10 @@ setValidating(false)
                       )
 
                     const order =
-                      await response.json()
+                      await readApiJson<RazorpayOrderResponse>(
+                        response,
+                        "Unable to start payment"
+                      )
 
                     if (!response.ok) {
                       await cancelReservation(
@@ -2335,24 +2518,84 @@ description: "Premium Japanese Diecast Collectibles",
                                 response.razorpay_signature,
                             }
 
-                            sessionStorage.setItem(
-                              "pending-order",
+                            const pendingOrderPayload =
                               JSON.stringify(pendingOrder)
-                            )
+
+                            let storedPendingOrder = false
+
+                            try {
+                              sessionStorage.setItem(
+                                "pending-order",
+                                pendingOrderPayload
+                              )
+                              storedPendingOrder = true
+                            } catch (storageError) {
+                              void storageError
+                            }
+
+                            try {
+                              localStorage.setItem(
+                                "pending-order-backup",
+                                pendingOrderPayload
+                              )
+                              storedPendingOrder = true
+                            } catch (storageError) {
+                              void storageError
+                            }
 
                             reservationIdRef.current = null
                             setReservationId(null)
                             setReservationExpiresAt(null)
                             clearStoredReservation()
 
-                            window.location.replace(
-                              "/processing"
-                            )
+                            if (!storedPendingOrder) {
+                              const saveOrderResponse =
+                                await fetch(
+                                  "/api/save-order",
+                                  {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type":
+                                        "application/json",
+                                    },
+                                    body: pendingOrderPayload,
+                                  }
+                                )
+
+                              const savedOrder =
+                                await readApiJson<SaveOrderResponse>(
+                                  saveOrderResponse,
+                                  "Payment received, but the order could not be saved."
+                                )
+
+                              if (
+                                !saveOrderResponse.ok ||
+                                !savedOrder.orderId
+                              ) {
+                                throw new Error(
+                                  savedOrder.error ||
+                                    savedOrder.message ||
+                                    "Payment received, but the order could not be saved."
+                                )
+                              }
+
+                              useCartStore.getState().clearCart()
+                              router.replace(
+                                `/success?orderId=${encodeURIComponent(
+                                  savedOrder.orderId
+                                )}`
+                              )
+                              return
+                            }
+
+                            router.replace("/processing")
 
                           } catch (error) {
 
                             toast.error(
-                              "Payment received, but the order could not be saved. Please contact support."
+                              error instanceof Error
+                                ? error.message
+                                : "Payment received, but the order could not be saved. Please contact support."
                             )
 
                             setLoading(false)
@@ -2361,11 +2604,13 @@ description: "Premium Japanese Diecast Collectibles",
 
                         },
 
-                      modal: {
+	                      modal: {
 
-                        ondismiss: function () {
+	                        ondismiss: function () {
+                          paymentHandoffActiveRef.current =
+                            false
 
-                          void cancelReservation(
+	                          void cancelReservation(
                             activeReservationId
                           )
 
@@ -2413,7 +2658,10 @@ if (appliedCouponCode.trim()) {
     )
 
   const couponData =
-    await couponResponse.json()
+    await readApiJson<CouponValidationResponse>(
+      couponResponse,
+      "Unable to validate coupon"
+    )
 
   if (!couponData.valid) {
 
@@ -2451,20 +2699,11 @@ if (appliedCouponCode.trim()) {
 
                     razorpay.open()
 
-                    requestAnimationFrame(() => {
-                      window.scrollTo({
-                        top: paymentScrollTop,
-                        left: 0,
-                        behavior: "auto",
-                      })
-                    })
-
                     razorpay.on(
-                      "payment.failed",
+	                      "payment.failed",
 
-                      function () {
-
-                        showPaymentToast(
+	                      function () {
+	                        showPaymentToast(
                           "error",
                           "Payment failed. Please retry or choose another payment method."
                         )
@@ -2474,9 +2713,11 @@ if (appliedCouponCode.trim()) {
                       }
                     )
 
-                  } catch (error) {
+	                  } catch (error) {
+                    paymentHandoffActiveRef.current =
+                      false
 
-                    if (reservationIdRef.current) {
+	                    if (reservationIdRef.current) {
                       await cancelReservation(
                         reservationIdRef.current
                       )

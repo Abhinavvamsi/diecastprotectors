@@ -46,7 +46,17 @@ export async function POST(req: Request) {
       )
     }
 
-    const body = await req.json()
+    let body: any
+
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid payment payload" },
+        { status: 400 }
+      )
+    }
+
     const { reservationId, couponCode, deliveryMethod } = body
 
     if (!reservationId) {
@@ -194,10 +204,7 @@ export async function POST(req: Request) {
 
     const order = await razorpay.orders.create(options)
 
-    return NextResponse.json({
-      ...order,
-      amount,
-    })
+    return NextResponse.json(order)
   } catch (error) {
     console.error("Create Order Error:", error)
     return NextResponse.json(

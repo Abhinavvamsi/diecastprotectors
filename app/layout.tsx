@@ -34,7 +34,7 @@ const organizationSchema = {
   "@type": "Organization",
   name: "Shinsei Diecast",
   url: siteUrl,
-  logo: `${siteUrl}/logo.png`,
+  logo: `${siteUrl}/icon-512.png`,
 }
 
 const websiteSchema = {
@@ -58,13 +58,41 @@ export const metadata: Metadata = {
 
   icons: {
 
-    icon: "/favicon.ico",
+    icon: [
+      {
+        url: "/favicon.ico",
+        sizes: "any",
+      },
+      {
+        url: "/favicon-48x48.png",
+        type: "image/png",
+        sizes: "48x48",
+      },
+      {
+        url: "/favicon-96x96.png",
+        type: "image/png",
+        sizes: "96x96",
+      },
+      {
+        url: "/icon-192.png",
+        type: "image/png",
+        sizes: "192x192",
+      },
+    ],
 
     shortcut: "/favicon.ico",
 
-    apple: "/logo.png",
+    apple: [
+      {
+        url: "/apple-touch-icon.png",
+        type: "image/png",
+        sizes: "180x180",
+      },
+    ],
 
   },
+
+  manifest: "/manifest.webmanifest",
 
   keywords: [
     "Hot Wheels",

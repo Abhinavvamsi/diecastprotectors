@@ -3,32 +3,44 @@ import { currentUser } from "@clerk/nextjs/server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET() {
+  try {
 
-  const user = await currentUser()
+    const user = await currentUser()
 
-  if (!user) {
+    if (!user) {
+      return NextResponse.json({
+        isAdmin: false,
+        role: null,
+      })
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: {
+        clerkId: user.id,
+      },
+    })
+
+    if (!admin || !admin.active) {
+      return NextResponse.json({
+        isAdmin: false,
+        role: null,
+      })
+    }
+
+    return NextResponse.json({
+      isAdmin: true,
+      role: admin.role,
+    })
+  } catch (error) {
+    console.error(
+      "Admin Me Error:",
+      error
+    )
+
     return NextResponse.json({
       isAdmin: false,
       role: null,
     })
   }
-
-  const admin = await prisma.admin.findUnique({
-    where: {
-      clerkId: user.id,
-    },
-  })
-
-  if (!admin || !admin.active) {
-    return NextResponse.json({
-      isAdmin: false,
-      role: null,
-    })
-  }
-
-  return NextResponse.json({
-    isAdmin: true,
-    role: admin.role,
-  })
 
 }
