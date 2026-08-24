@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
+import { AlertTriangle, Loader2 } from "lucide-react"
 import { useCartStore } from "@/store/cart-store"
 
 const pendingOrderStorageKey = "pending-order"
@@ -15,16 +15,32 @@ const confirmedOrderMaxAgeMs = 30 * 60 * 1000
 type SaveOrderResponse = {
   orderId?: string
   error?: string
+  code?: string
+  retryable?: boolean
 }
+
+const terminalSaveOrderErrorCodes = new Set([
+  "RESERVATION_EXPIRED",
+  "RESERVATION_EXPIRED_AFTER_PAYMENT",
+  "INVALID_RESERVATION",
+  "UNAUTHORIZED_RESERVATION",
+])
 
 async function readApiJson<T = unknown>(
   response: Response,
   fallbackMessage = "Failed to save order"
-): Promise<T & { error?: string }> {
+): Promise<T & { error?: string; retryable?: boolean }> {
   const text = await response.text()
 
   if (!text.trim()) {
-    return {} as T & { error?: string }
+    return {
+      error: response.ok
+        ? fallbackMessage
+        : `Request failed with status ${response.status}`,
+      retryable:
+        !response.ok &&
+        (response.status >= 500 || response.status === 429),
+    } as T & { error?: string; retryable?: boolean }
   }
 
   try {
@@ -32,8 +48,52 @@ async function readApiJson<T = unknown>(
   } catch {
     return {
       error: fallbackMessage,
-    } as T & { error?: string }
+      retryable:
+        !response.ok &&
+        (response.status >= 500 || response.status === 429),
+    } as T & { error?: string; retryable?: boolean }
   }
+}
+
+function isTerminalSaveOrderResponse(
+  response: Response,
+  savedOrder: SaveOrderResponse
+) {
+  if (
+    savedOrder.code &&
+    terminalSaveOrderErrorCodes.has(savedOrder.code)
+  ) {
+    return true
+  }
+
+  const errorMessage =
+    savedOrder.error?.toLowerCase() || ""
+
+  if (
+    errorMessage.includes("reservation") &&
+    errorMessage.includes("expired")
+  ) {
+    return true
+  }
+
+  if (savedOrder.retryable === false) {
+    return true
+  }
+
+  if (savedOrder.retryable === true) {
+    return false
+  }
+
+  if (
+    response.status >= 400 &&
+    response.status < 500 &&
+    response.status !== 408 &&
+    response.status !== 429
+  ) {
+    return true
+  }
+
+  return false
 }
 
 export default function ProcessingPage() {
@@ -41,6 +101,8 @@ export default function ProcessingPage() {
   const [message, setMessage] = useState(
     "Your payment is confirmed. We are saving your order now."
   )
+  const [isTerminalIssue, setIsTerminalIssue] =
+    useState(false)
 
   useEffect(() => {
     router.prefetch("/success")
@@ -175,6 +237,7 @@ export default function ProcessingPage() {
         setMessage(
           "Payment details are not available on this device. If money was deducted, please contact support with your Razorpay payment ID."
         )
+        setIsTerminalIssue(true)
         return
       }
 
@@ -212,6 +275,21 @@ export default function ProcessingPage() {
             !saveOrderResponse.ok ||
             !savedOrder.orderId
           ) {
+            const isTerminalError =
+              isTerminalSaveOrderResponse(
+                saveOrderResponse,
+                savedOrder
+              )
+
+            if (isTerminalError) {
+              setIsTerminalIssue(true)
+              setMessage(
+                savedOrder.error ||
+                  "Your checkout hold expired before payment confirmation. If money was deducted, please contact support with your Razorpay payment ID."
+              )
+              return
+            }
+
             throw new Error(
               savedOrder.error || "Failed to save order"
             )
@@ -237,7 +315,7 @@ export default function ProcessingPage() {
             )
           }
           return
-        } catch (error) {
+        } catch {
           if (cancelled) return
 
           if (attempt < maxAttempts) {
@@ -247,8 +325,9 @@ export default function ProcessingPage() {
             continue
           }
 
+          setIsTerminalIssue(true)
           setMessage(
-            "Payment is captured, but the order is still syncing. Please keep this page open and contact support if it does not confirm shortly."
+            "Payment is captured, but your order did not confirm automatically. Please save your payment ID and contact support for manual verification."
           )
           return
         }
@@ -266,24 +345,51 @@ export default function ProcessingPage() {
     <main className="min-h-screen bg-[#09090B] text-white flex items-center justify-center px-6">
       <div className="w-full max-w-xl rounded-3xl border border-zinc-800 bg-zinc-900/90 shadow-2xl p-10 text-center">
         <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-pink-500/10">
-          <Loader2 className="h-12 w-12 animate-spin text-pink-500" />
+          {isTerminalIssue ? (
+            <AlertTriangle className="h-12 w-12 text-amber-300" />
+          ) : (
+            <Loader2 className="h-12 w-12 animate-spin text-pink-500" />
+          )}
         </div>
 
         <p className="uppercase tracking-[0.35em] text-xs text-pink-400">
-          Finalizing Payment
+          {isTerminalIssue
+            ? "Action Needed"
+            : "Finalizing Payment"}
         </p>
 
         <h1 className="mt-4 text-4xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
-          Processing your order
+          {isTerminalIssue
+            ? "Payment needs review"
+            : "Processing your order"}
         </h1>
 
         <p className="mt-4 text-zinc-400 leading-7">
           {message}
         </p>
 
-        <div className="mt-8 h-2 overflow-hidden rounded-full bg-zinc-800">
-          <div className="h-full w-1/2 animate-pulse rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500" />
-        </div>
+        {isTerminalIssue ? (
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={() => router.replace("/checkout")}
+              className="rounded-full border border-pink-500/60 px-6 py-3 text-sm font-bold uppercase tracking-widest text-pink-200 transition hover:bg-pink-500/10"
+            >
+              Back to checkout
+            </button>
+            <button
+              type="button"
+              onClick={() => router.replace("/orders")}
+              className="rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-600 px-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition hover:scale-105"
+            >
+              Order history
+            </button>
+          </div>
+        ) : (
+          <div className="mt-8 h-2 overflow-hidden rounded-full bg-zinc-800">
+            <div className="h-full w-1/2 animate-pulse rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500" />
+          </div>
+        )}
       </div>
     </main>
   )

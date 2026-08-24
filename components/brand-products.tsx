@@ -16,12 +16,15 @@ type Product = {
   quantityPricing?: {
     quantity: string
     price: string
+    saleOriginalPrice?: number | string | null
   }[]
   badge?: string | null
   isPreOrder?: boolean
   depositAmount?: number
   expectedArrival?: string | null
   preOrderDeadline?: string | null
+  saleOriginalPrice?: number | null
+  siteDiscountPercent?: number | null
   brand?: {
     name?: string
   }
@@ -174,6 +177,8 @@ export default function BrandProducts({
               preOrderDeadline={product.preOrderDeadline}
               originalPrice={product.price}
               remainingPrice={getProductRemainingPrice(product)}
+              saleOriginalPrice={product.saleOriginalPrice}
+              siteDiscountPercent={product.siteDiscountPercent}
             />
           ))}
         </div>

@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { releaseExpiredReservations } from "@/lib/reservation-cleanup"
+import { applySiteDiscountToProduct } from "@/lib/site-discount"
+import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
 
 async function safeReadJson(
   req: Request
@@ -42,6 +45,17 @@ export async function POST(
       }
     )
   }
+
+  await prisma.$transaction(async (tx) => {
+    await releaseExpiredReservations({
+      client: tx,
+      productIds: products.map((item: any) => item.id),
+    })
+  })
+
+  const siteDiscountSettings =
+    await getStoreSiteDiscountSettings()
+  const latestProducts: any[] = []
 
   for (
     const item of products
@@ -137,10 +151,24 @@ export async function POST(
 
     }
 
+    latestProducts.push(
+      applySiteDiscountToProduct(
+        {
+          ...product,
+          stock: Math.max(
+            0,
+            product.stock - (product.reservedStock || 0)
+          ),
+        },
+        siteDiscountSettings
+      )
+    )
+
   }
 
   return NextResponse.json({
     valid: true,
+    products: latestProducts,
   })
   } catch (error) {
     console.error(

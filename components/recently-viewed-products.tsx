@@ -205,6 +205,8 @@ export default function RecentlyViewedProducts({
               expectedArrival={product.expectedArrival}
               preOrderDeadline={product.preOrderDeadline}
               remainingPrice={product.remainingPrice}
+              saleOriginalPrice={product.saleOriginalPrice}
+              siteDiscountPercent={product.siteDiscountPercent}
               quantityPricing={product.quantityPricing}
             />
           </div>

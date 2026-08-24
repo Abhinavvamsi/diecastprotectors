@@ -17,6 +17,8 @@ export type RecentlyViewedProduct = {
   expectedArrival?: string | null
   preOrderDeadline?: string | null
   remainingPrice?: number
+  saleOriginalPrice?: number | null
+  siteDiscountPercent?: number | null
   quantityPricing?: any[]
 }
 
@@ -73,6 +75,20 @@ export function normalizeRecentlyViewedProduct(
         : Math.max(
             0,
             Number(product.remainingPrice || 0)
+          ),
+    saleOriginalPrice:
+      product?.saleOriginalPrice === undefined
+        ? undefined
+        : Math.max(
+            0,
+            Number(product.saleOriginalPrice || 0)
+          ),
+    siteDiscountPercent:
+      product?.siteDiscountPercent === undefined
+        ? undefined
+        : Math.max(
+            0,
+            Number(product.siteDiscountPercent || 0)
           ),
     quantityPricing:
       product?.quantityPricing || undefined,

@@ -135,6 +135,8 @@ cart.forEach((item) => {
             id: product.id,
             price: getProductPayablePrice(product),
             originalPrice: Number(product.price || 0),
+            saleOriginalPrice: product.saleOriginalPrice,
+            siteDiscountPercent: product.siteDiscountPercent,
             depositAmount: product.depositAmount,
             expectedArrival: product.expectedArrival || undefined,
             isPreOrder: product.isPreOrder,

@@ -58,6 +58,8 @@ export default function SettingsPage() {
   const [pickupLocation, setPickupLocation] = useState("")
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [saleLaunchAt, setSaleLaunchAt] = useState("")
+  const [siteDiscountPercent, setSiteDiscountPercent] = useState("0")
+  const [siteDiscountEndsAt, setSiteDiscountEndsAt] = useState("")
   const [superDealProductIds, setSuperDealProductIds] = useState<string[]>([])
   const [preOrderFeaturedProductIds, setPreOrderFeaturedProductIds] = useState<string[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -120,6 +122,8 @@ export default function SettingsPage() {
     setShippingMessage(data.shippingMessage || "")
     setMaintenanceMode(data.maintenanceMode || false)
     setSaleLaunchAt(toDateTimeLocal(data.saleLaunchAt))
+    setSiteDiscountPercent(String(data.siteDiscountPercent || 0))
+    setSiteDiscountEndsAt(toDateTimeLocal(data.siteDiscountEndsAt))
     setSuperDealProductIds(Array.isArray(data.superDealProductIds) ? data.superDealProductIds : [])
     setPreOrderFeaturedProductIds(
       Array.isArray(data.preOrderFeaturedProductIds)
@@ -142,6 +146,8 @@ export default function SettingsPage() {
         pickupLocation,
         maintenanceMode,
         saleLaunchAt: fromDateTimeLocal(saleLaunchAt),
+        siteDiscountPercent: Number(siteDiscountPercent),
+        siteDiscountEndsAt: fromDateTimeLocal(siteDiscountEndsAt),
         superDealProductIds: activeSuperDealProductIds,
         preOrderFeaturedProductIds: activePreOrderFeaturedProductIds,
       }),
@@ -345,6 +351,83 @@ export default function SettingsPage() {
                   timeStyle: "short",
                 })}
                 .
+              </p>
+            )}
+          </div>
+
+          <div className="bg-[#09090B] border border-green-500/30 rounded-2xl p-6 shadow-[0_0_28px_rgba(34,197,94,.08)]">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-wider text-green-300">
+                  Site-Wide Discount
+                </p>
+                <p className="mt-1 max-w-2xl text-sm text-zinc-500">
+                  Apply a timed percentage offer across customer-facing products. Checkout and payment APIs recalculate it server-side.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSiteDiscountPercent("0")
+                  setSiteDiscountEndsAt("")
+                }}
+                className="h-11 rounded-xl border border-zinc-700 px-5 text-sm font-semibold text-zinc-300 transition hover:border-green-400 hover:text-green-200"
+              >
+                Clear Discount
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="block text-sm text-zinc-400 uppercase tracking-wider mb-3">
+                  Discount Percentage
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="90"
+                  value={siteDiscountPercent}
+                  onChange={(event) =>
+                    setSiteDiscountPercent(event.target.value)
+                  }
+                  className="h-14 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-white outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/20"
+                  placeholder="10"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-zinc-400 uppercase tracking-wider mb-3">
+                  Discount Ends At
+                </label>
+                <input
+                  type="datetime-local"
+                  value={siteDiscountEndsAt}
+                  onChange={(event) =>
+                    setSiteDiscountEndsAt(event.target.value)
+                  }
+                  className="h-14 w-full rounded-xl border border-zinc-700 bg-zinc-950 px-4 text-white outline-none [color-scheme:dark] focus:border-green-400 focus:ring-2 focus:ring-green-400/20"
+                />
+              </div>
+            </div>
+
+            {Number(siteDiscountPercent) > 0 && (
+              <p className="mt-3 text-sm text-green-200">
+                Customers will see{" "}
+                {Math.min(
+                  90,
+                  Math.max(0, Number(siteDiscountPercent) || 0)
+                )}
+                % off
+                {siteDiscountEndsAt
+                  ? ` until ${new Date(siteDiscountEndsAt).toLocaleString(
+                      "en-IN",
+                      {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }
+                    )}.`
+                  : " until you clear the discount."}
               </p>
             )}
           </div>

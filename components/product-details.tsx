@@ -45,25 +45,54 @@ export default function ProductDetails({
     setSelectedImage
   ] = useState(0)
 
-  const [selectedTier,
+const [selectedTier,
   setSelectedTier
 ] = useState<any>(
   null
 )
 
+const selectedTierData =
+  typeof selectedTier === "number"
+    ? product.quantityPricing?.[selectedTier]
+    : selectedTier
+
 const selectedPrice =
-  selectedTier
-    ? Number(selectedTier.price)
+  selectedTierData
+    ? Number(selectedTierData.price)
     : Number(product.price)
 
-const preorderBasePrice = Number(product.price)
+const selectedSaleOriginalPrice =
+  selectedTierData?.saleOriginalPrice
+    ? Number(selectedTierData.saleOriginalPrice)
+    : Number(product.saleOriginalPrice || 0)
+
+const siteDiscountPercent =
+  Number(product.siteDiscountPercent || 0)
+
+const showRegularSiteDiscount =
+  !product.isPreOrder &&
+  siteDiscountPercent > 0 &&
+  selectedSaleOriginalPrice > selectedPrice
+
+const showPreOrderSiteDiscount =
+  Boolean(
+    product.isPreOrder &&
+    siteDiscountPercent > 0 &&
+    selectedSaleOriginalPrice > selectedPrice
+  )
 
 const depositPrice = product.isPreOrder
-  ? getProductPayablePrice(product)
+  ? getProductPayablePrice({
+      ...product,
+      price: selectedPrice,
+    })
   : selectedPrice
 
 const remainingPrice = product.isPreOrder
-  ? getProductRemainingPrice(product)
+  ? getProductRemainingPrice({
+      ...product,
+      price: selectedPrice,
+    })
   : 0
 
 const availableStock = Number(product.stock || 0)
@@ -77,6 +106,10 @@ const availableStock = Number(product.stock || 0)
         ? depositPrice
         : selectedPrice,
       originalPrice: selectedPrice,
+      saleOriginalPrice:
+        selectedSaleOriginalPrice || undefined,
+      siteDiscountPercent:
+        siteDiscountPercent || undefined,
       image: product.images?.[0],
       stock: availableStock,
       remainingPrice,
@@ -85,6 +118,8 @@ const availableStock = Number(product.stock || 0)
     product,
     depositPrice,
     selectedPrice,
+    selectedSaleOriginalPrice,
+    siteDiscountPercent,
     availableStock,
     remainingPrice,
   ])
@@ -197,16 +232,40 @@ text-transparent uppercase tracking-widest text-sm font-semibold">
 
               </h1>
 
-              <p className="text-5xl font-bold mt-6 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
+<p className="text-5xl font-bold mt-6 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
   ₹{product.isPreOrder ? depositPrice : selectedPrice}
 
 </p>
 
+{showRegularSiteDiscount && (
+  <p className="mt-2 text-base font-semibold text-zinc-500 line-through">
+    ₹{selectedSaleOriginalPrice}
+  </p>
+)}
+
+{(showRegularSiteDiscount || showPreOrderSiteDiscount) && (
+  <p className="mt-2 text-sm font-bold uppercase tracking-[0.18em] text-green-400">
+    {siteDiscountPercent}% site-wide offer applied
+  </p>
+)}
+
 {product.isPreOrder && (
   <div className="mt-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 p-4 text-cyan-100">
     <p className="font-semibold">Pre-Order</p>
-    <p className="mt-1 text-sm">Original price: ₹{selectedPrice}</p>
+    <p className="mt-1 text-sm">
+      Original price:{" "}
+      {showPreOrderSiteDiscount ? (
+        <>
+          <span className="text-cyan-500/60 line-through">
+            ₹{selectedSaleOriginalPrice}
+          </span>{" "}
+          <span>₹{selectedPrice}</span>
+        </>
+      ) : (
+        <>₹{selectedPrice}</>
+      )}
+    </p>
     <p className="mt-1 text-sm">Deposit today: ₹{depositPrice}</p>
     <p className="text-sm">Balance due on arrival: ₹{remainingPrice}</p>
 	    {product.expectedArrival && (
@@ -307,6 +366,12 @@ text-transparent uppercase tracking-widest text-sm font-semibold">
             {tier.quantity}
             {" "}
             pcs @ each ₹ 
+            {tier.saleOriginalPrice &&
+              Number(tier.saleOriginalPrice) > Number(tier.price) && (
+                <span className="mr-1 text-zinc-400 line-through">
+                  {tier.saleOriginalPrice}
+                </span>
+              )}
             {tier.price}
 
           </button>
@@ -442,6 +507,12 @@ if (
   originalPrice:
     selectedPrice,
 
+  saleOriginalPrice:
+    selectedSaleOriginalPrice || undefined,
+
+  siteDiscountPercent:
+    siteDiscountPercent || undefined,
+
   quantityPricing:
     product.quantityPricing,
 
@@ -528,6 +599,12 @@ if (
   originalPrice:
     selectedPrice,
 
+  saleOriginalPrice:
+    selectedSaleOriginalPrice || undefined,
+
+  siteDiscountPercent:
+    siteDiscountPercent || undefined,
+
   quantityPricing:
     product.quantityPricing,
 
@@ -607,6 +684,18 @@ if (
   ₹{product.isPreOrder ? depositPrice : selectedPrice}
 </h3>
 
+{showRegularSiteDiscount && (
+  <p className="mt-1 text-xs text-zinc-500 line-through">
+    ₹{selectedSaleOriginalPrice}
+  </p>
+)}
+
+{(showRegularSiteDiscount || showPreOrderSiteDiscount) && (
+  <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-green-400">
+    {siteDiscountPercent}% off
+  </p>
+)}
+
 {product.isPreOrder && (
   <p className="mt-1 text-xs text-cyan-300">Deposit today: ₹{depositPrice}</p>
 )}
@@ -649,6 +738,12 @@ if (
 
   originalPrice:
     selectedPrice,
+
+  saleOriginalPrice:
+    selectedSaleOriginalPrice || undefined,
+
+  siteDiscountPercent:
+    siteDiscountPercent || undefined,
 
   quantityPricing:
     product.quantityPricing,

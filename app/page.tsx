@@ -46,6 +46,7 @@ type Product = {
   quantityPricing?: {
     quantity: string
     price: string
+    saleOriginalPrice?: number | string | null
   }[]
 
   badge?: string
@@ -55,6 +56,8 @@ type Product = {
   expectedArrival?: string | null
   preOrderDeadline?: string | null
   remainingPrice?: number
+  saleOriginalPrice?: number | null
+  siteDiscountPercent?: number | null
 
 brand?: {
   id: string
@@ -560,6 +563,8 @@ useEffect(() => {
       image={product.images?.[0]}
       description={product.description}
       stock={product.stock}
+      saleOriginalPrice={product.saleOriginalPrice}
+      siteDiscountPercent={product.siteDiscountPercent}
       quantityPricing={
         product.quantityPricing
       }

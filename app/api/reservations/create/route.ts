@@ -7,6 +7,7 @@ import {
   isPreOrderDeadlineActive,
 } from "@/lib/preorder"
 import { isSaleHidden } from "@/lib/sale-launch"
+import { releaseExpiredReservations } from "@/lib/reservation-cleanup"
 
 export async function POST(req: Request) {
   try {
@@ -52,6 +53,11 @@ export async function POST(req: Request) {
 
     const reservation =
       await prisma.$transaction(async (tx) => {
+
+        await releaseExpiredReservations({
+          client: tx,
+          productIds,
+        })
 
         const products =
 	          await tx.$queryRaw<any[]>`

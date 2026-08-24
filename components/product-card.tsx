@@ -28,6 +28,8 @@ type ProductCardProps = {
 	  expectedArrival?: string | null
 	  preOrderDeadline?: string | null
 	  remainingPrice?: number
+  saleOriginalPrice?: number | null
+  siteDiscountPercent?: number | null
 
   quantityPricing?: any[]
 
@@ -51,6 +53,8 @@ export default function ProductCard({
 	  expectedArrival,
 	  preOrderDeadline,
 	  remainingPrice,
+  saleOriginalPrice,
+  siteDiscountPercent,
 
   quantityPricing,
 
@@ -66,6 +70,20 @@ export default function ProductCard({
   const shouldShowBadge =
     Boolean(badge) &&
     !(isPreOrder && normalizedBadge === "preorder")
+  const numericPrice = Number(price || 0)
+  const numericOriginalPrice = Number(originalPrice ?? numericPrice)
+  const numericSaleOriginalPrice = Number(saleOriginalPrice || 0)
+  const discountPercent = Number(siteDiscountPercent || 0)
+  const showRegularSiteDiscount =
+    !isPreOrder &&
+    discountPercent > 0 &&
+    numericSaleOriginalPrice > numericPrice
+  const showPreOrderSiteDiscount =
+    Boolean(
+      isPreOrder &&
+      discountPercent > 0 &&
+      numericSaleOriginalPrice > numericOriginalPrice
+    )
 
   const addToCart =
     useCartStore(
@@ -278,15 +296,39 @@ shadow-lg
 
             <p className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
 
-              ₹{price}
+              ₹{numericPrice}
 
             </p>
 
+            {showRegularSiteDiscount && (
+              <p className="mt-1 text-sm font-semibold text-zinc-500 line-through">
+                ₹{numericSaleOriginalPrice}
+              </p>
+            )}
+
+            {(showRegularSiteDiscount || showPreOrderSiteDiscount) && (
+              <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-green-400">
+                {discountPercent}% site-wide offer applied
+              </p>
+            )}
+
             {isPreOrder && (
               <div className="mt-2 space-y-1 text-sm text-cyan-300">
-	                <p>Original price: ₹{originalPrice ?? price}</p>
-	                <p>Deposit today: ₹{price}</p>
-	                <p>Balance due on arrival: ₹{remainingPrice ?? 0}{expectedArrival ? ` • Arrives ${expectedArrival}` : ""}</p>
+		                <p>
+                  Original price:{" "}
+                  {showPreOrderSiteDiscount ? (
+                    <>
+                      <span className="text-cyan-500/60 line-through">
+                        ₹{numericSaleOriginalPrice}
+                      </span>{" "}
+                      <span>₹{numericOriginalPrice}</span>
+                    </>
+                  ) : (
+                    <>₹{numericOriginalPrice}</>
+                  )}
+                </p>
+		                <p>Deposit today: ₹{numericPrice}</p>
+		                <p>Balance due on arrival: ₹{remainingPrice ?? 0}{expectedArrival ? ` • Arrives ${expectedArrival}` : ""}</p>
 	                {preOrderDeadline && (
 	                  <p className="text-orange-300">Accepting orders until {formatIndianDisplayDate(preOrderDeadline)}</p>
 	                )}
@@ -356,10 +398,14 @@ disabled:opacity-40
   id,
   name,
 
-	  price,
+		  price: numericPrice,
 
-	  originalPrice:
-	    originalPrice ?? price,
+		  originalPrice:
+		    numericOriginalPrice,
+      saleOriginalPrice:
+        numericSaleOriginalPrice || undefined,
+      siteDiscountPercent:
+        discountPercent || undefined,
 
   quantityPricing:
     quantityPricing,
@@ -438,10 +484,14 @@ disabled:opacity-40
   id,
   name,
 
-	  price,
+		  price: numericPrice,
 
-	  originalPrice:
-	    originalPrice ?? price,
+		  originalPrice:
+		    numericOriginalPrice,
+      saleOriginalPrice:
+        numericSaleOriginalPrice || undefined,
+      siteDiscountPercent:
+        discountPercent || undefined,
 
   quantityPricing:
     quantityPricing,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@clerk/nextjs/server"
+import { releaseExpiredReservations } from "@/lib/reservation-cleanup"
 
 export async function POST() {
   try {
@@ -13,65 +14,11 @@ export async function POST() {
       )
     }
 
-    const expiredReservations =
-      await prisma.reservation.findMany({
-        where: {
-          userId,
-          status: "ACTIVE",
-          expiresAt: {
-            lte: new Date(),
-          },
-        },
-        include: {
-          items: true,
-        },
+    const expiredCount = await prisma.$transaction(async (tx) => {
+      return releaseExpiredReservations({
+        client: tx,
+        userId,
       })
-
-    let expiredCount = 0
-
-    await prisma.$transaction(async (tx) => {
-      for (const reservation of expiredReservations) {
-        const expiredReservation =
-          await tx.reservation.updateMany({
-            where: {
-              id: reservation.id,
-              userId,
-              status: "ACTIVE",
-              expiresAt: {
-                lte: new Date(),
-              },
-            },
-            data: {
-              status: "EXPIRED",
-            },
-          })
-
-        if (!expiredReservation.count) continue
-
-        expiredCount += 1
-
-        for (const item of reservation.items) {
-          const product = await tx.product.findUnique({
-            where: {
-              id: item.productId,
-            },
-            select: {
-              isPreOrder: true,
-            },
-          })
-
-          await tx.product.update({
-            where: {
-              id: item.productId,
-            },
-            data: {
-              reservedStock: {
-                decrement: item.quantity,
-              },
-            },
-          })
-        }
-      }
     })
 
     return NextResponse.json({

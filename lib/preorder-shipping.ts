@@ -45,6 +45,50 @@ export function getPreOrderShippingBatch(
   }
 }
 
+export function getMergedPreOrderShippingBatch(
+  orders: Array<{
+    id: string
+    orderId: string
+    products: any[]
+    deliveryMethod?: string | null
+  }>
+) {
+  const orderBatches = orders
+    .map((order) => ({
+      order,
+      batch: getPreOrderShippingBatch(
+        order.products,
+        order.deliveryMethod || undefined
+      ),
+    }))
+    .filter(({ batch }) => batch.items.length > 0)
+
+  const itemCount = orderBatches.reduce(
+    (total, { batch }) => total + batch.itemCount,
+    0
+  )
+  const subtotal = orderBatches.reduce(
+    (total, { batch }) => total + batch.subtotal,
+    0
+  )
+  const shippingAmount =
+    itemCount > 0
+      ? calculateShippingCharge({
+          subtotal,
+          itemCount,
+          deliveryMethod: "shipping",
+          hasOnlyPreOrderItems: false,
+        })
+      : 0
+
+  return {
+    orderBatches,
+    itemCount,
+    subtotal,
+    shippingAmount,
+  }
+}
+
 export function getPreOrderShippingPaidTotal(products: any[]) {
   return products.reduce(
     (total, item) =>

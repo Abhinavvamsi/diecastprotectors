@@ -18,7 +18,11 @@ from "next/navigation"
 import { getOrderItemPricing } from "@/lib/preorder"
 import PayPreOrderBalanceButton from "@/components/pay-preorder-balance-button"
 import PayPreOrderShippingButton from "@/components/pay-preorder-shipping-button"
-import { getPreOrderShippingBatch } from "@/lib/preorder-shipping"
+import PayMergedPreOrderShippingButton from "@/components/pay-merged-preorder-shipping-button"
+import {
+  getMergedPreOrderShippingBatch,
+  getPreOrderShippingBatch,
+} from "@/lib/preorder-shipping"
 
 function formatOrderTime(
   value: Date
@@ -170,8 +174,32 @@ export default async function OrdersPage({
       return Boolean(
         status &&
           (status.paymentDue > 0 || status.shippingDue > 0)
-      )
+          )
     }).length
+
+  const ordersWithShippingDue =
+    uniqueOrders.filter((order) => {
+      const status = orderPaymentStatus.get(order.id)
+
+      return Boolean(status && status.shippingDue > 0)
+    })
+
+  const mergedShippingBatch =
+    getMergedPreOrderShippingBatch(
+      ordersWithShippingDue.map((order) => ({
+        id: order.id,
+        orderId: order.orderId,
+        products: Array.isArray(order.products)
+          ? (order.products as any[])
+          : [],
+        deliveryMethod: order.deliveryMethod,
+      }))
+    )
+
+  const canMergePreOrderShipping =
+    ordersWithShippingDue.length > 1 &&
+    mergedShippingBatch.itemCount > 0 &&
+    mergedShippingBatch.shippingAmount > 0
 
   const filteredOrders =
     activeFilter === "payment-due"
@@ -276,6 +304,43 @@ hover:text-white
                 <p className="mt-2 text-zinc-200">
                   {paymentDueCount} order{paymentDueCount === 1 ? "" : "s"} need balance or shipping payment before dispatch.
                 </p>
+              </div>
+            )}
+
+            {canMergePreOrderShipping && (
+              <div
+                className="
+                rounded-3xl
+                border
+                border-cyan-400/35
+                bg-cyan-500/10
+                p-5
+                shadow-[0_0_35px_rgba(34,211,238,.18)]
+                "
+              >
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                      Merge Pre-Order Shipping
+                    </p>
+                    <p className="mt-2 text-zinc-200">
+                      Pay one dispatch charge for {ordersWithShippingDue.length} orders and {mergedShippingBatch.itemCount} arrived pre-order item{mergedShippingBatch.itemCount === 1 ? "" : "s"}.
+                    </p>
+                    <p className="mt-1 text-sm text-zinc-400">
+                      Uses the same shipping rule: ₹140 up to 2 items, then ₹20 per extra item, and free shipping above ₹10,000 original value.
+                    </p>
+                  </div>
+
+                  <div className="w-full md:max-w-xs">
+                    <PayMergedPreOrderShippingButton
+                      orderIds={ordersWithShippingDue.map(
+                        (order) => order.id
+                      )}
+                      amount={mergedShippingBatch.shippingAmount}
+                      itemCount={mergedShippingBatch.itemCount}
+                    />
+                  </div>
+                </div>
               </div>
             )}
 

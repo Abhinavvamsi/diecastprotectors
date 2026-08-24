@@ -9,6 +9,9 @@ import {
   getProductPayablePrice,
   isPreOrderDeadlineActive,
 } from "@/lib/preorder"
+import { releaseExpiredReservations } from "@/lib/reservation-cleanup"
+import { applySiteDiscountToPrice } from "@/lib/site-discount"
+import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -78,6 +81,30 @@ export async function POST(req: Request) {
       )
     }
 
+    if (
+      reservation.status !== "ACTIVE" ||
+      reservation.expiresAt <= new Date()
+    ) {
+      await prisma.$transaction(async (tx) => {
+        await releaseExpiredReservations({
+          client: tx,
+          productIds: reservation.items.map(
+            (item) => item.productId
+          ),
+        })
+      })
+
+      return NextResponse.json(
+        {
+          error:
+            "Your stock reservation has expired. Please try checkout again.",
+        },
+        {
+          status: 400,
+        }
+      )
+    }
+
     const productIds = reservation.items.map((item) => item.productId)
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
@@ -137,6 +164,8 @@ export async function POST(req: Request) {
       reservation.items.every((item) =>
         Boolean(productMap.get(item.productId)?.isPreOrder)
       )
+    const siteDiscountSettings =
+      await getStoreSiteDiscountSettings()
     const normalizedCouponCode =
       typeof couponCode === "string" && couponCode.trim()
         ? couponCode.trim().toUpperCase()
@@ -148,7 +177,10 @@ export async function POST(req: Request) {
     const subtotal = reservation.items.reduce((sum, item) => {
       const product = productMap.get(item.productId)
       if (!product) return sum
-      const currentPrice = getTierPrice(product, item.quantity)
+      const currentPrice = applySiteDiscountToPrice(
+        getTierPrice(product, item.quantity),
+        siteDiscountSettings
+      )
       const payablePrice = product.isPreOrder
         ? getProductPayablePrice({
             ...product,

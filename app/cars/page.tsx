@@ -36,6 +36,13 @@ type Product = {
   category: string
   stock: number
   badge?: string
+  quantityPricing?: {
+    quantity: string
+    price: string
+    saleOriginalPrice?: number | string | null
+  }[]
+  saleOriginalPrice?: number | null
+  siteDiscountPercent?: number | null
 
   brand?: {
     id: string
@@ -806,6 +813,9 @@ to-purple-600
         image={product.images?.[0]}
         description={product.description}
         stock={product.stock}
+        quantityPricing={product.quantityPricing}
+        saleOriginalPrice={product.saleOriginalPrice}
+        siteDiscountPercent={product.siteDiscountPercent}
         badge={product.badge}
       />
 

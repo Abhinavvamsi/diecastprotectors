@@ -15,6 +15,7 @@ import {
   ThemeProvider,
 } from "@/components/theme-provider"
 import StoreAssistant from "@/components/store-assistant"
+import InteractionFeedback from "@/components/interaction-feedback"
 
 import {
   Bebas_Neue,
@@ -183,6 +184,8 @@ export default function RootLayout({
 
             {/* App */}
             {children}
+
+            <InteractionFeedback />
 
             <StoreAssistant />
 

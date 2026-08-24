@@ -20,6 +20,8 @@ type Product = {
   depositAmount?: number
   expectedArrival?: string | null
   remainingPrice?: number
+  saleOriginalPrice?: number | null
+  siteDiscountPercent?: number | null
   brand?: {
     name?: string
   }
@@ -65,6 +67,14 @@ export default function SuperDealsSection({
             const remainingPrice = isPreOrder
               ? getProductRemainingPrice(product)
               : 0
+            const showRegularDiscount =
+              !isPreOrder &&
+              Number(product.siteDiscountPercent || 0) > 0 &&
+              Number(product.saleOriginalPrice || 0) > payablePrice
+            const showPreOrderDiscount =
+              isPreOrder &&
+              Number(product.siteDiscountPercent || 0) > 0 &&
+              Number(product.saleOriginalPrice || 0) > Number(product.price || 0)
 
             return (
               <Link
@@ -143,9 +153,25 @@ export default function SuperDealsSection({
                         >
                           ₹{payablePrice}
                         </p>
+                        {showRegularDiscount ? (
+                          <div className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-pink-200/90">
+                            <span className="mr-2 text-zinc-500 line-through">
+                              ₹{product.saleOriginalPrice}
+                            </span>
+                            {product.siteDiscountPercent}% off
+                          </div>
+                        ) : null}
                         {isPreOrder ? (
                           <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-cyan-200/90">
-                            <p>Original ₹{product.price}</p>
+                            <p>
+                              Original{" "}
+                              {showPreOrderDiscount ? (
+                                <span className="mr-2 text-cyan-100/40 line-through">
+                                  ₹{product.saleOriginalPrice}
+                                </span>
+                              ) : null}
+                              ₹{product.price}
+                            </p>
                             <p>
                               Balance ₹{remainingPrice}
                               {product.expectedArrival

@@ -78,6 +78,8 @@ model StoreSettings {
   superDealProductIds Json?
   preOrderFeaturedProductIds Json?
   saleLaunchAt String?
+  siteDiscountPercent Int @default(0)
+  siteDiscountEndsAt String?
 }
 
 model Brand {

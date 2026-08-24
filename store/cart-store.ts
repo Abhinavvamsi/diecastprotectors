@@ -10,9 +10,14 @@ type CartItem = {
 
   originalPrice: number
 
+  saleOriginalPrice?: number | null
+
+  siteDiscountPercent?: number | null
+
   quantityPricing?: {
     quantity: string
     price: string
+    saleOriginalPrice?: number | string | null
   }[]
 
   image: string

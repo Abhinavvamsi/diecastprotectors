@@ -12,6 +12,7 @@ type PreOrderProduct = {
   id: string
   name: string
   price: number
+  createdAt?: string | Date
   images?: string[]
   description: string
   stock: number
@@ -19,12 +20,15 @@ type PreOrderProduct = {
   quantityPricing?: {
     quantity: string
     price: string
+    saleOriginalPrice?: number | string | null
   }[]
   badge?: string | null
   isPreOrder?: boolean
   depositAmount?: number
   expectedArrival?: string | null
   preOrderDeadline?: string | null
+  saleOriginalPrice?: number | null
+  siteDiscountPercent?: number | null
   brand?: {
     name?: string | null
     logo?: string | null
@@ -105,6 +109,16 @@ export default function PreOrdersBrowser({
 
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase()
+    const getCreatedAtTime = (product: PreOrderProduct) => {
+      if (!product.createdAt) return 0
+
+      const value =
+        product.createdAt instanceof Date
+          ? product.createdAt
+          : new Date(product.createdAt)
+
+      return value.getTime()
+    }
 
     return [...products]
       .filter((product) => {
@@ -169,7 +183,9 @@ export default function PreOrdersBrowser({
           return 0
         }
 
-        return featuredOrder
+        if (featuredOrder !== 0) return featuredOrder
+
+        return getCreatedAtTime(b) - getCreatedAtTime(a)
       })
   }, [products, search, selectedBrand, stockFilter, sortBy, featuredRank])
 
@@ -315,6 +331,8 @@ export default function PreOrdersBrowser({
                     preOrderDeadline={product.preOrderDeadline}
                     originalPrice={product.price}
                     remainingPrice={getProductRemainingPrice(product)}
+                    saleOriginalPrice={product.saleOriginalPrice}
+                    siteDiscountPercent={product.siteDiscountPercent}
                   />
                 </div>
               ))}

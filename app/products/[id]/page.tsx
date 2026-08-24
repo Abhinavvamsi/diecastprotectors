@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 
 import ProductDetails from "@/components/product-details"
 import { isPreOrderDeadlineActive } from "@/lib/preorder"
+import { applySiteDiscountToProduct } from "@/lib/site-discount"
+import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
 
 type ProductPageProps = {
 
@@ -69,9 +71,18 @@ export default async function ProductPage({
     ),
   }
 
+  const siteDiscountSettings =
+    await getStoreSiteDiscountSettings()
+
+  const pricedProduct =
+    applySiteDiscountToProduct(
+      availableProduct,
+      siteDiscountSettings
+    )
+
   return (
 
-    <ProductDetails product={availableProduct} />
+    <ProductDetails product={pricedProduct} />
 
   )
 

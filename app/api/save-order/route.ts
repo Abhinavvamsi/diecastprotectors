@@ -7,6 +7,56 @@ import { auth } from "@clerk/nextjs/server"
 import { calculateShippingCharge } from "@/lib/shipping"
 import { getProductPayablePrice } from "@/lib/preorder"
 import { buildWhatsAppItemsSummary } from "@/lib/notifications"
+import { applySiteDiscountToPrice } from "@/lib/site-discount"
+import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
+
+class SaveOrderError extends Error {
+  code: string
+  status: number
+  retryable: boolean
+
+  constructor(
+    code: string,
+    message: string,
+    status = 400,
+    retryable = false
+  ) {
+    super(message)
+    this.name = "SaveOrderError"
+    this.code = code
+    this.status = status
+    this.retryable = retryable
+  }
+}
+
+function isSaveOrderError(
+  error: unknown
+): error is SaveOrderError {
+  if (error instanceof SaveOrderError) {
+    return true
+  }
+
+  if (
+    typeof error !== "object" ||
+    error === null
+  ) {
+    return false
+  }
+
+  const possibleError = error as {
+    name?: unknown
+    code?: unknown
+    status?: unknown
+    retryable?: unknown
+  }
+
+  return (
+    possibleError.name === "SaveOrderError" &&
+    typeof possibleError.code === "string" &&
+    typeof possibleError.status === "number" &&
+    typeof possibleError.retryable === "boolean"
+  )
+}
 
 function getTierPrice(product: any, quantity: number) {
   const tiers = (product.quantityPricing || []) as Array<{
@@ -150,6 +200,9 @@ if (!signatureIsValid) {
     { status: 400 }
   )
 }
+    const siteDiscountSettings =
+      await getStoreSiteDiscountSettings()
+
     let orderId = ""
 
     const order =
@@ -193,12 +246,22 @@ if (!signatureIsValid) {
         }
       }
 
+      const now = new Date()
+      const reservationExpired =
+        !!reservation?.expiresAt &&
+        reservation.expiresAt <= now
+
       if (
         !reservation ||
-        reservation.status === "CANCELLED"
+        reservation.status === "CANCELLED" ||
+        reservation.status === "EXPIRED" ||
+        reservationExpired
       ) {
-        throw new Error(
-          "Your stock reservation has expired"
+        throw new SaveOrderError(
+          "RESERVATION_EXPIRED",
+          "Your stock reservation expired before this payment could be confirmed. If money was deducted, please contact support with your Razorpay payment ID.",
+          409,
+          false
         )
       }
 
@@ -206,11 +269,21 @@ if (!signatureIsValid) {
         body.userId &&
         reservation.userId !== body.userId
       ) {
-        throw new Error("Invalid stock reservation")
+        throw new SaveOrderError(
+          "INVALID_RESERVATION",
+          "Invalid stock reservation",
+          400,
+          false
+        )
       }
 
       if (userId !== reservation.userId) {
-        throw new Error("Unauthorized")
+        throw new SaveOrderError(
+          "UNAUTHORIZED_RESERVATION",
+          "Unauthorized",
+          401,
+          false
+        )
       }
 
       const bodyProducts = Array.isArray(body.products)
@@ -236,8 +309,9 @@ if (!signatureIsValid) {
           await tx.reservation.updateMany({
           where: {
             id: reservation.id,
-            status: {
-              in: ["ACTIVE", "EXPIRED"],
+            status: "ACTIVE",
+            expiresAt: {
+              gt: now,
             },
           },
           data: {
@@ -273,8 +347,11 @@ if (!signatureIsValid) {
             }
           }
 
-          throw new Error(
-            "Your order is already being processed"
+          throw new SaveOrderError(
+            "RESERVATION_EXPIRED_AFTER_PAYMENT",
+            "Your payment was captured after the stock hold expired. Please contact support with your Razorpay payment ID so we can verify and resolve it.",
+            409,
+            false
           )
         }
       } else {
@@ -338,10 +415,14 @@ if (!signatureIsValid) {
 
       productLookup.set(item.productId, product)
 
-        const currentPrice = getTierPrice(
-          product,
-          item.quantity
-        )
+        const currentPrice =
+          applySiteDiscountToPrice(
+            getTierPrice(
+              product,
+              item.quantity
+            ),
+            siteDiscountSettings
+          )
 
         const payablePrice = product.isPreOrder
           ? getProductPayablePrice({
@@ -364,10 +445,14 @@ if (!signatureIsValid) {
 	      orderedItems = reservation.items.map((item) => {
 	        const bodyItem = bodyProductMap.get(item.productId) || {}
 	        const product = productLookup.get(item.productId)
-	        const originalUnitPrice = getTierPrice(
-	          product,
-	          item.quantity
-	        )
+	        const originalUnitPrice =
+	          applySiteDiscountToPrice(
+	            getTierPrice(
+	              product,
+	              item.quantity
+	            ),
+	            siteDiscountSettings
+	          )
 	        const payableUnitPrice = product.isPreOrder
 	          ? getProductPayablePrice({
 	              ...product,
@@ -1012,15 +1097,28 @@ if (!signatureIsValid) {
 
     console.log(error)
 
-    return NextResponse.json(
-  {
-    error:
+    const saveOrderError = isSaveOrderError(error)
+      ? error
+      : null
+    const message =
       error instanceof Error
         ? error.message
-        : "Failed to save order",
+        : "Failed to save order"
+
+    return NextResponse.json(
+  {
+    error: message,
+    code: saveOrderError
+      ? saveOrderError.code
+      : "SAVE_ORDER_FAILED",
+    retryable: saveOrderError
+      ? saveOrderError.retryable
+      : true,
   },
   {
-    status: 400,
+    status: saveOrderError
+      ? saveOrderError.status
+      : 400,
   }
 )
 

@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { requireAdmin } from "@/lib/admin"
+import { releaseExpiredReservationsThrottled } from "@/lib/reservation-cleanup"
+import { applySiteDiscountToProduct } from "@/lib/site-discount"
+import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -11,6 +14,8 @@ export async function GET(req: Request) {
   if (includeHiddenSale) {
     await requireAdmin()
   }
+
+  await releaseExpiredReservationsThrottled()
 
   const products =
   await prisma.product.findMany({
@@ -48,16 +53,30 @@ export async function GET(req: Request) {
           ).map((product) => product.id)
         )
 
+  const siteDiscountSettings =
+    includeHiddenSale
+      ? null
+      : await getStoreSiteDiscountSettings()
+
     return NextResponse.json(
       products
         .filter((product) => !hiddenSaleIds.has(product.id))
-        .map((product) => ({
-          ...product,
-          stock: Math.max(
-            0,
-            product.stock - product.reservedStock
-          ),
-        })),
+        .map((product) => {
+          const normalizedProduct = {
+            ...product,
+            stock: Math.max(
+              0,
+              product.stock - product.reservedStock
+            ),
+          }
+
+          return siteDiscountSettings
+            ? applySiteDiscountToProduct(
+                normalizedProduct,
+                siteDiscountSettings
+              )
+            : normalizedProduct
+        }),
       {
         headers: {
           "Cache-Control":

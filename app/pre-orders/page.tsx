@@ -6,13 +6,18 @@ import PreOrdersBrowser from "@/components/preorders-browser"
 import RecentlyViewedProducts from "@/components/recently-viewed-products"
 import SaleCountdown from "@/components/sale-countdown"
 import { getIndiaDateKey } from "@/lib/preorder"
+import { releaseExpiredReservationsThrottled } from "@/lib/reservation-cleanup"
+import { applySiteDiscountToProduct } from "@/lib/site-discount"
+import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
 
 export const dynamic = "force-dynamic"
 
 export default async function PreOrdersPage() {
   const todayKey = getIndiaDateKey()
 
-  const [products, settingsRows] = await Promise.all([
+  await releaseExpiredReservationsThrottled()
+
+  const [products, settingsRows, siteDiscountSettings] = await Promise.all([
     prisma.product.findMany({
       where: {
         isPreOrder: true,
@@ -34,6 +39,7 @@ export default async function PreOrdersPage() {
       FROM "StoreSettings"
       LIMIT 1
     `.catch(() => []),
+    getStoreSiteDiscountSettings(),
   ])
 
   const preOrderFeaturedProductIds =
@@ -73,30 +79,35 @@ export default async function PreOrdersPage() {
     )
 
   const normalizedProducts =
-    visibleProducts.map((product) => ({
-      ...product,
-      images: Array.isArray(product.images)
-        ? product.images.filter(
-            (image): image is string =>
-              typeof image === "string"
-          )
-        : [],
-      quantityPricing: Array.isArray(product.quantityPricing)
-        ? product.quantityPricing.filter(
-            (
-              item
-            ): item is {
-              quantity: string
-              price: string
-            } =>
-              typeof item === "object" &&
-              item !== null &&
-              typeof (item as { quantity?: unknown }).quantity ===
-                "string" &&
-              typeof (item as { price?: unknown }).price === "string"
-          )
-        : [],
-    }))
+    visibleProducts.map((product) =>
+      applySiteDiscountToProduct(
+        {
+          ...product,
+          images: Array.isArray(product.images)
+            ? product.images.filter(
+                (image): image is string =>
+                  typeof image === "string"
+              )
+            : [],
+          quantityPricing: Array.isArray(product.quantityPricing)
+            ? product.quantityPricing.filter(
+                (
+                  item
+                ): item is {
+                  quantity: string
+                  price: string
+                } =>
+                  typeof item === "object" &&
+                  item !== null &&
+                  typeof (item as { quantity?: unknown }).quantity ===
+                    "string" &&
+                  typeof (item as { price?: unknown }).price === "string"
+              )
+            : [],
+        },
+        siteDiscountSettings
+      )
+    )
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#09090B] text-white">

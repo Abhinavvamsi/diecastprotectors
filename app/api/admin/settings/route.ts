@@ -2,8 +2,9 @@ import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/admin"
 import { NextResponse } from "next/server"
 import { isFutureSaleLaunch } from "@/lib/sale-launch"
+import { normalizeSiteDiscountPercent } from "@/lib/site-discount"
 
-let preOrderFeaturedColumnReady = false
+let storeSettingsExtraColumnsReady = false
 
 function normalizeProductIds(value: unknown) {
   return Array.isArray(value)
@@ -14,15 +15,25 @@ function normalizeProductIds(value: unknown) {
     : []
 }
 
-async function ensurePreOrderFeaturedColumn() {
-  if (preOrderFeaturedColumnReady) return
+async function ensureStoreSettingsExtraColumns() {
+  if (storeSettingsExtraColumnsReady) return
 
   await prisma.$executeRaw`
     ALTER TABLE "StoreSettings"
     ADD COLUMN IF NOT EXISTS "preOrderFeaturedProductIds" JSONB
   `
 
-  preOrderFeaturedColumnReady = true
+  await prisma.$executeRaw`
+    ALTER TABLE "StoreSettings"
+    ADD COLUMN IF NOT EXISTS "siteDiscountPercent" INTEGER DEFAULT 0
+  `
+
+  await prisma.$executeRaw`
+    ALTER TABLE "StoreSettings"
+    ADD COLUMN IF NOT EXISTS "siteDiscountEndsAt" TEXT
+  `
+
+  storeSettingsExtraColumnsReady = true
 }
 
 async function readSettingsExtras(settingsId: string) {
@@ -31,9 +42,11 @@ async function readSettingsExtras(settingsId: string) {
       Array<{
         saleLaunchAt: string | null
         preOrderFeaturedProductIds: unknown
+        siteDiscountPercent: number | null
+        siteDiscountEndsAt: string | null
       }>
     >`
-      SELECT "saleLaunchAt", "preOrderFeaturedProductIds"
+      SELECT "saleLaunchAt", "preOrderFeaturedProductIds", "siteDiscountPercent", "siteDiscountEndsAt"
       FROM "StoreSettings"
       WHERE id = ${settingsId}
       LIMIT 1
@@ -43,6 +56,10 @@ async function readSettingsExtras(settingsId: string) {
     saleLaunchAt: rows[0]?.saleLaunchAt ?? null,
     preOrderFeaturedProductIds:
       normalizeProductIds(rows[0]?.preOrderFeaturedProductIds),
+    siteDiscountPercent:
+      normalizeSiteDiscountPercent(rows[0]?.siteDiscountPercent),
+    siteDiscountEndsAt:
+      rows[0]?.siteDiscountEndsAt ?? null,
   }
 }
 
@@ -50,10 +67,14 @@ async function updateSettingsExtras({
   settingsId,
   saleLaunchAt,
   preOrderFeaturedProductIds,
+  siteDiscountPercent,
+  siteDiscountEndsAt,
 }: {
   settingsId: string
   saleLaunchAt: string | null
   preOrderFeaturedProductIds: string[]
+  siteDiscountPercent: number
+  siteDiscountEndsAt: string | null
 }) {
   await prisma.$executeRaw`
     UPDATE "StoreSettings"
@@ -61,14 +82,16 @@ async function updateSettingsExtras({
       "saleLaunchAt" = ${saleLaunchAt},
       "preOrderFeaturedProductIds" = CAST(${JSON.stringify(
         preOrderFeaturedProductIds
-      )} AS JSONB)
+      )} AS JSONB),
+      "siteDiscountPercent" = ${siteDiscountPercent},
+      "siteDiscountEndsAt" = ${siteDiscountEndsAt}
     WHERE id = ${settingsId}
   `
 }
 
 export async function GET() {
   try {
-    await ensurePreOrderFeaturedColumn()
+    await ensureStoreSettingsExtraColumns()
 
     const settings =
       await prisma.storeSettings.findFirst()
@@ -107,6 +130,8 @@ export async function GET() {
         superDealProductIds: [],
         saleLaunchAt: null,
         preOrderFeaturedProductIds: [],
+        siteDiscountPercent: 0,
+        siteDiscountEndsAt: null,
       },
       {
         headers: {
@@ -124,7 +149,7 @@ export async function POST(
 ) {
   try {
     await requireAdmin()
-    await ensurePreOrderFeaturedColumn()
+    await ensureStoreSettingsExtraColumns()
 
     const body =
       await req.json()
@@ -137,6 +162,12 @@ export async function POST(
       normalizeProductIds(
         body.preOrderFeaturedProductIds
       )
+    const siteDiscountPercent =
+      normalizeSiteDiscountPercent(
+        body.siteDiscountPercent
+      )
+    const siteDiscountEndsAt =
+      body.siteDiscountEndsAt || null
     const now = new Date().toISOString()
 
     async function syncHiddenSaleProducts() {
@@ -197,6 +228,8 @@ export async function POST(
         settingsId: existing.id,
         saleLaunchAt,
         preOrderFeaturedProductIds,
+        siteDiscountPercent,
+        siteDiscountEndsAt,
       })
 
       await syncHiddenSaleProducts()
@@ -205,6 +238,8 @@ export async function POST(
         ...updated,
         saleLaunchAt,
         preOrderFeaturedProductIds,
+        siteDiscountPercent,
+        siteDiscountEndsAt,
       })
       response.cookies.set("maintenance-mode", String(Boolean(updated.maintenanceMode)), {
         path: "/",
@@ -250,6 +285,8 @@ export async function POST(
       settingsId: created.id,
       saleLaunchAt,
       preOrderFeaturedProductIds,
+      siteDiscountPercent,
+      siteDiscountEndsAt,
     })
 
     await syncHiddenSaleProducts()
@@ -258,6 +295,8 @@ export async function POST(
       ...created,
       saleLaunchAt,
       preOrderFeaturedProductIds,
+      siteDiscountPercent,
+      siteDiscountEndsAt,
     })
     response.cookies.set("maintenance-mode", String(Boolean(created.maintenanceMode)), {
       path: "/",

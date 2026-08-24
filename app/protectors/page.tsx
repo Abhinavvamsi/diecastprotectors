@@ -22,6 +22,16 @@ type Product = {
 
   stock: number
 
+  quantityPricing?: {
+    quantity: string
+    price: string
+    saleOriginalPrice?: number | string | null
+  }[]
+
+  saleOriginalPrice?: number | null
+
+  siteDiscountPercent?: number | null
+
   badge?: string
 
 }
@@ -123,6 +133,9 @@ export default function ProtectorsPage() {
               image={product.images?.[0]}
               description={product.description}
               stock={product.stock}
+              quantityPricing={product.quantityPricing}
+              saleOriginalPrice={product.saleOriginalPrice}
+              siteDiscountPercent={product.siteDiscountPercent}
               badge={product.badge}
             />
 

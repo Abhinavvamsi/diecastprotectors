@@ -6,6 +6,8 @@ import Footer from "@/components/footer"
 import BrandProducts from "@/components/brand-products"
 import RecentlyViewedProducts from "@/components/recently-viewed-products"
 import { getIndiaDateKey, isPreOrderDeadlineActive } from "@/lib/preorder"
+import { applySiteDiscountToProduct } from "@/lib/site-discount"
+import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
 
 type Props = {
   params: Promise<{
@@ -70,31 +72,40 @@ export default async function BrandPage({
         isPreOrderDeadlineActive(product, todayKey)
     )
 
+  const siteDiscountSettings =
+    await getStoreSiteDiscountSettings()
+
   const normalizedProducts =
-    visibleProducts.map((product) => ({
-      ...product,
-      images: Array.isArray(product.images)
-        ? product.images.filter(
-            (image): image is string =>
-              typeof image === "string"
-          )
-        : [],
-      quantityPricing: Array.isArray(product.quantityPricing)
-        ? product.quantityPricing.filter(
-            (
-              item
-            ): item is {
-              quantity: string
-              price: string
-            } =>
-              typeof item === "object" &&
-              item !== null &&
-              typeof (item as { quantity?: unknown }).quantity ===
-                "string" &&
-              typeof (item as { price?: unknown }).price === "string"
-          )
-        : [],
-    }))
+    visibleProducts.map((product) =>
+      applySiteDiscountToProduct(
+        {
+          ...product,
+          images: Array.isArray(product.images)
+            ? product.images.filter(
+                (image): image is string =>
+                  typeof image === "string"
+              )
+            : [],
+          quantityPricing: Array.isArray(product.quantityPricing)
+            ? product.quantityPricing.filter(
+                (
+                  item
+                ): item is {
+                  quantity: string
+                  price: string
+                  saleOriginalPrice?: number | string | null
+                } =>
+                  typeof item === "object" &&
+                  item !== null &&
+                  typeof (item as { quantity?: unknown }).quantity ===
+                    "string" &&
+                  typeof (item as { price?: unknown }).price === "string"
+              )
+            : [],
+        },
+        siteDiscountSettings
+      )
+    )
 
   return (
 

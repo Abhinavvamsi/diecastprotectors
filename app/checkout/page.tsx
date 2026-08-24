@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   useRef,
+  useCallback,
 } from "react"
 
 import {
@@ -76,6 +77,7 @@ type StockCheckResponse = {
   valid?: boolean
   message?: string
   error?: string
+  products?: any[]
 }
 
 type ReservationCreateResponse = {
@@ -158,7 +160,14 @@ async function readApiJson<T = unknown>(
   const text = await response.text()
 
   if (!text.trim()) {
-    return {} as T & { error?: string; message?: string }
+    const message = response.ok
+      ? fallbackMessage
+      : `Request failed with status ${response.status}`
+
+    return {
+      error: message,
+      message,
+    } as T & { error?: string; message?: string }
   }
 
   try {
@@ -234,6 +243,8 @@ const removeFromCart =
           id: product.id,
           price: getProductPayablePrice(product),
           originalPrice: Number(product.price || 0),
+          saleOriginalPrice: product.saleOriginalPrice,
+          siteDiscountPercent: product.siteDiscountPercent,
           depositAmount: product.depositAmount,
           expectedArrival: product.expectedArrival || undefined,
           isPreOrder: product.isPreOrder,
@@ -419,11 +430,23 @@ const reservationIdRef =
 const paymentHandoffActiveRef =
   useRef(false)
 
+const paymentCapturedRef =
+  useRef(false)
+
+const razorpayInstanceRef =
+  useRef<any>(null)
+
+const reservationExpiredRef =
+  useRef(false)
+
+const reservationExpiryTimeoutRef =
+  useRef<number | null>(null)
+
 const activeReservationStorageKey =
   "active-checkout-reservation-id"
 
 const cancelReservationSilently =
-  async (id: string) => {
+  useCallback(async (id: string) => {
     try {
       const payload = JSON.stringify({
         reservationId: id,
@@ -457,15 +480,15 @@ const cancelReservationSilently =
     } catch {
       // Best-effort cleanup when the page is leaving.
     }
-  }
+  }, [])
 
-const clearStoredReservation = () => {
+const clearStoredReservation = useCallback(() => {
   if (typeof window !== "undefined") {
     sessionStorage.removeItem(
       activeReservationStorageKey
     )
   }
-}
+}, [activeReservationStorageKey])
 
 function formatIstTime(value: string) {
   return new Intl.DateTimeFormat(
@@ -878,6 +901,107 @@ useEffect(() => {
 
 }, [reservationId])
 
+function getReservationExpiryTime(
+  expiresAt?: string | null
+) {
+  if (!expiresAt) return null
+
+  const expiresAtTime =
+    new Date(expiresAt).getTime()
+
+  return Number.isFinite(expiresAtTime)
+    ? expiresAtTime
+    : null
+}
+
+const clearReservationExpiryTimer = useCallback(() => {
+  if (!reservationExpiryTimeoutRef.current) return
+
+  window.clearTimeout(
+    reservationExpiryTimeoutRef.current
+  )
+  reservationExpiryTimeoutRef.current = null
+}, [])
+
+const cancelReservation = useCallback(async (
+  id: string
+) => {
+
+  try {
+    await cancelReservationSilently(id)
+  } finally {
+    clearReservationExpiryTimer()
+    reservationIdRef.current = null
+    setReservationId(null)
+    setReservationExpiresAt(null)
+    clearStoredReservation()
+  }
+
+}, [
+  cancelReservationSilently,
+  clearReservationExpiryTimer,
+  clearStoredReservation,
+])
+
+const expireReservationPayment = useCallback(async () => {
+  const activeReservationId =
+    reservationIdRef.current
+
+  if (!activeReservationId || paymentCapturedRef.current) {
+    return
+  }
+
+  reservationExpiredRef.current = true
+  clearReservationExpiryTimer()
+
+  try {
+    razorpayInstanceRef.current?.close?.()
+  } catch {
+  }
+
+  paymentHandoffActiveRef.current = false
+  razorpayInstanceRef.current = null
+
+  try {
+    await cancelReservation(activeReservationId)
+  } finally {
+    setLoading(false)
+    showPaymentToast(
+      "error",
+      "Your stock hold expired. Please retry checkout to reserve fresh stock."
+    )
+  }
+}, [cancelReservation, clearReservationExpiryTimer])
+
+useEffect(() => {
+  clearReservationExpiryTimer()
+
+  const expiresAtTime =
+    getReservationExpiryTime(reservationExpiresAt)
+
+  if (!expiresAtTime) return
+
+  const timeLeft =
+    expiresAtTime - Date.now()
+
+  if (timeLeft <= 0) {
+    void expireReservationPayment()
+    return
+  }
+
+  reservationExpiryTimeoutRef.current =
+    window.setTimeout(() => {
+      reservationExpiryTimeoutRef.current = null
+      void expireReservationPayment()
+    }, timeLeft)
+
+  return clearReservationExpiryTimer
+}, [
+  clearReservationExpiryTimer,
+  expireReservationPayment,
+  reservationExpiresAt,
+])
+
 if (!user) {
 
   return <RedirectToSignIn />
@@ -944,21 +1068,6 @@ function selectAddressSuggestion(item: any) {
 
   setSuggestions([])
   setShowAddressSuggestions(false)
-}
-
-async function cancelReservation(
-  id: string
-) {
-
-  try {
-    await cancelReservationSilently(id)
-  } finally {
-    reservationIdRef.current = null
-    setReservationId(null)
-    setReservationExpiresAt(null)
-    clearStoredReservation()
-  }
-
 }
 
 async function applyCoupon() {
@@ -2341,6 +2450,30 @@ if (!stockCheckResponse.ok || !stockCheck.valid) {
 
 }
 
+if (Array.isArray(stockCheck.products)) {
+  stockCheck.products.forEach((product: any) => {
+    syncProduct({
+      id: product.id,
+      price: getProductPayablePrice(product),
+      originalPrice: Number(product.price || 0),
+      saleOriginalPrice: product.saleOriginalPrice,
+      siteDiscountPercent: product.siteDiscountPercent,
+      depositAmount: product.depositAmount,
+      expectedArrival: product.expectedArrival || undefined,
+      preOrderDeadline:
+        product.preOrderDeadline || undefined,
+      isPreOrder: product.isPreOrder,
+      stock: product.stock,
+      name: product.name,
+      image:
+        product.images?.[0] ||
+        product.image ||
+        "",
+      quantityPricing: product.quantityPricing,
+    })
+  })
+}
+
 setValidating(false)
                     const reservationResponse =
                       await fetch(
@@ -2383,10 +2516,41 @@ setValidating(false)
                       )
                     }
 
+                    const reservationExpiryTime =
+                      getReservationExpiryTime(
+                        reservationData.reservation?.expiresAt ||
+                          null
+                      )
+
+                    if (
+                      !reservationExpiryTime ||
+                      reservationExpiryTime <= Date.now()
+                    ) {
+                      await cancelReservation(
+                        activeReservationId
+                      )
+                      throw new Error(
+                        "Your stock hold expired. Please retry checkout to reserve fresh stock."
+                      )
+                    }
+
+                    const secondsUntilReservationExpiry =
+                      Math.max(
+                        1,
+                        Math.floor(
+                          (reservationExpiryTime - Date.now()) /
+                            1000
+                        )
+                      )
+
                     reservationIdRef.current =
                       activeReservationId
                     paymentHandoffActiveRef.current =
                       true
+                    paymentCapturedRef.current =
+                      false
+                    reservationExpiredRef.current =
+                      false
                     setReservationId(activeReservationId)
                     setReservationExpiresAt(
                       reservationData.reservation?.expiresAt || null
@@ -2453,12 +2617,20 @@ description: "Premium Japanese Diecast Collectibles",
                       order_id:
                         order.id,
 
+                      timeout:
+                        secondsUntilReservationExpiry,
+
                       handler:
                         async function (
                           response: any
                         ) {
 
                           try {
+                            paymentCapturedRef.current =
+                              true
+                            clearReservationExpiryTimer()
+                            razorpayInstanceRef.current =
+                              null
 
                             const pendingOrder = {
                               userId: user!.id,
@@ -2546,6 +2718,7 @@ description: "Premium Japanese Diecast Collectibles",
                             reservationIdRef.current = null
                             setReservationId(null)
                             setReservationExpiresAt(null)
+                            clearReservationExpiryTimer()
                             clearStoredReservation()
 
                             if (!storedPendingOrder) {
@@ -2607,8 +2780,19 @@ description: "Premium Japanese Diecast Collectibles",
 	                      modal: {
 
 	                        ondismiss: function () {
+                          if (
+                            paymentCapturedRef.current ||
+                            reservationExpiredRef.current
+                          ) {
+                            return
+                          }
+
                           paymentHandoffActiveRef.current =
                             false
+                          paymentCapturedRef.current =
+                            false
+                          razorpayInstanceRef.current =
+                            null
 
 	                          void cancelReservation(
                             activeReservationId
@@ -2697,12 +2881,17 @@ if (appliedCouponCode.trim()) {
                         options
                       )
 
+                    razorpayInstanceRef.current =
+                      razorpay
+
                     razorpay.open()
 
                     razorpay.on(
 	                      "payment.failed",
 
 	                      function () {
+                        paymentCapturedRef.current =
+                          false
 	                        showPaymentToast(
                           "error",
                           "Payment failed. Please retry or choose another payment method."
@@ -2716,6 +2905,10 @@ if (appliedCouponCode.trim()) {
 	                  } catch (error) {
                     paymentHandoffActiveRef.current =
                       false
+                    paymentCapturedRef.current =
+                      false
+                    razorpayInstanceRef.current =
+                      null
 
 	                    if (reservationIdRef.current) {
                       await cancelReservation(
