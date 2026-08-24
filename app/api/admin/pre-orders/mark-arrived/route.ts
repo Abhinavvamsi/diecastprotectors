@@ -13,19 +13,20 @@ export async function POST(req: Request) {
 
     const body = await req.json()
     const { arrived = true } = body
+    const rawProductIds: unknown[] =
+      Array.isArray(body.productIds)
+        ? body.productIds
+        : [body.productId]
+
     const productIds =
       Array.from(
         new Set(
-          (
-            Array.isArray(body.productIds)
-              ? body.productIds
-              : [body.productId]
-          )
+          rawProductIds
             .filter(
-              (id): id is string =>
+              (id: unknown): id is string =>
                 typeof id === "string" && id.trim().length > 0
             )
-            .map((id) => id.trim())
+            .map((id: string) => id.trim())
         )
       )
 
