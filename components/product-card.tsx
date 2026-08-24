@@ -300,6 +300,12 @@ shadow-lg
 
             </p>
 
+            {isPreOrder && (
+              <p className="mt-1 text-sm font-bold text-pink-400">
+                Total price: ₹{numericOriginalPrice}
+              </p>
+            )}
+
             {showRegularSiteDiscount && (
               <p className="mt-1 text-sm font-semibold text-zinc-500 line-through">
                 ₹{numericSaleOriginalPrice}

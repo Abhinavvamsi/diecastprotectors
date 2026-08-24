@@ -11,32 +11,52 @@ export async function POST(req: Request) {
   try {
     await requireAdmin()
 
-    const { productId, arrived = true } = await req.json()
+    const body = await req.json()
+    const { arrived = true } = body
+    const productIds =
+      Array.from(
+        new Set(
+          (
+            Array.isArray(body.productIds)
+              ? body.productIds
+              : [body.productId]
+          )
+            .filter(
+              (id): id is string =>
+                typeof id === "string" && id.trim().length > 0
+            )
+            .map((id) => id.trim())
+        )
+      )
 
-    if (!productId) {
+    if (productIds.length === 0) {
       return NextResponse.json(
         { error: "Product ID required" },
         { status: 400 }
       )
     }
 
-    const product = await prisma.product.findUnique({
+    const products = await prisma.product.findMany({
       where: {
-        id: productId,
+        id: {
+          in: productIds,
+        },
+        isPreOrder: true,
       },
       select: {
         id: true,
-        name: true,
-        isPreOrder: true,
       },
     })
 
-    if (!product || !product.isPreOrder) {
+    if (products.length !== productIds.length) {
       return NextResponse.json(
         { error: "Pre-order product not found" },
         { status: 404 }
       )
     }
+
+    const productIdSet =
+      new Set(products.map((product) => product.id))
 
     const orders = await prisma.order.findMany({
       where: {
@@ -62,8 +82,16 @@ export async function POST(req: Request) {
       const arrivedNotificationItems: any[] = []
 
       const nextProducts = products.map((item) => {
+        const itemProductId =
+          typeof item?.id === "string"
+            ? item.id
+            : typeof item?.productId === "string"
+              ? item.productId
+              : ""
+
         const isTargetPreOrder =
-          item?.id === productId && Boolean(item?.isPreOrder)
+          productIdSet.has(itemProductId) &&
+          Boolean(item?.isPreOrder)
 
         if (!isTargetPreOrder) {
           return item
@@ -155,6 +183,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       arrived: markArrived,
+      productCount: productIds.length,
       updatedOrders,
       updatedItems,
       lockedItems,
