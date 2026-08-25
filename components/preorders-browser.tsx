@@ -224,31 +224,51 @@ export default function PreOrdersBrowser({
 
       <div className="mb-8">
         <p className="mb-3 text-sm font-medium text-cyan-300">Brand</p>
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {brandFilters.map((brand) => (
             <button
               key={brand.name}
               onClick={() => setSelectedBrand(brand.name)}
-              className={`flex min-h-[4.75rem] min-w-[10rem] items-center justify-center gap-3 rounded-full border px-7 py-4 text-base font-black uppercase tracking-wide transition-all duration-300 ${
+              className={`group flex aspect-[1.18] min-w-0 flex-col overflow-hidden rounded-2xl border bg-[#111118] text-left transition-all duration-300 ${
                 selectedBrand === brand.name
-                  ? "border-transparent bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
-                  : "border-[#2B2B3A] text-gray-300 hover:border-cyan-400"
+                  ? "border-cyan-400 shadow-[0_0_28px_rgba(34,211,238,.22)]"
+                  : "border-[#2B2B3A] hover:border-cyan-400/70"
               }`}
             >
-              {brand.name === "All" ? (
-                <span>{brand.name}</span>
-              ) : (
-                <>
-                  {brand.logo ? (
-                    <img
-                      src={brand.logo}
-                      alt={brand.name}
-                      className="h-10 w-10 rounded-full object-contain"
-                    />
-                  ) : null}
-                  <span>{brand.name}</span>
-                </>
-              )}
+              <span
+                className={`flex min-h-0 flex-1 items-center justify-center bg-[#09090B] px-3 ${
+                  selectedBrand === brand.name
+                    ? "bg-cyan-500/10"
+                    : ""
+                }`}
+              >
+                {brand.name === "All" ? (
+                  <span className="text-lg font-black uppercase text-white">
+                    All
+                  </span>
+                ) : brand.logo ? (
+                  <img
+                    src={brand.logo}
+                    alt={brand.name}
+                    className="h-12 w-16 object-contain sm:h-14 sm:w-20"
+                  />
+                ) : (
+                  <span className="text-center text-sm font-black uppercase text-white">
+                    {brand.name}
+                  </span>
+                )}
+              </span>
+              <span className="flex min-h-14 items-center justify-center px-3 text-center">
+                <span
+                  className={`line-clamp-2 break-words text-xs font-black uppercase leading-tight text-white sm:text-sm ${
+                    selectedBrand === brand.name
+                      ? "text-cyan-100"
+                      : ""
+                  }`}
+                >
+                  {brand.name}
+                </span>
+              </span>
             </button>
           ))}
         </div>

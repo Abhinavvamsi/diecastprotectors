@@ -12,7 +12,10 @@ import OrderStatusSelect from "@/components/order-status-select"
 
 import { requireAdmin } from "@/lib/admin"
 import { calculateShippingCharge } from "@/lib/shipping"
-import { getOrderItemPricing } from "@/lib/preorder"
+import {
+  getOrderItemPricing,
+  getOrderItemsWithInferredPreOrderDiscount,
+} from "@/lib/preorder"
 import {
   getPreOrderShippingBatch,
   getPreOrderShippingPaidTotal,
@@ -33,6 +36,35 @@ function getIndiaDayRange(dateKey: string) {
   }
 }
 
+function getIndiaMonthRange(monthKey: string) {
+  if (!/^\d{4}-\d{2}$/.test(monthKey)) {
+    return null
+  }
+
+  const start = new Date(`${monthKey}-01T00:00:00+05:30`)
+  const end = new Date(start)
+  end.setUTCMonth(end.getUTCMonth() + 1)
+
+  return {
+    start,
+    end,
+  }
+}
+
+function formatIndiaMonthLabel(monthKey: string) {
+  const range = getIndiaMonthRange(monthKey)
+
+  if (!range) {
+    return "All time"
+  }
+
+  return new Intl.DateTimeFormat("en-IN", {
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Kolkata",
+  }).format(range.start)
+}
+
 export default async function OrdersPage({
   searchParams,
 }: {
@@ -43,6 +75,7 @@ export default async function OrdersPage({
   preorderFilter?: string
   preorderPaymentFilter?: string
   date?: string
+  month?: string
 }>
 }) {
 
@@ -55,6 +88,7 @@ export default async function OrdersPage({
   preorderFilter = "All",
   preorderPaymentFilter = "All",
   date = "",
+  month = "",
 } = await searchParams
   const normalizedPreorderFilter =
     preorderFilter === "Pre Order"
@@ -64,6 +98,10 @@ export default async function OrdersPage({
     /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : ""
   const selectedDateRange =
     getIndiaDayRange(selectedDate)
+  const selectedMonth =
+    /^\d{4}-\d{2}$/.test(month) ? month : ""
+  const selectedMonthRange =
+    getIndiaMonthRange(selectedMonth)
   const dateScopedWhere = selectedDateRange
     ? {
         createdAt: {
@@ -72,6 +110,15 @@ export default async function OrdersPage({
         },
       }
     : {}
+  const revenueScopedWhere = selectedMonthRange
+    ? {
+        createdAt: {
+          gte: selectedMonthRange.start,
+          lt: selectedMonthRange.end,
+        },
+      }
+    : dateScopedWhere
+  const summaryScopedWhere = revenueScopedWhere
   const ordersWhere = {
     ...dateScopedWhere,
     ...(status !== "All"
@@ -83,6 +130,17 @@ export default async function OrdersPage({
   const dateQuery = selectedDate
     ? `&date=${encodeURIComponent(selectedDate)}`
     : ""
+  const monthQuery = selectedMonth
+    ? `&month=${encodeURIComponent(selectedMonth)}`
+    : ""
+  const dateAndMonthQuery =
+    `${dateQuery}${monthQuery}`
+  const revenueLabel = selectedMonth
+    ? formatIndiaMonthLabel(selectedMonth)
+    : selectedDate
+    ? `Date: ${selectedDate}`
+    : "All time"
+  const summaryLabel = revenueLabel
 
   const orders =
   await prisma.order.findMany({
@@ -160,13 +218,20 @@ export default async function OrdersPage({
   )
 
   const orderHasPreOrderItem = (order: any) =>
-    (order.products as any[]).some((item) => {
+    getOrderItemsWithInferredPreOrderDiscount(
+      order.products as any[],
+      order.totalAmount
+    ).some((item) => {
       const fallbackProduct = productMap.get(item.id)
       return Boolean(item.isPreOrder) || Boolean(fallbackProduct?.isPreOrder)
     })
 
   const getPreOrderPaymentState = (order: any) => {
-    const orderItems = order.products as any[]
+    const orderItems =
+      getOrderItemsWithInferredPreOrderDiscount(
+        order.products as any[],
+        order.totalAmount
+      )
     const preOrderItems = orderItems
       .map((item) => ({
         item,
@@ -284,7 +349,7 @@ const [
   }),
 
   prisma.order.count({
-    where: dateScopedWhere,
+    where: summaryScopedWhere,
   }),
 
   prisma.order.count({
@@ -303,7 +368,7 @@ const [
 
   prisma.order.aggregate({
     where: {
-      ...dateScopedWhere,
+      ...revenueScopedWhere,
       status: {
         not: "Cancelled",
       },
@@ -394,6 +459,10 @@ shadow-2xl
 
     </p>
 
+    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+      {summaryLabel}
+    </p>
+
     <h2 className="text-4xl font-bold mt-2">
 
       {totalCount}
@@ -417,6 +486,10 @@ shadow-2xl
 
       Revenue
 
+    </p>
+
+    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-zinc-500">
+      {revenueLabel}
     </p>
 
     <h2 className="text-4xl font-bold mt-2 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-clip-text text-transparent">
@@ -519,7 +592,7 @@ shadow-2xl
 
   <Link
   key={item.name}
-	  href={`?search=${search}&status=${item.name}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}${dateQuery}`}
+	  href={`?search=${search}&status=${item.name}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}${dateAndMonthQuery}`}
   className={`
     px-5
     py-2
@@ -563,7 +636,7 @@ shadow-2xl
     ].map((item) => (
       <Link
         key={item.name}
-	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}&preorderFilter=${item.name}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}${dateQuery}`}
+	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}&preorderFilter=${item.name}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}${dateAndMonthQuery}`}
         className={`
           px-5 py-2 rounded-full border transition-all flex items-center gap-2
           ${
@@ -610,7 +683,7 @@ shadow-2xl
 	    ].map((item) => (
 	      <Link
 	        key={item.name}
-	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}&preorderPaymentFilter=${item.name}${dateQuery}`}
+	        href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}&preorderPaymentFilter=${item.name}${dateAndMonthQuery}`}
 	        className={`
 	          px-5 py-2 rounded-full border transition-all flex items-center gap-2
 	          ${
@@ -688,7 +761,7 @@ shadow-2xl
 	  value={preorderPaymentFilter}
 	/>
 
-<div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px_auto_auto]">
+<div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_220px_220px_auto_auto_auto]">
   <AdminOrdersSearch initialSearch={search} />
 
   <label className="relative block">
@@ -720,6 +793,35 @@ shadow-2xl
     />
   </label>
 
+  <label className="relative block">
+    <span className="absolute left-5 top-2 text-[10px] uppercase tracking-[0.22em] text-pink-300">
+      Revenue Month
+    </span>
+    <input
+      type="month"
+      name="month"
+      defaultValue={selectedMonth}
+      className="
+      h-14
+      w-full
+      rounded-2xl
+      border
+      border-pink-400/35
+      bg-zinc-900/95
+      px-5
+      pt-5
+      text-white
+      outline-none
+      transition-all
+      [color-scheme:dark]
+      focus:border-pink-300
+      focus:ring-2
+      focus:ring-pink-400/25
+      hover:border-pink-300/60
+      "
+    />
+  </label>
+
   <button
     type="submit"
     className="
@@ -744,7 +846,7 @@ shadow-2xl
 
   {selectedDate && (
     <Link
-      href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}`}
+      href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}${monthQuery}`}
       className="
       flex
       h-14
@@ -765,6 +867,32 @@ shadow-2xl
       "
     >
       Clear Date
+    </Link>
+  )}
+
+  {selectedMonth && (
+    <Link
+      href={`?search=${search}&status=${status}${productId ? `&productId=${productId}` : ""}${preorderFilter !== "All" ? `&preorderFilter=${preorderFilter}` : ""}${preorderPaymentFilter !== "All" ? `&preorderPaymentFilter=${preorderPaymentFilter}` : ""}${dateQuery}`}
+      className="
+      flex
+      h-14
+      items-center
+      justify-center
+      rounded-2xl
+      border
+      border-zinc-700
+      px-6
+      text-sm
+      font-bold
+      uppercase
+      tracking-[0.12em]
+      text-zinc-300
+      transition-all
+      hover:border-cyan-400
+      hover:text-cyan-300
+      "
+    >
+      Clear Month
     </Link>
   )}
 </div>
@@ -1038,7 +1166,11 @@ text-purple-400
                       Price Breakdown
                     </p>
                     {(() => {
-                      const orderItems = order.products as any[]
+                      const orderItems =
+                        getOrderItemsWithInferredPreOrderDiscount(
+                          order.products as any[],
+                          order.totalAmount
+                        )
                       const itemBreakdowns = orderItems.map((item) => {
                         const fallbackProduct = productMap.get(item.id)
                         return {
@@ -1098,6 +1230,13 @@ text-purple-400
 	                                pricing.lineRemainingPrice,
 	                          0
 	                        )
+                      const siteDiscountSavings =
+                        itemBreakdowns.reduce(
+                          (sum, { pricing }) =>
+                            sum +
+                            pricing.lineSiteDiscountSavings,
+                          0
+                        )
 	                      const shippingCharge =
 	                        calculateShippingCharge({
                           subtotal:
@@ -1130,9 +1269,8 @@ text-purple-400
                         shippingCharge > 0
 	                      const couponDiscount = Math.max(
                         0,
-                        itemsSubtotal +
+                        payableSubtotal +
                           shippingCharge -
-                          remainingLaterTotal -
                           Number(order.totalAmount || 0)
                       )
                       const showCouponDiscount =
@@ -1141,8 +1279,18 @@ text-purple-400
                       return (
                         <div className="mt-4 space-y-2 text-sm text-zinc-200">
                           <div className="flex items-center justify-between">
-                            <span className="text-zinc-400">Items Payable Now</span>
+                            <span className="text-zinc-400">Catalog Total</span>
                             <span>₹{itemsSubtotal}</span>
+                          </div>
+                          {siteDiscountSavings > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-zinc-400">Site-Wide Discount</span>
+                              <span>-₹{siteDiscountSavings}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <span className="text-zinc-400">Items Payable Now</span>
+                            <span>₹{payableSubtotal}</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-zinc-400">Shipping</span>
@@ -1224,7 +1372,10 @@ shadow-sm pt-8">
 
                 <div className="space-y-4">
 
-                  {(order.products as any[])
+                  {getOrderItemsWithInferredPreOrderDiscount(
+                    order.products as any[],
+                    order.totalAmount
+                  )
                     .map(
                       (
                         product,
@@ -1242,12 +1393,6 @@ shadow-sm pt-8">
                           (fallbackProduct as any)?.images?.[0] ||
                           (fallbackProduct as any)?.image ||
                           ""
-                        const displayPrice =
-                          product.price ??
-                          product.unitPrice ??
-                          product.originalPrice ??
-                          fallbackProduct?.price ??
-                          0
                         const isPreOrder =
                           Boolean(product.isPreOrder) ||
                           Boolean(fallbackProduct?.isPreOrder)
@@ -1314,6 +1459,13 @@ shadow-sm pt-8">
 
                             </p>
 
+                            {!isPreOrder &&
+                              pricing.lineSiteDiscountSavings > 0 && (
+                                <p className="mt-2 text-xs text-zinc-500 line-through">
+                                  Catalog total: ₹{pricing.lineOriginalPrice}
+                                </p>
+                              )}
+
                             {isPreOrder && (
                               <span className="mt-2 inline-flex rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-100">
                                 Pre-Order
@@ -1329,7 +1481,7 @@ shadow-sm pt-8">
                             {isPreOrder ? (
                               <div className="mt-2 inline-flex flex-col rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-100">
                                 <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre-Order</span>
-                                <span className="text-xs mt-1">Original amount: ₹{pricing.lineOriginalPrice}</span>
+                                <span className="text-xs mt-1">Original amount: ₹{pricing.lineDiscountedPrice}</span>
                                 <span className="text-xs">Deposit paid: ₹{pricing.linePayablePrice}</span>
                                 <span className="text-xs">Balance due on arrival: ₹{pricing.lineRemainingPrice}</span>
                                 {product.preOrderArrived && !product.preOrderBalancePaid && (
@@ -1346,9 +1498,17 @@ shadow-sm pt-8">
                                 )}
                               </div>
                             ) : (
-                              <p className="text-pink-400">
-                                Unit Price: ₹{displayPrice}
-                              </p>
+                              <>
+                                <p className="text-pink-400">
+                                  Paid: ₹{pricing.linePayablePrice}
+                                </p>
+                                {pricing.siteDiscountPercentApplied > 0 &&
+                                  pricing.lineSiteDiscountSavings > 0 && (
+                                    <p className="mt-1 text-xs text-emerald-300">
+                                      {pricing.siteDiscountPercentApplied}% site-wide offer applied
+                                    </p>
+                                  )}
+                              </>
                             )}
 
                           </div>
@@ -1361,7 +1521,7 @@ shadow-sm pt-8">
                               {
                                 isPreOrder
                                   ? pricing.linePayablePrice
-                                  : displayPrice * product.quantity
+                                  : pricing.linePayablePrice
                               }
 
                             </p>

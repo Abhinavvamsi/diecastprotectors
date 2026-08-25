@@ -35,15 +35,7 @@ export default function BrandsSection({
 
       </div>
 
-      <div
-        className="
-        grid
-        grid-cols-2
-        md:grid-cols-3
-        lg:grid-cols-4
-        gap-6
-        "
-      >
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
 
         {brands.map((brand) => (
 
@@ -55,9 +47,9 @@ export default function BrandsSection({
 
             <div
               className="
-              h-full
               flex
               flex-col
+              aspect-square
               bg-zinc-900
               border
               border-zinc-800
@@ -74,12 +66,12 @@ export default function BrandsSection({
 
               <div
                 className="
-                h-56
+                flex-1
                 flex
                 items-center
                 justify-center
                 bg-zinc-950
-                p-8
+                p-5 md:p-6
                 "
               >
 
@@ -88,11 +80,14 @@ export default function BrandsSection({
                   <Image
                     src={getBrandLogoUrl(brand.logo)}
                     alt={brand.name}
-                    width={180}
-                    height={100}
+                    width={120}
+                    height={120}
                     sizes="(max-width: 768px) 50vw, 25vw"
                     className="
-                    max-h-24
+                    max-h-16
+                    max-w-[90px]
+                    md:max-h-20
+                    md:max-w-[110px]
                     w-auto
                     h-auto
                     object-contain
@@ -103,15 +98,15 @@ export default function BrandsSection({
 
               </div>
 
-              <div className="p-5 flex-1">
+              <div className="p-4 text-center md:p-5">
 
-                <h3 className="font-bold text-lg text-white">
+                <h3 className="font-bold text-sm text-white md:text-base">
 
                   {brand.name}
 
                 </h3>
 
-                <p className="text-zinc-400 text-sm mt-1">
+                <p className="mt-1 text-xs text-zinc-400 md:text-sm">
 
                   {brand._count.products}
                   {" "}

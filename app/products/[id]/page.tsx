@@ -69,6 +69,7 @@ export default async function ProductPage({
       0,
       product.stock - product.reservedStock
     ),
+    reservedStock: 0,
   }
 
   const siteDiscountSettings =

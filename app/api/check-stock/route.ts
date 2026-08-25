@@ -159,6 +159,7 @@ export async function POST(
             0,
             product.stock - (product.reservedStock || 0)
           ),
+          reservedStock: 0,
         },
         siteDiscountSettings
       )

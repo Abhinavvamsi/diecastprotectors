@@ -112,29 +112,50 @@ export function getOrderItemPricing(
     Boolean(item?.isPreOrder) ||
     Boolean(fallbackProduct?.isPreOrder)
 
-  const snapshotOriginalUnitPrice = Math.max(
+  const snapshotCatalogUnitPrice = Math.max(
     0,
     Number(
+      item?.catalogUnitPrice ??
       item?.originalPrice ??
+        item?.discountedUnitPrice ??
+        item?.payableUnitPrice ??
         item?.price ??
         item?.unitPrice ??
         0
     )
   )
-  const fallbackOriginalUnitPrice = Math.max(
+  const fallbackCatalogUnitPrice = Math.max(
     0,
     Number(fallbackProduct?.price || 0)
   )
-  const originalUnitPrice = isPreOrder
-    ? Math.max(
-        snapshotOriginalUnitPrice,
-        fallbackOriginalUnitPrice
-      )
-    : snapshotOriginalUnitPrice || fallbackOriginalUnitPrice
+  const originalUnitPrice =
+    snapshotCatalogUnitPrice ||
+    fallbackCatalogUnitPrice
+
+  const snapshotDiscountedUnitPrice = Math.max(
+    0,
+    Number(
+      item?.discountedUnitPrice ??
+        item?.effectiveUnitPrice ??
+        item?.originalPrice ??
+        item?.payableUnitPrice ??
+        item?.unitPrice ??
+        item?.price ??
+        0
+    )
+  )
+  const discountedUnitPrice =
+    snapshotDiscountedUnitPrice ||
+    originalUnitPrice
 
   const snapshotPayableUnitPrice = Math.max(
     0,
-    Number(item?.price ?? item?.unitPrice ?? 0)
+    Number(
+      item?.payableUnitPrice ??
+        item?.unitPrice ??
+        item?.price ??
+        0
+    )
   )
   const depositAmountSource =
     item?.depositAmount ??
@@ -150,7 +171,7 @@ export function getOrderItemPricing(
     getProductPayablePrice({
       ...(fallbackProduct || {}),
       ...item,
-      price: originalUnitPrice,
+      price: discountedUnitPrice,
       depositAmount,
       isPreOrder: true,
     })
@@ -164,20 +185,140 @@ export function getOrderItemPricing(
       : payableFromDepositSetting
     : snapshotPayableUnitPrice > 0
     ? snapshotPayableUnitPrice
-    : originalUnitPrice
+    : discountedUnitPrice
 
   const remainingUnitPrice = isPreOrder
-    ? Math.max(0, originalUnitPrice - payableUnitPrice)
+    ? Math.max(0, discountedUnitPrice - payableUnitPrice)
     : 0
+  const siteDiscountUnitSavings = Math.max(
+    0,
+    originalUnitPrice - discountedUnitPrice
+  )
+  const inferredDiscountPercent =
+    originalUnitPrice > 0 &&
+    siteDiscountUnitSavings > 0
+      ? Math.round(
+          (siteDiscountUnitSavings /
+            originalUnitPrice) *
+            100
+        )
+      : 0
+  const siteDiscountPercentApplied = Math.max(
+    0,
+    Number(
+      item?.siteDiscountPercentApplied ??
+        item?.siteDiscountPercent ??
+        inferredDiscountPercent
+    )
+  )
 
   return {
     quantity,
     isPreOrder,
     originalUnitPrice,
+    discountedUnitPrice,
     payableUnitPrice,
     remainingUnitPrice,
+    siteDiscountUnitSavings,
+    siteDiscountPercentApplied,
     lineOriginalPrice: originalUnitPrice * quantity,
+    lineDiscountedPrice: discountedUnitPrice * quantity,
     linePayablePrice: payableUnitPrice * quantity,
     lineRemainingPrice: remainingUnitPrice * quantity,
+    lineSiteDiscountSavings:
+      siteDiscountUnitSavings * quantity,
   }
+}
+
+export function getOrderItemsWithInferredPreOrderDiscount(
+  items: any[],
+  totalAmount: unknown
+) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return []
+  }
+
+  const allPreOrderItems = items.every((item) =>
+    Boolean(item?.isPreOrder)
+  )
+
+  if (!allPreOrderItems) {
+    return items
+  }
+
+  const alreadySnapshotted = items.some(
+    (item) =>
+      item?.discountedUnitPrice !== undefined ||
+      item?.effectiveUnitPrice !== undefined ||
+      item?.siteDiscountPercentApplied !== undefined
+  )
+
+  if (alreadySnapshotted) {
+    return items
+  }
+
+  const paidTotal = Math.max(
+    0,
+    Math.round(Number(totalAmount || 0))
+  )
+  const baseBreakdowns = items.map((item) =>
+    getOrderItemPricing(item)
+  )
+  const basePayableTotal = baseBreakdowns.reduce(
+    (sum, pricing) => sum + pricing.linePayablePrice,
+    0
+  )
+
+  if (
+    paidTotal <= 0 ||
+    basePayableTotal <= 0 ||
+    paidTotal >= basePayableTotal
+  ) {
+    return items
+  }
+
+  let allocatedPaidTotal = 0
+
+  return items.map((item, index) => {
+    const pricing = baseBreakdowns[index]
+    const quantity = Math.max(
+      1,
+      Number(item?.quantity || 1)
+    )
+    const linePaid =
+      index === items.length - 1
+        ? Math.max(0, paidTotal - allocatedPaidTotal)
+        : Math.floor(
+            (pricing.linePayablePrice / basePayableTotal) *
+              paidTotal
+          )
+
+    allocatedPaidTotal += linePaid
+
+    const payableUnitPrice = Math.max(
+      0,
+      Math.floor(linePaid / quantity)
+    )
+    const depositAmount = Number(
+      item?.depositAmount ?? 50
+    )
+    const inferredDiscountedUnitPrice =
+      depositAmount > 0 && depositAmount <= 100
+        ? Math.ceil((payableUnitPrice * 100) / depositAmount)
+        : Math.max(
+            payableUnitPrice,
+            pricing.discountedUnitPrice
+          )
+
+    return {
+      ...item,
+      price: payableUnitPrice,
+      unitPrice: payableUnitPrice,
+      payableUnitPrice,
+      discountedUnitPrice:
+        inferredDiscountedUnitPrice,
+      effectiveUnitPrice:
+        inferredDiscountedUnitPrice,
+    }
+  })
 }

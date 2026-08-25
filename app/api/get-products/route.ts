@@ -68,6 +68,7 @@ export async function GET(req: Request) {
               0,
               product.stock - product.reservedStock
             ),
+            reservedStock: 0,
           }
 
           return siteDiscountSettings

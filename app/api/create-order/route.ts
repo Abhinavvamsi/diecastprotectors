@@ -10,8 +10,12 @@ import {
   isPreOrderDeadlineActive,
 } from "@/lib/preorder"
 import { releaseExpiredReservations } from "@/lib/reservation-cleanup"
-import { applySiteDiscountToPrice } from "@/lib/site-discount"
-import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
+import {
+  applySiteDiscountToProductPrice,
+} from "@/lib/site-discount"
+import {
+  getStoreSiteDiscountSettings,
+} from "@/lib/site-discount-server"
 
 const razorpay = new Razorpay({
   key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
@@ -177,10 +181,15 @@ export async function POST(req: Request) {
     const subtotal = reservation.items.reduce((sum, item) => {
       const product = productMap.get(item.productId)
       if (!product) return sum
-      const currentPrice = applySiteDiscountToPrice(
-        getTierPrice(product, item.quantity),
-        siteDiscountSettings
-      )
+      const currentPrice =
+        applySiteDiscountToProductPrice(
+          {
+            ...product,
+            reservedStock: 0,
+          },
+          getTierPrice(product, item.quantity),
+          siteDiscountSettings
+        )
       const payablePrice = product.isPreOrder
         ? getProductPayablePrice({
             ...product,

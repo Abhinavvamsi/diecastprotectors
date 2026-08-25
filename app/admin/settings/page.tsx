@@ -272,7 +272,7 @@ export default function SettingsPage() {
             />
           </div>
 
-          <div className="bg-[#09090B] border border-zinc-700 rounded-2xl p-6">
+          <div className="bg-[#09090B] border border-zinc-700 rounded-2xl p-4 sm:p-6">
             <label className="flex items-center gap-3 font-medium">
               <input
                 type="checkbox"
@@ -362,7 +362,7 @@ export default function SettingsPage() {
                   Site-Wide Discount
                 </p>
                 <p className="mt-1 max-w-2xl text-sm text-zinc-500">
-                  Apply a timed percentage offer across customer-facing products. Checkout and payment APIs recalculate it server-side.
+                  Apply a timed percentage offer across products that have available stock when the customer buys. Sold-out items are excluded, and completed orders keep their purchase-time pricing.
                 </p>
               </div>
 
@@ -455,7 +455,7 @@ export default function SettingsPage() {
             </div>
 
             {activeSuperDealProductIds.length > 0 && (
-              <div className="mt-6 rounded-2xl border border-pink-500/20 bg-pink-500/5 p-4">
+              <div className="mt-6 overflow-hidden rounded-2xl border border-pink-500/20 bg-pink-500/5 p-3 sm:p-4">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-sm uppercase tracking-wider text-pink-400">
@@ -470,7 +470,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {activeSuperDealProductIds.map((productId) => {
                     const selectedProduct = products.find((product) => product.id === productId)
                     if (!selectedProduct) return null
@@ -479,9 +479,9 @@ export default function SettingsPage() {
                     return (
                       <div
                         key={productId}
-                        className="flex items-center gap-4 rounded-2xl border border-zinc-700 bg-[#111118] p-3"
+                        className="flex min-w-0 items-center gap-3 rounded-2xl border border-zinc-700 bg-[#111118] p-3"
                       >
-                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-zinc-700 bg-black/40">
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-700 bg-black/40 sm:h-20 sm:w-20">
                           <Image
                             src={selectedProduct.images?.[0] || "/logo.png"}
                             alt={selectedProduct.name}
@@ -493,7 +493,7 @@ export default function SettingsPage() {
                           <p className="text-xs uppercase tracking-[0.25em] text-pink-400">
                             Pick {activeSuperDealProductIds.indexOf(productId) + 1}
                           </p>
-                          <h3 className="mt-1 truncate text-sm font-semibold text-white">
+                          <h3 className="mt-1 line-clamp-2 break-words text-sm font-semibold leading-tight text-white">
                             {selectedProduct.name}
                           </h3>
                           <p className="mt-1 text-xs text-zinc-400">
@@ -600,7 +600,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="bg-[#09090B] border border-cyan-500/30 rounded-2xl p-6 shadow-[0_0_28px_rgba(34,211,238,.08)]">
+          <div className="bg-[#09090B] border border-cyan-500/30 rounded-2xl p-4 shadow-[0_0_28px_rgba(34,211,238,.08)] sm:p-6">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
                 <p className="text-sm uppercase tracking-wider text-cyan-300">
@@ -623,7 +623,7 @@ export default function SettingsPage() {
             </div>
 
             {activePreOrderFeaturedProductIds.length > 0 && (
-              <div className="mt-6 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+              <div className="mt-6 overflow-hidden rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-3 sm:p-4">
                 <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="text-sm uppercase tracking-wider text-cyan-300">
@@ -638,7 +638,7 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {activePreOrderFeaturedProductIds.map((productId) => {
                     const selectedProduct = preOrderProducts.find((product) => product.id === productId)
                     if (!selectedProduct) return null
@@ -647,9 +647,9 @@ export default function SettingsPage() {
                     return (
                       <div
                         key={productId}
-                        className="flex items-center gap-4 rounded-2xl border border-cyan-500/20 bg-[#111118] p-3"
+                        className="flex min-w-0 items-center gap-3 rounded-2xl border border-cyan-500/20 bg-[#111118] p-3"
                       >
-                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-zinc-700 bg-black/40">
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-700 bg-black/40 sm:h-20 sm:w-20">
                           <Image
                             src={selectedProduct.images?.[0] || "/logo.png"}
                             alt={selectedProduct.name}
@@ -661,7 +661,7 @@ export default function SettingsPage() {
                           <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
                             Pick {activePreOrderFeaturedProductIds.indexOf(productId) + 1}
                           </p>
-                          <h3 className="mt-1 truncate text-sm font-semibold text-white">
+                          <h3 className="mt-1 line-clamp-2 break-words text-sm font-semibold leading-tight text-white">
                             {selectedProduct.name}
                           </h3>
                           <p className="mt-1 text-xs text-zinc-400">

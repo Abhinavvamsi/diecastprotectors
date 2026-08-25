@@ -3,6 +3,12 @@ export type SiteDiscountSettings = {
   siteDiscountEndsAt?: string | null
 }
 
+type SiteDiscountEligibleProduct = {
+  isPreOrder?: boolean | null
+  stock?: unknown
+  reservedStock?: unknown
+}
+
 export function normalizeSiteDiscountPercent(value: unknown) {
   const percent = Math.floor(Number(value || 0))
 
@@ -67,22 +73,70 @@ export function applySiteDiscountToPrice(
   )
 }
 
+export function getSiteDiscountAvailableStock(
+  product?: SiteDiscountEligibleProduct | null
+) {
+  return Math.max(
+    0,
+    Number(product?.stock || 0) -
+      Number(product?.reservedStock || 0)
+  )
+}
+
+export function isSiteDiscountEligibleProduct(
+  product?: SiteDiscountEligibleProduct | null
+) {
+  if (!product) {
+    return false
+  }
+
+  return getSiteDiscountAvailableStock(product) > 0
+}
+
+export function applySiteDiscountToProductPrice(
+  product: SiteDiscountEligibleProduct | null | undefined,
+  price: unknown,
+  settings?: SiteDiscountSettings | null,
+  now = new Date()
+) {
+  const normalizedPrice = Math.max(
+    0,
+    Math.round(Number(price || 0))
+  )
+
+  if (!isSiteDiscountEligibleProduct(product)) {
+    return normalizedPrice
+  }
+
+  return applySiteDiscountToPrice(
+    normalizedPrice,
+    settings,
+    now
+  )
+}
+
 export function applySiteDiscountToProduct<
   T extends {
     price: unknown
     quantityPricing?: unknown
+    isPreOrder?: boolean | null
+    stock?: unknown
+    reservedStock?: unknown
   },
 >(
   product: T,
   settings?: SiteDiscountSettings | null,
   now = new Date()
 ) {
-  const percent = getSiteDiscountPercent(settings, now)
+  const percent = isSiteDiscountEligibleProduct(product)
+    ? getSiteDiscountPercent(settings, now)
+    : 0
   const originalPrice = Math.max(
     0,
     Math.round(Number(product.price || 0))
   )
-  const discountedPrice = applySiteDiscountToPrice(
+  const discountedPrice = applySiteDiscountToProductPrice(
+    product,
     originalPrice,
     settings,
     now
@@ -93,11 +147,13 @@ export function applySiteDiscountToProduct<
           0,
           Math.round(Number(tier?.price || 0))
         )
-        const tierDiscounted = applySiteDiscountToPrice(
-          tierOriginal,
-          settings,
-          now
-        )
+        const tierDiscounted =
+          applySiteDiscountToProductPrice(
+            product,
+            tierOriginal,
+            settings,
+            now
+          )
 
         return {
           ...tier,

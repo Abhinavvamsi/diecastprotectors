@@ -628,7 +628,7 @@ to-purple-600
 
   </p>
 
-  <div className="flex flex-wrap gap-3">
+  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
 
     {brandFilters.map((brand) => (
 
@@ -638,44 +638,59 @@ to-purple-600
           setSelectedBrand(brand.name)
         }
         className={`
-          px-7
-          py-4
-          rounded-full
+          group
+          flex
+          aspect-[1.18]
+          min-w-0
+          flex-col
+          overflow-hidden
+          rounded-2xl
           border
-          min-h-[4.75rem]
-          min-w-[10rem]
+          bg-[#111118]
+          text-left
           transition-all
           duration-300
-          flex
-          items-center
-          justify-center
-          gap-3
-          text-base
-          font-black
-          uppercase
-          tracking-wide
-        
           ${
             selectedBrand === brand.name
-? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-transparent"
-: "border-[#2B2B3A] text-gray-300 hover:border-pink-500"
+? "border-pink-500 shadow-[0_0_28px_rgba(236,72,153,.22)]"
+: "border-[#2B2B3A] hover:border-pink-500/70"
           }
         `}
       >
-        {brand.name === "All" ? (
-          <span>{brand.name}</span>
-        ) : (
-          <>
-            {brand.logo ? (
-              <img
-                src={brand.logo}
-                alt={brand.name}
-                className="h-10 w-10 rounded-full object-contain"
-              />
-            ) : null}
-            <span>{brand.name}</span>
-          </>
-        )}
+        <span
+          className={`flex min-h-0 flex-1 items-center justify-center bg-[#09090B] px-3 ${
+            selectedBrand === brand.name
+              ? "bg-pink-500/10"
+              : ""
+          }`}
+        >
+          {brand.name === "All" ? (
+            <span className="text-lg font-black uppercase text-white">
+              All
+            </span>
+          ) : brand.logo ? (
+            <img
+              src={brand.logo}
+              alt={brand.name}
+              className="h-12 w-16 object-contain sm:h-14 sm:w-20"
+            />
+          ) : (
+            <span className="text-center text-sm font-black uppercase text-white">
+              {brand.name}
+            </span>
+          )}
+        </span>
+        <span className="flex min-h-14 items-center justify-center px-3 text-center">
+          <span
+            className={`line-clamp-2 break-words text-xs font-black uppercase leading-tight text-white sm:text-sm ${
+              selectedBrand === brand.name
+                ? "text-pink-100"
+                : ""
+            }`}
+          >
+            {brand.name}
+          </span>
+        </span>
 
       </button>
 

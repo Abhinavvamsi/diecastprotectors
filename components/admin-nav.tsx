@@ -89,7 +89,7 @@ export default function AdminNav() {
 
   return (
 
-    <div className="flex flex-wrap gap-4 mb-12 mt-6">
+    <div className="mb-12 mt-6 grid grid-cols-2 gap-3 md:flex md:flex-wrap md:gap-4">
 
       {links.map((link) => {
 
@@ -102,17 +102,25 @@ export default function AdminNav() {
               key={link.href}
               href={link.href}
               prefetch
-            >
-
-            <button
               className={`
-                px-6
-                py-3
+                inline-flex
+                min-h-12
+                w-full
+                items-center
+                justify-center
                 rounded-2xl
-                font-semibold
                 border
+                px-4
+                py-3
+                text-center
+                text-sm
+                font-semibold
+                leading-tight
                 transition-all
                 duration-300
+                md:min-h-11
+                md:w-auto
+                md:px-6
 
                 ${
                   isActive
@@ -141,9 +149,7 @@ export default function AdminNav() {
 
               {link.label}
 
-            </button>
-
-          </Link>
+            </Link>
 
         )
 

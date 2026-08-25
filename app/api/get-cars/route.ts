@@ -55,6 +55,7 @@ export async function GET() {
               0,
               product.stock - product.reservedStock
             ),
+            reservedStock: 0,
           },
           siteDiscountSettings
         )

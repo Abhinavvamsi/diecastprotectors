@@ -7,8 +7,14 @@ import { auth } from "@clerk/nextjs/server"
 import { calculateShippingCharge } from "@/lib/shipping"
 import { getProductPayablePrice } from "@/lib/preorder"
 import { buildWhatsAppItemsSummary } from "@/lib/notifications"
-import { applySiteDiscountToPrice } from "@/lib/site-discount"
-import { getStoreSiteDiscountSettings } from "@/lib/site-discount-server"
+import {
+  applySiteDiscountToProductPrice,
+  getSiteDiscountPercent,
+  isSiteDiscountEligibleProduct,
+} from "@/lib/site-discount"
+import {
+  getStoreSiteDiscountSettings,
+} from "@/lib/site-discount-server"
 
 class SaveOrderError extends Error {
   code: string
@@ -416,7 +422,11 @@ if (!signatureIsValid) {
       productLookup.set(item.productId, product)
 
         const currentPrice =
-          applySiteDiscountToPrice(
+          applySiteDiscountToProductPrice(
+            {
+              ...product,
+              reservedStock: 0,
+            },
             getTierPrice(
               product,
               item.quantity
@@ -445,20 +455,36 @@ if (!signatureIsValid) {
 	      orderedItems = reservation.items.map((item) => {
 	        const bodyItem = bodyProductMap.get(item.productId) || {}
 	        const product = productLookup.get(item.productId)
-	        const originalUnitPrice =
-	          applySiteDiscountToPrice(
-	            getTierPrice(
-	              product,
-	              item.quantity
-	            ),
+	        const catalogUnitPrice =
+	          getTierPrice(
+	            product,
+	            item.quantity
+	          )
+	        const discountedUnitPrice =
+	          applySiteDiscountToProductPrice(
+	            {
+	              ...product,
+	              reservedStock: 0,
+	            },
+	            catalogUnitPrice,
 	            siteDiscountSettings
 	          )
 	        const payableUnitPrice = product.isPreOrder
 	          ? getProductPayablePrice({
 	              ...product,
-	              price: originalUnitPrice,
+	              price: discountedUnitPrice,
 	            })
-	          : originalUnitPrice
+	          : discountedUnitPrice
+	        const siteDiscountPercentApplied =
+	          isSiteDiscountEligibleProduct({
+	            ...product,
+	            reservedStock: 0,
+	          }) &&
+	          discountedUnitPrice < catalogUnitPrice
+	            ? getSiteDiscountPercent(
+	                siteDiscountSettings
+	              )
+	            : 0
 	        const productImages = Array.isArray(product.images)
 	          ? product.images
 	          : []
@@ -472,7 +498,12 @@ if (!signatureIsValid) {
 	          quantity: item.quantity,
 	          price: payableUnitPrice,
 	          unitPrice: payableUnitPrice,
-	          originalPrice: originalUnitPrice,
+	          payableUnitPrice,
+	          originalPrice: catalogUnitPrice,
+	          catalogUnitPrice,
+	          discountedUnitPrice,
+	          effectiveUnitPrice: discountedUnitPrice,
+	          siteDiscountPercentApplied,
 	          image:
 	            bodyItem.image ||
 	            productImages[0] ||
@@ -550,7 +581,9 @@ if (!signatureIsValid) {
           const originalUnitPrice = Math.max(
             0,
             Number(
-              item.originalPrice ??
+              item.discountedUnitPrice ??
+                item.effectiveUnitPrice ??
+                item.originalPrice ??
                 item.unitPrice ??
                 item.price ??
                 0
@@ -772,7 +805,9 @@ if (!signatureIsValid) {
           const originalUnitPrice = Math.max(
             0,
             Number(
-              item.originalPrice ??
+              item.discountedUnitPrice ??
+                item.effectiveUnitPrice ??
+                item.originalPrice ??
                 item.unitPrice ??
                 item.price ??
                 0
@@ -846,6 +881,11 @@ if (!signatureIsValid) {
     }
 
     after(async () => {
+      const confirmedOrderTotal =
+        "totalAmount" in order
+          ? order.totalAmount
+          : Number(body.totalAmount || 0)
+
       const results = await Promise.allSettled([
         sendWithTimeout({
           from:
@@ -889,7 +929,7 @@ if (!signatureIsValid) {
           <strong>
             Total Amount:
           </strong>
-          ₹${body.totalAmount}
+          ₹${confirmedOrderTotal}
         </p>
 
         <p>
@@ -953,9 +993,7 @@ if (!signatureIsValid) {
               status: "Confirmed",
               templateName: "order_confirmation",
               totalAmount:
-                "totalAmount" in order
-                  ? order.totalAmount
-                  : Number(body.totalAmount || 0),
+                confirmedOrderTotal,
               items: notificationItems,
             }
       ),
@@ -1036,7 +1074,7 @@ if (!signatureIsValid) {
           <strong>
             Total Amount:
           </strong>
-          ₹${body.totalAmount}
+          ₹${confirmedOrderTotal}
         </p>
 
         <hr />

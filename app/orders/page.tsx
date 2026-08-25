@@ -15,7 +15,10 @@ import {
 
 import { redirect }
 from "next/navigation"
-import { getOrderItemPricing } from "@/lib/preorder"
+import {
+  getOrderItemPricing,
+  getOrderItemsWithInferredPreOrderDiscount,
+} from "@/lib/preorder"
 import PayPreOrderBalanceButton from "@/components/pay-preorder-balance-button"
 import PayPreOrderShippingButton from "@/components/pay-preorder-shipping-button"
 import PayMergedPreOrderShippingButton from "@/components/pay-merged-preorder-shipping-button"
@@ -130,7 +133,11 @@ export default async function OrdersPage({
   >()
 
   for (const order of uniqueOrders) {
-    const orderProducts = order.products as any[]
+    const orderProducts =
+      getOrderItemsWithInferredPreOrderDiscount(
+        order.products as any[],
+        order.totalAmount
+      )
     const paymentDue =
       orderProducts.reduce((total, item) => {
         const pricing = getOrderItemPricing(item)
@@ -393,7 +400,11 @@ hover:text-white
         <div className="space-y-8">
 
 	          {filteredOrders.map((order) => {
-              const orderProducts = order.products as any[]
+              const orderProducts =
+                getOrderItemsWithInferredPreOrderDiscount(
+                  order.products as any[],
+                  order.totalAmount
+                )
               const status =
                 orderPaymentStatus.get(order.id) || {
                   paymentDue: 0,
@@ -495,12 +506,6 @@ text-transparent text-sm uppercase tracking-widest">
                         (fallbackProduct as any)?.images?.[0] ||
                         (fallbackProduct as any)?.image ||
                         ""
-                      const displayPrice =
-                        product.price ??
-                        product.unitPrice ??
-                        product.originalPrice ??
-                        fallbackProduct?.price ??
-                        0
                       const expectedArrival =
                         product.expectedArrival ||
                         fallbackProduct?.expectedArrival
@@ -511,6 +516,8 @@ text-transparent text-sm uppercase tracking-widest">
                       const isPreOrder = pricing.isPreOrder
                       const lineOriginalPrice =
                         pricing.lineOriginalPrice
+                      const lineOrderPrice =
+                        pricing.lineDiscountedPrice
                       const lineDepositPrice =
                         pricing.linePayablePrice
                       const lineRemainingPrice =
@@ -577,10 +584,17 @@ text-transparent text-sm uppercase tracking-widest">
                               Quantity: {product.quantity}
 </p>
 
+                        {!isPreOrder &&
+                          pricing.lineSiteDiscountSavings > 0 && (
+                            <p className="mt-2 text-xs text-zinc-500 line-through">
+                              Catalog price: ₹{lineOriginalPrice}
+                            </p>
+                          )}
+
                         {isPreOrder && (
                           <div className="mt-2 inline-flex flex-col rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-cyan-100">
-                            <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre-Order</span>
-	                            <span className="text-xs mt-1">Original amount: ₹{lineOriginalPrice}</span>
+	                            <span className="text-[11px] font-semibold uppercase tracking-[0.25em]">Pre-Order</span>
+	                            <span className="text-xs mt-1">Original amount: ₹{lineOrderPrice}</span>
 	                            <span className="text-xs">Deposit paid: ₹{lineDepositPrice}</span>
 		                            <span
 		                              className={`text-xs font-semibold ${
@@ -606,8 +620,16 @@ text-transparent text-sm uppercase tracking-widest">
                         )}
 
                         <p className="text-pink-400 text-sm mt-1">
-  {isPreOrder ? "Deposit paid" : "Unit price"}: ₹{isPreOrder ? lineDepositPrice : displayPrice}
+  {isPreOrder ? "Deposit paid" : "Paid today"}: ₹{lineDepositPrice}
 </p>
+
+                        {!isPreOrder &&
+                          pricing.siteDiscountPercentApplied > 0 &&
+                          pricing.lineSiteDiscountSavings > 0 && (
+                            <p className="mt-1 text-xs text-emerald-300">
+                              {pricing.siteDiscountPercentApplied}% site-wide offer applied
+                            </p>
+                          )}
 
                       </div>
 
