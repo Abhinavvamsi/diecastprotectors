@@ -160,7 +160,7 @@ const [
   settingsResponse,
 ] = await Promise.all([
   fetch("/api/get-products?includePreOrder=true", { cache: "no-store" }),
-  fetch("/api/admin/brands"),
+  fetch("/api/admin/brands?visibleOnly=true", { cache: "no-store" }),
   fetch("/api/banners", { cache: "no-store" }),
   fetch("/api/admin/settings", { cache: "no-store" }),
 ])
